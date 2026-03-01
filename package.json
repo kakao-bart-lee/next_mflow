@@ -95,6 +95,7 @@
     "@vitejs/plugin-react": "^5.1.4",
     "@vitest/coverage-v8": "^4.0.18",
     "jsdom": "^28.1.0",
+    "lunar-javascript": "^1.7.7",
     "msw": "^2.12.10",
     "postcss": "^8.5",
     "prisma": "^6.19.2",

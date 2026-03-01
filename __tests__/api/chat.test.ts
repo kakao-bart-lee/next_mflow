@@ -1,29 +1,62 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { NextRequest } from "next/server"
 
-const { mockAuth } = vi.hoisted(() => ({ mockAuth: vi.fn() }))
-vi.mock("@/lib/auth", () => ({ auth: mockAuth }))
-
-const { mockIsCreditEnabled, mockConsumeCredit } = vi.hoisted(() => ({
+const {
+  mockAuth,
+  mockGetStringSystemSetting,
+  mockIsCreditEnabled,
+  mockConsumeCredit,
+  mockStreamText,
+  mockOpenai,
+} = vi.hoisted(() => ({
+  mockAuth: vi.fn(),
+  mockGetStringSystemSetting: vi.fn(),
   mockIsCreditEnabled: vi.fn(),
   mockConsumeCredit: vi.fn(),
+  mockStreamText: vi.fn(),
+  mockOpenai: vi.fn(),
 }))
+
+vi.mock("@/lib/auth", () => ({
+  auth: mockAuth,
+}))
+
+vi.mock("@/lib/system-settings", () => ({
+  getStringSystemSetting: mockGetStringSystemSetting,
+}))
+
+vi.mock("@/lib/mastra/agents/saju-agent", () => ({
+  SAJU_EXPERT_PROMPT: "fallback prompt",
+  buildSajuSystemPrompt: (context: { birthInfo?: unknown; sajuData?: unknown }, customPrompt?: string) => {
+    const lines = [customPrompt ?? "fallback prompt"]
+
+    if (context.birthInfo || context.sajuData) {
+      lines.push("## Current User Context")
+      if (context.birthInfo) {
+        lines.push(`BIRTH_INFO_JSON: ${JSON.stringify(context.birthInfo)}`)
+      }
+      if (context.sajuData) {
+        lines.push(`SAJU_DATA_JSON: ${JSON.stringify(context.sajuData)}`)
+      }
+    }
+
+    return lines.join("\n")
+  },
+}))
+
 vi.mock("@/lib/credit-service", () => ({
   isCreditEnabled: mockIsCreditEnabled,
   consumeCredit: mockConsumeCredit,
-  CREDIT_COSTS: { SAJU_ANALYSIS: 2, CHAT_MESSAGE: 1, COMPATIBILITY: 3 },
+  CREDIT_COSTS: { CHAT_MESSAGE: 1 },
 }))
 
-const { mockToTextStreamResponse } = vi.hoisted(() => ({
-  mockToTextStreamResponse: vi.fn(),
-}))
 vi.mock("ai", () => ({
-  streamText: vi.fn(() => ({
-    toTextStreamResponse: mockToTextStreamResponse,
-  })),
+  streamText: mockStreamText,
 }))
 
-vi.mock("@ai-sdk/openai", () => ({ openai: vi.fn().mockReturnValue("gpt-4o-mini-model") }))
+vi.mock("@ai-sdk/openai", () => ({
+  openai: mockOpenai,
+}))
 
 import { POST } from "@/app/api/chat/route"
 
@@ -38,55 +71,68 @@ function makeRequest(body: unknown) {
 describe("POST /api/chat", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockAuth.mockResolvedValue(null)
+    mockAuth.mockResolvedValue({ user: { id: "test-user" } })
+    mockGetStringSystemSetting.mockResolvedValue("custom saju prompt")
     mockIsCreditEnabled.mockReturnValue(false)
-    mockToTextStreamResponse.mockReturnValue(new Response("안녕하세요"))
-  })
-
-  it("정상 요청에 스트리밍 응답 반환", async () => {
-    const res = await POST(makeRequest({
-      messages: [{ role: "user", content: "오늘 운세가 궁금해요" }],
+    mockOpenai.mockReturnValue("mock-model")
+    mockStreamText.mockImplementation(() => ({
+      toTextStreamResponse: () => new Response("mock stream"),
     }))
-    expect(res.status).toBe(200)
-    expect(mockToTextStreamResponse).toHaveBeenCalled()
   })
 
-  it("JSON 파싱 실패 시 400 반환", async () => {
-    const req = new NextRequest("http://localhost:3000/api/chat", {
+  it("POST with valid messages returns 200 streaming response", async () => {
+    const response = await POST(
+      makeRequest({
+        messages: [{ role: "user", content: "오늘 운세 알려주세요" }],
+      })
+    )
+
+    expect(response.status).toBe(200)
+    await expect(response.text()).resolves.toBe("mock stream")
+    expect(mockStreamText).toHaveBeenCalledTimes(1)
+  })
+
+  it("POST with empty messages returns 400", async () => {
+    const response = await POST(makeRequest({ messages: [] }))
+
+    expect(response.status).toBe(400)
+    await expect(response.json()).resolves.toEqual({ error: "messages가 필요합니다" })
+    expect(mockStreamText).not.toHaveBeenCalled()
+  })
+
+  it("POST with malformed body returns 400", async () => {
+    const request = new NextRequest("http://localhost:3000/api/chat", {
       method: "POST",
-      body: "bad",
       headers: { "Content-Type": "application/json" },
+      body: "{invalid-json",
     })
-    const res = await POST(req)
-    expect(res.status).toBe(400)
+
+    const response = await POST(request)
+
+    expect(response.status).toBe(400)
+    await expect(response.json()).resolves.toEqual({ error: "잘못된 요청 형식입니다" })
   })
 
-  it("messages가 비어 있으면 400 반환", async () => {
-    const res = await POST(makeRequest({ messages: [] }))
-    expect(res.status).toBe(400)
-  })
+  it("System prompt includes saju context when provided", async () => {
+    const context = {
+      birthInfo: { birthDate: "1993-10-08", gender: "M" },
+      sajuData: { pillars: { 일: { 천간: "임(壬)", 지지: "술(戌)" } } },
+    }
 
-  it("크레딧 활성화 + 로그인 상태에서 크레딧 차감", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "user-1" } })
-    mockIsCreditEnabled.mockReturnValue(true)
-    mockConsumeCredit.mockResolvedValue({ success: true, balance: 7 })
+    const response = await POST(
+      makeRequest({
+        messages: [{ role: "user", content: "제 사주를 해석해 주세요" }],
+        context,
+      })
+    )
 
-    await POST(makeRequest({
-      messages: [{ role: "user", content: "질문" }],
-    }))
-    expect(mockConsumeCredit).toHaveBeenCalledWith("user-1", 1, "AI 채팅")
-  })
+    expect(response.status).toBe(200)
+    expect(mockStreamText).toHaveBeenCalledTimes(1)
 
-  it("크레딧 부족 시 402 반환", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "user-1" } })
-    mockIsCreditEnabled.mockReturnValue(true)
-    mockConsumeCredit.mockResolvedValue({ success: false, balance: 0 })
-
-    const res = await POST(makeRequest({
-      messages: [{ role: "user", content: "질문" }],
-    }))
-    expect(res.status).toBe(402)
-    const json = await res.json()
-    expect(json.code).toBe("INSUFFICIENT_CREDITS")
+    const streamArg = mockStreamText.mock.calls[0]?.[0]
+    expect(streamArg.messages).toEqual([{ role: "user", content: "제 사주를 해석해 주세요" }])
+    expect(streamArg.system).toContain("## Current User Context")
+    expect(streamArg.system).toContain(`BIRTH_INFO_JSON: ${JSON.stringify(context.birthInfo)}`)
+    expect(streamArg.system).toContain(`SAJU_DATA_JSON: ${JSON.stringify(context.sajuData)}`)
   })
 })

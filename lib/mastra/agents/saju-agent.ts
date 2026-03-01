@@ -74,9 +74,16 @@ export interface SajuAgentContext {
 /**
  * 컨텍스트 기반 시스템 프롬프트 빌더
  * API Route에서 messages에 system role로 삽입합니다.
+ *
+ * @param context - 사주/생년월일 컨텍스트
+ * @param customPrompt - DB에서 로드된 커스텀 프롬프트 (없으면 기본값 사용)
  */
-export function buildSajuSystemPrompt(context: SajuAgentContext): string {
-  const lines: string[] = [SAJU_EXPERT_PROMPT];
+export function buildSajuSystemPrompt(
+  context: SajuAgentContext,
+  customPrompt?: string,
+): string {
+  const basePrompt = customPrompt || SAJU_EXPERT_PROMPT;
+  const lines: string[] = [basePrompt];
 
   if (context.birthInfo || context.sajuData) {
     lines.push("\n## Current User Context");
