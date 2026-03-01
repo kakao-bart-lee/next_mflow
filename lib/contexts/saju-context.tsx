@@ -15,6 +15,7 @@ interface SajuContextValue {
   birthInfo: BirthInfo | null
   sajuResult: FortuneResponse | null
   isLoading: boolean
+  isHydrated: boolean
   error: string | null
   setBirthInfo: (info: BirthInfo) => Promise<void>
   clearData: () => void
@@ -29,6 +30,7 @@ export function SajuProvider({ children }: { children: ReactNode }) {
   const [sajuResult, setSajuResult] = useState<FortuneResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isHydrated, setIsHydrated] = useState(false)
 
   const fetchAnalysis = useCallback(async (info: BirthInfo) => {
     setIsLoading(true)
@@ -64,8 +66,19 @@ export function SajuProvider({ children }: { children: ReactNode }) {
       }
     } catch {
       // ignore parse or storage errors
+    } finally {
+      setIsHydrated(true)
     }
   }, [fetchAnalysis])
+
+  // Auto-reanalyze: if birthInfo exists but sajuResult is missing (e.g. after refresh),
+  // trigger analysis automatically. This covers the case where SajuProvider is in root
+  // layout and doesn't remount on navigation.
+  useEffect(() => {
+    if (isHydrated && birthInfo && !sajuResult && !isLoading && !error) {
+      fetchAnalysis(birthInfo)
+    }
+  }, [isHydrated, birthInfo, sajuResult, isLoading, error, fetchAnalysis])
 
   const setBirthInfo = useCallback(
     async (info: BirthInfo) => {
@@ -93,7 +106,7 @@ export function SajuProvider({ children }: { children: ReactNode }) {
 
   return (
     <SajuContext.Provider
-      value={{ birthInfo, sajuResult, isLoading, error, setBirthInfo, clearData }}
+      value={{ birthInfo, sajuResult, isLoading, isHydrated, error, setBirthInfo, clearData }}
     >
       {children}
     </SajuContext.Provider>

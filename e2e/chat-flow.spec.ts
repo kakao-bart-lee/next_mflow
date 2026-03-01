@@ -17,14 +17,15 @@ test.describe("AI 채팅 플로우", () => {
     await page.evaluate((info) => {
       localStorage.setItem("saju_birth_info", JSON.stringify(info))
     }, BIRTH_INFO)
-    await page.reload()
+    // Navigate to explore tab where chat lives
+    await page.goto("/explore")
   })
 
   test("AI 채팅 패널이 열린다", async ({ page }) => {
     // 채팅 열기 버튼 클릭
     const chatBtn = page.getByText("AI와 대화하기").or(page.getByText("이야기하기")).first()
     await chatBtn.click({ timeout: 5000 }).catch(() => {
-      // 버튼이 없는 경우(다른 탭) 탐색 탭으로 이동
+      // 버튼이 없는 경우 스킵
     })
 
     // 채팅 시작하기 버튼 찾기
@@ -35,8 +36,6 @@ test.describe("AI 채팅 플로우", () => {
   })
 
   test("메시지 입력창이 존재한다", async ({ page }) => {
-    // 탐색 탭에서 채팅 열기
-    await page.getByRole("tab", { name: "탐색" }).or(page.getByText("탐색")).first().click().catch(() => {})
     await page.getByText("대화 시작하기").first().click().catch(() => {})
     await expect(
       page.getByPlaceholder("메시지를 입력하세요...")
@@ -46,8 +45,6 @@ test.describe("AI 채팅 플로우", () => {
   })
 
   test("메시지 전송 시 사용자 메시지가 표시된다", async ({ page }) => {
-    // 채팅 열기
-    await page.getByRole("tab", { name: "탐색" }).or(page.getByText("탐색")).first().click().catch(() => {})
     const startBtn = page.getByText("대화 시작하기").first()
     if (await startBtn.isVisible()) {
       await startBtn.click()

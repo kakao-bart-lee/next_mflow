@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import { Noto_Sans_KR, Noto_Serif_KR } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
+import { LocaleProvider } from '@/lib/contexts/locale-context'
+import { SajuProvider } from '@/lib/contexts/saju-context'
 import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
@@ -47,7 +49,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <LocaleProvider>
+            <SajuProvider>
+              {children}
+            </SajuProvider>
+          </LocaleProvider>
           <Toaster />
         </ThemeProvider>
         <Analytics />

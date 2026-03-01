@@ -18,17 +18,21 @@ test.describe("사주 분석 결과 화면", () => {
     await page.evaluate((info) => {
       localStorage.setItem("saju_birth_info", JSON.stringify(info))
     }, BIRTH_INFO)
-    await page.reload()
+    // With birthInfo, / redirects to /today
+    await page.goto("/today")
   })
 
-  test("메인 앱 화면의 탭 네비게이션이 표시된다", async ({ page }) => {
-    // 온보딩 이후 탭이 보여야 함
-    await expect(page.getByRole("tab", { name: "오늘" }).or(page.getByText("오늘의 운세"))).toBeVisible({ timeout: 5000 })
+  test("메인 앱 화면의 하단 네비게이션이 표시된다", async ({ page }) => {
+    await expect(page.getByRole("navigation", { name: "메인 탐색" })).toBeVisible({ timeout: 5000 })
+    await expect(page.getByRole("link", { name: "오늘" })).toBeVisible()
+    await expect(page.getByRole("link", { name: "이번 주" })).toBeVisible()
+    await expect(page.getByRole("link", { name: "결정" })).toBeVisible()
+    await expect(page.getByRole("link", { name: "탐색" })).toBeVisible()
   })
 
   test("탐색 탭으로 이동하면 사주 일주가 표시된다", async ({ page }) => {
-    // 탐색 탭 클릭
-    await page.getByRole("tab", { name: "탐색" }).or(page.getByText("탐색")).first().click()
+    await page.getByRole("link", { name: "탐색" }).click()
+    await expect(page).toHaveURL("/explore")
     await expect(page.getByText("나의 사주 일주").or(page.getByText("나의 하늘과 사주"))).toBeVisible({ timeout: 5000 })
   })
 
