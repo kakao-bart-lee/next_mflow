@@ -29,7 +29,7 @@ test.describe("AI 채팅 플로우", () => {
     })
 
     // 채팅 시작하기 버튼 찾기
-    const startChatBtn = page.getByText("대화 시작하기").or(page.getByText("AI와 대화하기"))
+    const startChatBtn = page.getByRole("button", { name: "대화 시작하기" })
     if (await startChatBtn.isVisible()) {
       await startChatBtn.click()
     }

@@ -33,7 +33,7 @@ test.describe("사주 분석 결과 화면", () => {
   test("탐색 탭으로 이동하면 사주 일주가 표시된다", async ({ page }) => {
     await page.getByRole("link", { name: "탐색" }).click()
     await expect(page).toHaveURL("/explore")
-    await expect(page.getByText("나의 사주 일주").or(page.getByText("나의 하늘과 사주"))).toBeVisible({ timeout: 5000 })
+    await expect(page.getByRole("heading", { name: "나의 하늘과 사주" })).toBeVisible({ timeout: 5000 })
   })
 
   test("사주 분석 API 응답 후 데이터가 화면에 표시된다", async ({ page }) => {

@@ -18,12 +18,12 @@ test.describe("온보딩 플로우", () => {
     await expect(page.getByText("언제 태어나셨나요?")).toBeVisible()
   })
 
-  test("날짜 입력 없이 다음 버튼을 누르면 진행되지 않는다", async ({ page }) => {
+  test("날짜 입력 없이 다음 버튼은 비활성화되어 있다", async ({ page }) => {
     await page.getByRole("button", { name: /시작/ }).click()
     await expect(page).toHaveURL("/onboarding")
 
     const nextBtn = page.getByRole("button", { name: "다음" })
-    await nextBtn.click()
+    await expect(nextBtn).toBeDisabled()
     // 여전히 step 0
     await expect(page.getByText("언제 태어나셨나요?")).toBeVisible()
   })
@@ -48,9 +48,8 @@ test.describe("온보딩 플로우", () => {
 
     // Step 1
     await page.getByRole("button", { name: "남성" }).click()
-    await page.getByPlaceholder("도시를 검색하세요").fill("서울")
-    await page.waitForTimeout(1000) // debounce
-    await page.locator("[role='option']").first().click()
+    await page.getByPlaceholder("도시 이름을 검색하세요...").fill("서울")
+    await page.locator("button").filter({ hasText: "서울특별시" }).first().click()
     await page.getByRole("button", { name: "시작하기" }).click()
 
     // /today로 이동

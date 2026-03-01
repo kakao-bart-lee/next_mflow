@@ -53,9 +53,8 @@ test.describe("신규 유저 플로우", () => {
 
     // Step 1: gender & location
     await page.getByRole("button", { name: "남성" }).click()
-    await page.getByPlaceholder("도시를 검색하세요").fill("서울")
-    await page.waitForTimeout(1000) // debounce
-    await page.locator("[role='option']").first().click()
+    await page.getByPlaceholder("도시 이름을 검색하세요...").fill("서울")
+    await page.locator("button").filter({ hasText: "서울특별시" }).first().click()
     await page.getByRole("button", { name: "시작하기" }).click()
 
     // Should navigate to /today
