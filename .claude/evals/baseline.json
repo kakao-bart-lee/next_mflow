@@ -1,0 +1,35 @@
+{
+  "version": "1.0.0",
+  "capturedAt": "2026-03-02",
+  "gitSha": "826f2f7",
+  "testSuites": {
+    "unit": {
+      "total": 53,
+      "passed": 53,
+      "failed": 0,
+      "files": [
+        "__tests__/lib/schemas/birth-info.test.ts",
+        "__tests__/lib/credit-service.test.ts",
+        "__tests__/lib/use-cases/analyze-saju.test.ts",
+        "__tests__/lib/saju-core/facade.test.ts",
+        "__tests__/api/saju-analyze.test.ts",
+        "__tests__/api/chat.test.ts",
+        "__tests__/api/admin.test.ts"
+      ]
+    },
+    "e2e": {
+      "total": 4,
+      "passed": 0,
+      "skipped": 4,
+      "note": "E2E 테스트는 로컬 실행 환경(DB + Dev 서버) 필요"
+    }
+  },
+  "criticalPaths": [
+    "lib/saju-core/",
+    "lib/credit-service.ts",
+    "lib/use-cases/analyze-saju.ts",
+    "app/api/saju/analyze/route.ts",
+    "app/api/chat/route.ts",
+    "app/api/admin/credits/route.ts"
+  ]
+}

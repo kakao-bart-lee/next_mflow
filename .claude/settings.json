@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat); if echo \"$input\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get('file_path','') or d.get('path',''))\" 2>/dev/null | grep -q '\\.env\\.local$'; then echo 'BLOCKED: .env.local 직접 편집은 허용되지 않습니다. .env.example을 참고하거나 환경변수를 수동으로 추가하세요.' >&2; exit 1; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat); file=$(echo \"$input\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get('file_path','') or d.get('path',''))\" 2>/dev/null); if echo \"$file\" | grep -qE '\\.(ts|tsx)$'; then cd /Users/bart/workspace/talelapse/next-mflow && npx tsc --noEmit 2>&1 | head -30; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
