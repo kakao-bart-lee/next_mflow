@@ -8,3 +8,8 @@ node_modules/
 .next/
 .env*.local
 .DS_Store
+
+# Playwright
+test-results/
+playwright-report/
+.playwright-mcp/
