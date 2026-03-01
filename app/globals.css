@@ -46,6 +46,9 @@
 
   --radius: 0.75rem;
 
+  /* Ambient gradient for layered backgrounds */
+  --gradient-warm: oklch(0.94 0.025 75 / 0.6);
+
   --sidebar: oklch(0.95 0.01 75);
   --sidebar-foreground: oklch(0.22 0.02 50);
   --sidebar-primary: oklch(0.35 0.08 155);
@@ -94,6 +97,8 @@
   --chart-3: oklch(0.55 0.06 75);
   --chart-4: oklch(0.72 0.10 90);
   --chart-5: oklch(0.50 0.05 200);
+
+  --gradient-warm: oklch(0.20 0.018 55 / 0.5);
 
   --sidebar: oklch(0.18 0.01 60);
   --sidebar-foreground: oklch(0.90 0.01 75);
@@ -153,5 +158,64 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Text selection — matches theme palette */
+  ::selection {
+    background-color: oklch(0.35 0.08 155 / 0.12);
+  }
+  .dark ::selection {
+    background-color: oklch(0.60 0.08 155 / 0.2);
+  }
+
+  /* Refined scrollbar */
+  @supports selector(::-webkit-scrollbar) {
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: oklch(0.5 0.01 75 / 0.18);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: oklch(0.5 0.01 75 / 0.35);
+    }
+  }
+}
+
+/* ─── Custom keyframes ─── */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes line-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
   }
 }
