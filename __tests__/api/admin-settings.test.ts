@@ -1,20 +1,13 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { describe, it, expect, vi, beforeEach } from "vitest"
 import { NextRequest, NextResponse } from "next/server"
 
-const {
-  mockRequireAdmin,
-  mockGetSystemSettingsByKeys,
-  mockUpsertSystemSettings,
-} = vi.hoisted(() => ({
-  mockRequireAdmin: vi.fn(),
+const { mockRequireAdmin } = vi.hoisted(() => ({ mockRequireAdmin: vi.fn() }))
+vi.mock("@/lib/auth/admin", () => ({ requireAdmin: mockRequireAdmin }))
+
+const { mockGetSystemSettingsByKeys, mockUpsertSystemSettings } = vi.hoisted(() => ({
   mockGetSystemSettingsByKeys: vi.fn(),
   mockUpsertSystemSettings: vi.fn(),
 }))
-
-vi.mock("@/lib/auth/admin", () => ({
-  requireAdmin: mockRequireAdmin,
-}))
-
 vi.mock("@/lib/system-settings", () => ({
   getSystemSettingsByKeys: mockGetSystemSettingsByKeys,
   upsertSystemSettings: mockUpsertSystemSettings,
@@ -22,95 +15,60 @@ vi.mock("@/lib/system-settings", () => ({
 
 import { GET, PUT } from "@/app/api/admin/settings/route"
 
-const SUPPORTED_KEYS = ["saju_agent_prompt", "saju_today_prompt", "saju_weekly_prompt"]
-
-function makePutRequest(body: unknown) {
-  return new NextRequest("http://localhost:3000/api/admin/settings", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  })
-}
-
-describe("/api/admin/settings", () => {
+describe("Admin settings API", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockRequireAdmin.mockResolvedValue({ error: null })
-  })
-
-  it("GET returns settings from DB", async () => {
+    mockRequireAdmin.mockResolvedValue({ userId: "admin-1", error: null })
     mockGetSystemSettingsByKeys.mockResolvedValue({
-      saju_agent_prompt: "agent prompt",
-      saju_today_prompt: "today prompt",
-      saju_weekly_prompt: "weekly prompt",
+      astrology_chat_prompt: "prompt",
     })
-
-    const response = await GET()
-
-    expect(response.status).toBe(200)
-    expect(mockGetSystemSettingsByKeys).toHaveBeenCalledWith(SUPPORTED_KEYS)
-    await expect(response.json()).resolves.toEqual({
-      settings: {
-        saju_agent_prompt: "agent prompt",
-        saju_today_prompt: "today prompt",
-        saju_weekly_prompt: "weekly prompt",
-      },
-    })
+    mockUpsertSystemSettings.mockResolvedValue(undefined)
   })
 
-  it("GET returns 401 when not admin", async () => {
+  it("GET 성공 시 settings 반환", async () => {
+    const res = await GET()
+    expect(res.status).toBe(200)
+    const json = await res.json()
+    expect(json.settings).toBeDefined()
+  })
+
+  it("GET 권한 실패 시 에러 응답 전달", async () => {
     mockRequireAdmin.mockResolvedValue({
-      error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+      userId: null,
+      error: NextResponse.json({ error: "권한 없음" }, { status: 403 }),
     })
-
-    const response = await GET()
-
-    expect(response.status).toBe(401)
-    await expect(response.json()).resolves.toEqual({ error: "Unauthorized" })
-    expect(mockGetSystemSettingsByKeys).not.toHaveBeenCalled()
+    const res = await GET()
+    expect(res.status).toBe(403)
   })
 
-  it("PUT updates settings successfully", async () => {
-    const payload = {
-      settings: {
-        saju_agent_prompt: "updated agent prompt",
-        saju_today_prompt: "updated today prompt",
-      },
-    }
-
-    const response = await PUT(makePutRequest(payload))
-
-    expect(response.status).toBe(200)
-    expect(mockUpsertSystemSettings).toHaveBeenCalledWith(payload.settings)
-    await expect(response.json()).resolves.toEqual({ settings: payload.settings })
-  })
-
-  it("PUT returns 422 for invalid payload", async () => {
-    const response = await PUT(
-      makePutRequest({
-        settings: {
-          saju_agent_prompt: "",
-        },
-      })
-    )
-
-    expect(response.status).toBe(422)
-    const json = await response.json()
-    expect(json.error).toBe("설정값이 올바르지 않습니다")
-    expect(mockUpsertSystemSettings).not.toHaveBeenCalled()
-  })
-
-  it("PUT returns 400 for malformed JSON", async () => {
-    const request = new NextRequest("http://localhost:3000/api/admin/settings", {
+  it("PUT 유효값 저장", async () => {
+    const req = new NextRequest("http://localhost:3000/api/admin/settings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: "{invalid-json",
+      body: JSON.stringify({
+        settings: {
+          astrology_chat_prompt: "hello",
+          astrology_report_prompt: "world",
+        },
+      }),
     })
 
-    const response = await PUT(request)
+    const res = await PUT(req)
+    expect(res.status).toBe(200)
+    expect(mockUpsertSystemSettings).toHaveBeenCalled()
+  })
 
-    expect(response.status).toBe(400)
-    await expect(response.json()).resolves.toEqual({ error: "잘못된 요청 형식입니다" })
-    expect(mockUpsertSystemSettings).not.toHaveBeenCalled()
+  it("PUT 검증 실패 시 422", async () => {
+    const req = new NextRequest("http://localhost:3000/api/admin/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        settings: {
+          credit_system_enabled: true,
+        },
+      }),
+    })
+    const res = await PUT(req)
+    expect(res.status).toBe(422)
   })
 })

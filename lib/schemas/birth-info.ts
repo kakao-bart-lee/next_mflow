@@ -1,5 +1,14 @@
 import { z } from "zod";
 
+function isValidIanaTimeZone(value: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: value });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * 생년월일 + 위치 정보 스키마
  *
@@ -16,7 +25,10 @@ export const BirthInfoSchema = z
       .nullable()
       .optional(),
     isTimeUnknown: z.boolean(),
-    timezone: z.string().min(1),
+    timezone: z
+      .string()
+      .min(1)
+      .refine(isValidIanaTimeZone, "유효한 IANA timezone이어야 합니다"),
     gender: z.enum(["M", "F"]),
     // 위치 정보 (선택, 점성술 및 정밀 사주에 활용)
     latitude: z.number().min(-90).max(90).optional(),

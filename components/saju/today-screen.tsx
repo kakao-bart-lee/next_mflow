@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, type ElementType } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -107,7 +107,7 @@ function buildTodayDisplay(result: FortuneResponse): TodayDisplay {
   }
 }
 
-const TAG_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+const TAG_ICONS: Record<string, ElementType<{ className?: string }>> = {
   성장: Leaf,
   시작: Sparkles,
   열정: Flame,
