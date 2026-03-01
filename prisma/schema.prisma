@@ -1,0 +1,250 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ──────────────────────────────────────────
+// Auth.js (NextAuth v5) required models
+// ──────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+
+  // 사주/점성술 정보
+  // { birthDate, birthTime, isTimeUnknown, timezone, gender, latitude?, longitude?, locationName? }
+  birthInfo     Json?
+
+  preferences   UserPreferences?
+  chatSessions  ChatSession[]
+
+  // 크레딧 시스템
+  credit        Credit?
+  creditLogs    CreditLog[]
+  adminCreditLogs CreditLog[] @relation("AdminCreditLogs")
+
+  // 구독 시스템
+  subscriptions Subscription[]
+
+  // 관리자
+  isAdmin       Boolean   @default(false)
+  isSuspended   Boolean   @default(false)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([email])
+  @@index([isAdmin])
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+// ──────────────────────────────────────────
+// 채팅 & 분석
+// ──────────────────────────────────────────
+
+model ChatSession {
+  id       String  @id @default(cuid())
+  userId   String
+  // "saju" | "astrology" | ...
+  expertId String
+  title    String?
+
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  ChatMessage[]
+  analyses  Analysis[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([expertId])
+}
+
+model ChatMessage {
+  id        String @id @default(cuid())
+  sessionId String
+  // "user" | "assistant" | "system"
+  role      String
+  content   String @db.Text
+
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+}
+
+model Analysis {
+  id        String @id @default(cuid())
+  sessionId String?
+  userId    String?
+  // "saju" | "astrology"
+  expertId  String
+  input     Json
+  result    Json
+
+  session ChatSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([userId])
+  @@index([expertId])
+}
+
+// ──────────────────────────────────────────
+// 크레딧 시스템
+// ──────────────────────────────────────────
+
+model Credit {
+  id      String @id @default(cuid())
+  userId  String @unique
+  balance Int    @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+model CreditLog {
+  id      String  @id @default(cuid())
+  userId  String
+  // 양수: 충전, 음수: 사용
+  amount  Int
+  reason  String
+  adminId String?
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  admin User? @relation("AdminCreditLogs", fields: [adminId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([adminId])
+}
+
+// ──────────────────────────────────────────
+// 구독 시스템
+// ──────────────────────────────────────────
+
+model SubscriptionPlan {
+  id          String  @id @default(cuid())
+  name        String  @unique // "free" | "basic" | "pro"
+  displayName String
+  description String?
+  // 월 크레딧 지급량 (0 = 무제한)
+  monthlyCredits Int @default(0)
+  // 월 가격 (원화, 0 = 무료)
+  priceKrw    Int     @default(0)
+  // 사용 가능 기능 목록 (JSON 배열)
+  features    Json    @default("[]")
+  isActive    Boolean @default(true)
+  sortOrder   Int     @default(0)
+
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Subscription {
+  id       String @id @default(cuid())
+  userId   String
+  planId   String
+  // "active" | "cancelled" | "expired" | "paused"
+  status   String @default("active")
+  // 현재 구독 기간
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  // 취소 예약 (기간 만료 시 취소)
+  cancelAtPeriodEnd  Boolean  @default(false)
+  // 결제 참조 ID (PG사 연동 시)
+  paymentRef  String?
+  metadata    Json?
+
+  user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+// ──────────────────────────────────────────
+// 사용자 설정 & 시스템
+// ──────────────────────────────────────────
+
+model UserPreferences {
+  id                 String  @id @default(cuid())
+  userId             String  @unique
+  language           String  @default("ko")
+  emailNotifications Boolean @default(true)
+  saveHistory        Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+model SystemSettings {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Json
+  description String?
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@index([key])
+}

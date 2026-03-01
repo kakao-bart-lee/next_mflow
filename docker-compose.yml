@@ -1,0 +1,39 @@
+services:
+  # ──────────────────────────────────────────
+  # PostgreSQL — 포트 5433 (로컬 5432와 충돌 방지)
+  # ──────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: mflow-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mflow
+      POSTGRES_PASSWORD: mflow_dev_pw
+      POSTGRES_DB: next_mflow
+    ports:
+      - "6532:5432"
+    volumes:
+      - mflow_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mflow -d next_mflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ──────────────────────────────────────────
+  # Mailhog — 이메일 테스트 (SMTP: 1026, Web UI: 8026)
+  # 기본 1025/8025는 일부 시스템에서 권한 필요
+  # ──────────────────────────────────────────
+  mail:
+    image: mailhog/mailhog:latest
+    container_name: mflow-mail
+    restart: unless-stopped
+    ports:
+      - "2830:1025"   # SMTP
+      - "9830:8025"   # Web UI
+    profiles:
+      - mail   # make mail-up 으로만 활성화
+
+volumes:
+  mflow_postgres_data:
+    name: mflow_postgres_data
