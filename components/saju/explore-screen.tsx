@@ -11,6 +11,8 @@ import {
   BookOpen,
   HelpCircle,
 } from "lucide-react"
+import { SolarSystemView } from "./celestial/solar-system-view"
+import type { PlanetSizeMode } from "./celestial/scene"
 import {
   Tooltip,
   TooltipContent,
@@ -101,14 +103,6 @@ const PLANET_POSITIONS = [
   { symbol: "♄", name: "토성 (Saturn)", sign: "Pisces 15°", house: 12, sajuMap: "비견 (比肩)", description: "내면의 규율과 성찰이 필요한 시기. 조용한 노력이 결실을 맺습니다." },
 ]
 
-const ZODIAC_SIGNS = [
-  { sign: "Aries", symbol: "♈", degree: 0 }, { sign: "Taurus", symbol: "♉", degree: 30 },
-  { sign: "Gemini", symbol: "♊", degree: 60 }, { sign: "Cancer", symbol: "♋", degree: 90 },
-  { sign: "Leo", symbol: "♌", degree: 120 }, { sign: "Virgo", symbol: "♍", degree: 150 },
-  { sign: "Libra", symbol: "♎", degree: 180 }, { sign: "Scorpio", symbol: "♏", degree: 210 },
-  { sign: "Sagittarius", symbol: "♐", degree: 240 }, { sign: "Capricorn", symbol: "♑", degree: 270 },
-  { sign: "Aquarius", symbol: "♒", degree: 300 }, { sign: "Pisces", symbol: "♓", degree: 330 },
-]
 
 const TRANSITS = [
   { id: "t1", type: "daily" as const, headline: "감정의 조화로운 흐름", planets: "☽ trine ♀", sajuResonance: "식신과 정재의 만남 — 표현이 결실로 이어지는 날", body: "달과 금성의 트라인이 형성됩니다. 사주 관점에서 식신과 정재의 조화는 내면의 재능이 현실 성과로 연결되는 에너지예요.", significance: "high" as const },
@@ -118,11 +112,6 @@ const TRANSITS = [
 ]
 
 /* ─── 유틸 ─── */
-
-function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
-  const rad = ((angleDeg - 90) * Math.PI) / 180
-  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }
-}
 
 function TermTooltip({ term, definition }: { term: string; definition: string }) {
   return (
@@ -139,45 +128,6 @@ function TermTooltip({ term, definition }: { term: string; definition: string })
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
-}
-
-function MiniChart({ activePlanetIdx, onPlanetClick }: { activePlanetIdx: number | null; onPlanetClick: (i: number) => void }) {
-  const size = 320
-  const cx = size / 2
-  const cy = size / 2
-  const outerR = size / 2 - 10
-  const middleR = outerR - 26
-  const innerR = middleR - 22
-  const planetR = innerR - 18
-  const planetDegrees = [340, 95, 310, 15, 68, 62, 345]
-
-  return (
-    <svg viewBox={`0 0 ${size} ${size}`} className="mx-auto h-auto w-full max-w-[320px]" role="img" aria-label="네이탈 차트">
-      <circle cx={cx} cy={cy} r={outerR} fill="none" className="stroke-border" strokeWidth="1.5" />
-      <circle cx={cx} cy={cy} r={middleR} fill="none" className="stroke-border" strokeWidth="1" />
-      <circle cx={cx} cy={cy} r={innerR} fill="none" className="stroke-border" strokeWidth="1" />
-      <circle cx={cx} cy={cy} r={innerR} className="fill-card" opacity="0.4" />
-      {ZODIAC_SIGNS.map((z) => {
-        const s = polarToCartesian(cx, cy, innerR, z.degree)
-        const e = polarToCartesian(cx, cy, outerR, z.degree)
-        return <line key={z.sign} x1={s.x} y1={s.y} x2={e.x} y2={e.y} className="stroke-border" strokeWidth="0.5" />
-      })}
-      {ZODIAC_SIGNS.map((z) => {
-        const pos = polarToCartesian(cx, cy, (outerR + middleR) / 2, z.degree + 15)
-        return <text key={z.sign} x={pos.x} y={pos.y} textAnchor="middle" dominantBaseline="central" className="fill-muted-foreground" fontSize={11}>{z.symbol}</text>
-      })}
-      {PLANET_POSITIONS.map((planet, i) => {
-        const pos = polarToCartesian(cx, cy, planetR, planetDegrees[i])
-        const isActive = activePlanetIdx === i
-        return (
-          <g key={planet.name} onClick={() => onPlanetClick(i)} style={{ cursor: "pointer" }}>
-            <circle cx={pos.x} cy={pos.y} r={13} className={isActive ? "fill-primary/20" : "fill-card"} stroke="currentColor" strokeWidth="1" style={{ color: isActive ? "var(--color-primary)" : "var(--color-border)" }} />
-            <text x={pos.x} y={pos.y} textAnchor="middle" dominantBaseline="central" className={isActive ? "fill-primary" : "fill-foreground"} fontSize={13}>{planet.symbol}</text>
-          </g>
-        )
-      })}
-    </svg>
   )
 }
 
@@ -205,6 +155,7 @@ export function ExploreScreen() {
   const [activePlanetIdx, setActivePlanetIdx] = useState<number | null>(null)
   const [expandedTransit, setExpandedTransit] = useState<string | null>(null)
   const [transitFilter, setTransitFilter] = useState<"all" | "daily" | "weekly" | "special">("all")
+  const [planetSizeMode, setPlanetSizeMode] = useState<PlanetSizeMode>("influence")
 
   const sajuPillar = useMemo(
     () => (sajuResult ? buildSajuPillar(sajuResult) : null),
@@ -291,7 +242,26 @@ export function ExploreScreen() {
                 <Sparkles className="h-4 w-4 text-accent/60" />
               </div>
               <div className="mt-3 rounded-2xl border border-border bg-card p-5">
-                <MiniChart activePlanetIdx={activePlanetIdx} onPlanetClick={(i) => setActivePlanetIdx(activePlanetIdx === i ? null : i)} />
+                {/* Size mode toggle */}
+                <div className="mb-3 flex justify-end">
+                  <div className="inline-flex rounded-full border border-border p-0.5 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setPlanetSizeMode("influence")}
+                      className={`rounded-full px-3 py-1 transition-colors ${planetSizeMode === "influence" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      영향력
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPlanetSizeMode("physical")}
+                      className={`rounded-full px-3 py-1 transition-colors ${planetSizeMode === "physical" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      실제 크기
+                    </button>
+                  </div>
+                </div>
+                <SolarSystemView activePlanetIdx={activePlanetIdx} onPlanetClick={(i: number) => setActivePlanetIdx(activePlanetIdx === i ? null : i)} sizeMode={planetSizeMode} />
                 {activePlanet && (
                   <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-4 animate-in fade-in slide-in-from-bottom-2 duration-200">
                     <div className="flex items-start gap-3">
