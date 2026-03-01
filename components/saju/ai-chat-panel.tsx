@@ -59,7 +59,7 @@ function ChatContent({
   context = "default",
   initialPrompt,
 }: Omit<AIChatPanelProps, "open" | "onOpenChange">) {
-  const { birthInfo, sajuResult } = useSaju()
+  const { birthInfo, astrologyResult } = useSaju()
   const ctxKey = ["today", "week", "decision"].includes(context ?? "")
     ? (context as string)
     : "default"
@@ -68,8 +68,6 @@ function ChatContent({
   const scrollRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // Transport created once per mount — birthInfo/sajuResult are stable during a chat session
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const transport = useMemo(
     () =>
       new TextStreamChatTransport({
@@ -77,11 +75,11 @@ function ChatContent({
         body: {
           context: {
             birthInfo: birthInfo ?? undefined,
-            sajuData: sajuResult ?? undefined,
+            astrologyData: astrologyResult ?? undefined,
           },
         },
       }),
-    [],
+    [birthInfo, astrologyResult],
   )
 
   const { messages, sendMessage, stop, setMessages, status } = useChat({

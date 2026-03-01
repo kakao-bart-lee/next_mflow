@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState, type ElementType } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,8 +17,32 @@ import {
   BookOpen,
 } from "lucide-react"
 import { AIChatPanel } from "./ai-chat-panel"
+import { useSaju } from "@/lib/contexts/saju-context"
+import type { PlanetId } from "@/lib/astrology/static/types"
 
-const WEEK_DATA = {
+interface WeekDay {
+  day: string
+  date: string
+  icon: ElementType<{ className?: string }>
+  keyword: string
+  note: string
+  highlight: boolean
+}
+
+interface WeekData {
+  theme: string
+  range: string
+  days: WeekDay[]
+  aiRecap: {
+    summary: string
+    keywords: string[]
+    emotionPattern: string
+    suggestion: string
+  }
+  prompt: string
+}
+
+const WEEK_DATA: WeekData = {
   theme: "이번 주는 내면의 힘을 키우는 시간입니다",
   range: "3/1 - 3/7",
   days: [
@@ -39,11 +63,72 @@ const WEEK_DATA = {
   prompt: "이번 주, 내가 가장 보호하고 싶은 것은 무엇인가요?",
 }
 
+const PLANET_ICON: Record<PlanetId, ElementType<{ className?: string }>> = {
+  SUN: Sun,
+  MOON: Moon,
+  MERCURY: Wind,
+  VENUS: Star,
+  MARS: Flame,
+  JUPITER: TreePine,
+  SATURN: Droplets,
+}
+
+const PLANET_KEYWORD: Record<PlanetId, string> = {
+  SUN: "정렬",
+  MOON: "돌봄",
+  MERCURY: "소통",
+  VENUS: "관계",
+  MARS: "실행",
+  JUPITER: "확장",
+  SATURN: "구조",
+}
+
+function getWeekdayLabel(dateIso: string): string {
+  const days = ["일", "월", "화", "수", "목", "금", "토"]
+  const [yyyy, mm, dd] = dateIso.split("-").map((v) => Number(v))
+  const date = new Date(Date.UTC(yyyy, (mm || 1) - 1, dd || 1))
+  return days[date.getUTCDay()] ?? "?"
+}
+
+function getShortDateLabel(dateIso: string): string {
+  const [yyyy, mm, dd] = dateIso.split("-").map((v) => Number(v))
+  if (!yyyy || !mm || !dd) return dateIso
+  return `${mm}/${dd}`
+}
+
 export function WeekScreen() {
+  const { astrologyResult } = useSaju()
   const [journalText, setJournalText] = useState("")
   const [journalSaved, setJournalSaved] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
+
+  const weekData = useMemo<WeekData>(() => {
+    if (!astrologyResult) return WEEK_DATA
+
+    const dominantPlanet = astrologyResult.ranking[0] ?? "SUN"
+    const days = astrologyResult.future.days.map((day) => ({
+      day: getWeekdayLabel(day.date),
+      date: getShortDateLabel(day.date),
+      icon: PLANET_ICON[day.dominantPlanet],
+      keyword: PLANET_KEYWORD[day.dominantPlanet],
+      note: day.focus,
+      highlight: day.intensity === "high",
+    }))
+
+    return {
+      theme: astrologyResult.today.headline,
+      range: astrologyResult.future.rangeLabel,
+      days,
+      aiRecap: {
+        summary: "점성 정적 분석 기반 주간 리캡",
+        keywords: astrologyResult.ranking.slice(0, 3).map((planet) => PLANET_KEYWORD[planet]),
+        emotionPattern: astrologyResult.today.summary,
+        suggestion: astrologyResult.today.actions[0] ?? "이번 주 핵심 과제 하나를 명확히 정해보세요.",
+      },
+      prompt: `${PLANET_KEYWORD[dominantPlanet]} 흐름을 살리기 위해 이번 주 어떤 선택을 하시겠어요?`,
+    }
+  }, [astrologyResult])
 
   const handleJournalSave = () => {
     if (!journalText.trim()) return
@@ -63,10 +148,10 @@ export function WeekScreen() {
             {/* Week Header */}
             <header className="py-2">
               <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                {WEEK_DATA.range}
+                {weekData.range}
               </p>
               <h1 className="mt-2 text-balance font-serif text-xl font-semibold leading-snug text-foreground lg:text-2xl">
-                {WEEK_DATA.theme}
+                {weekData.theme}
               </h1>
             </header>
 
@@ -95,7 +180,7 @@ export function WeekScreen() {
                 이번 주 예보
               </h2>
               <div className="space-y-2">
-                {WEEK_DATA.days.map((day) => {
+                {weekData.days.map((day) => {
                   const Icon = day.icon
                   const isSelected = selectedDay === day.date
                   return (
@@ -180,11 +265,11 @@ export function WeekScreen() {
           <aside className="hidden lg:block lg:w-72 lg:shrink-0 lg:pt-14">
             <div className="sticky top-6 space-y-6">
               {/* AI Weekly Recap */}
-              <AIRecapCard recap={WEEK_DATA.aiRecap} />
+              <AIRecapCard recap={weekData.aiRecap} />
 
               {/* Journal prompt */}
               <JournalPrompt
-                prompt={WEEK_DATA.prompt}
+                prompt={weekData.prompt}
                 text={journalText}
                 onTextChange={setJournalText}
                 saved={journalSaved}
@@ -196,9 +281,9 @@ export function WeekScreen() {
 
         {/* Mobile: AI recap + Journal below forecast */}
         <div className="mt-8 space-y-6 lg:hidden">
-          <AIRecapCard recap={WEEK_DATA.aiRecap} />
+          <AIRecapCard recap={weekData.aiRecap} />
           <JournalPrompt
-            prompt={WEEK_DATA.prompt}
+            prompt={weekData.prompt}
             text={journalText}
             onTextChange={setJournalText}
             saved={journalSaved}

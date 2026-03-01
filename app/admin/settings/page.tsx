@@ -1,129 +1,155 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Settings } from "lucide-react";
+import { useEffect, useMemo, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Textarea } from "@/components/ui/textarea"
+import { Bot } from "lucide-react"
 
-const SETTING_DEFS = [
+type SettingValue = boolean | number | string
+
+type SettingDef = {
+  key: string
+  label: string
+  description: string
+  type: "text"
+  default: SettingValue
+}
+
+const SETTING_DEFS: SettingDef[] = [
   {
-    key: "creditSystem",
-    label: "크레딧 시스템",
-    description: "활성화 시 API 사용마다 크레딧이 차감됩니다",
-    type: "boolean",
-    default: false,
+    key: "astrology_chat_prompt",
+    label: "점성 채팅 시스템 프롬프트",
+    description: "AI 점성 해석 에이전트의 기본 시스템 프롬프트",
+    type: "text",
+    default:
+      "You are an astrology interpretation guide for a destiny decision product. Use Korean honorifics and practical advice.",
   },
   {
-    key: "subscriptionSystem",
-    label: "구독 시스템",
-    description: "활성화 시 구독 플랜 기반 접근 제어가 적용됩니다",
-    type: "boolean",
-    default: false,
+    key: "astrology_report_prompt",
+    label: "점성 해석 생성 프롬프트",
+    description: "정적 점성 데이터 기반 리포트 생성 시 사용할 프롬프트",
+    type: "text",
+    default:
+      "Generate concise Korean astrology interpretation using static planetary influence data. Keep it practical, specific, and grounded.",
   },
-  {
-    key: "initialFreeCredits",
-    label: "신규 가입 무료 크레딧",
-    description: "신규 가입 시 자동으로 지급되는 크레딧 수",
-    type: "number",
-    default: 10,
-  },
-  {
-    key: "sajuAnalysisCost",
-    label: "사주 분석 크레딧 비용",
-    description: "사주 분석 1회당 차감 크레딧",
-    type: "number",
-    default: 2,
-  },
-  {
-    key: "chatMessageCost",
-    label: "채팅 메시지 크레딧 비용",
-    description: "AI 채팅 메시지 1회당 차감 크레딧",
-    type: "number",
-    default: 1,
-  },
-];
+]
+
+function buildDefaultSettings(): Record<string, SettingValue> {
+  return SETTING_DEFS.reduce<Record<string, SettingValue>>((acc, def) => {
+    acc[def.key] = def.default
+    return acc
+  }, {})
+}
 
 export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState<Record<string, boolean | number>>({});
-  const [saved, setSaved] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [settings, setSettings] = useState<Record<string, SettingValue>>(buildDefaultSettings())
+  const [saved, setSaved] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [fetching, setFetching] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // 초기값 설정
+  const defaultSettings = useMemo(() => buildDefaultSettings(), [])
+
   useEffect(() => {
-    const defaults: Record<string, boolean | number> = {};
-    SETTING_DEFS.forEach((d) => { defaults[d.key] = d.default; });
-    setSettings(defaults);
-  }, []);
+    let cancelled = false
+
+    async function loadSettings() {
+      setFetching(true)
+      setError(null)
+      try {
+        const res = await fetch("/api/admin/settings")
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}))
+          throw new Error(data.error ?? "설정을 불러오지 못했습니다")
+        }
+        const data = (await res.json()) as { settings?: Record<string, SettingValue> }
+        if (cancelled) return
+        setSettings({
+          ...defaultSettings,
+          ...(data.settings ?? {}),
+        })
+      } catch (err) {
+        if (cancelled) return
+        setError(err instanceof Error ? err.message : "설정을 불러오지 못했습니다")
+      } finally {
+        if (!cancelled) setFetching(false)
+      }
+    }
+
+    loadSettings()
+    return () => {
+      cancelled = true
+    }
+  }, [defaultSettings])
 
   const handleSave = async () => {
-    setLoading(true);
-    setSaved(false);
+    setLoading(true)
+    setSaved(false)
+    setError(null)
     try {
-      // SystemSettings API (추후 구현 — 현재는 로컬 상태만)
-      await new Promise((r) => setTimeout(r, 500));
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ settings }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error ?? "설정 저장에 실패했습니다")
+      }
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "설정 저장에 실패했습니다")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-semibold text-foreground">시스템 설정</h1>
-        <p className="text-sm text-muted-foreground">서비스 동작 방식을 설정합니다</p>
+        <p className="text-sm text-muted-foreground">AI 프롬프트를 설정합니다</p>
       </div>
 
-      <div className="space-y-4 max-w-xl">
+      {error && (
+        <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
+      <div className="space-y-4 max-w-3xl">
         {SETTING_DEFS.map((def) => (
           <Card key={def.key}>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm">
-                <Settings className="h-4 w-4 text-muted-foreground" />
+                <Bot className="h-4 w-4 text-muted-foreground" />
                 {def.label}
               </CardTitle>
               <p className="text-xs text-muted-foreground">{def.description}</p>
             </CardHeader>
             <CardContent>
-              {def.type === "boolean" ? (
-                <div className="flex items-center gap-3">
-                  <Switch
-                    checked={Boolean(settings[def.key] ?? def.default)}
-                    onCheckedChange={(v) => setSettings((s) => ({ ...s, [def.key]: v }))}
-                  />
-                  <span className="text-sm text-muted-foreground">
-                    {settings[def.key] ? "활성" : "비활성"}
-                  </span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <Label className="sr-only">{def.label}</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={String(settings[def.key] ?? def.default)}
-                    onChange={(e) =>
-                      setSettings((s) => ({ ...s, [def.key]: Number(e.target.value) }))
-                    }
-                    className="w-24"
-                  />
-                </div>
-              )}
+              <div className="space-y-2">
+                <Textarea
+                  value={String(settings[def.key] ?? def.default)}
+                  onChange={(e) => setSettings((s) => ({ ...s, [def.key]: e.target.value }))}
+                  rows={6}
+                  className="font-mono text-xs"
+                  disabled={fetching || loading}
+                />
+              </div>
             </CardContent>
           </Card>
         ))}
 
         <div className="flex items-center gap-3 pt-2">
-          <Button onClick={handleSave} disabled={loading}>
+          <Button onClick={handleSave} disabled={loading || fetching}>
             {loading ? "저장 중…" : "설정 저장"}
           </Button>
           {saved && <p className="text-sm text-green-600">✓ 저장되었습니다</p>}
         </div>
       </div>
     </div>
-  );
+  )
 }

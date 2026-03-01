@@ -1,0 +1,75 @@
+import { describe, it, expect, vi, beforeEach } from "vitest"
+import { NextRequest, NextResponse } from "next/server"
+
+const { mockRequireAdmin } = vi.hoisted(() => ({ mockRequireAdmin: vi.fn() }))
+vi.mock("@/lib/auth/admin", () => ({ requireAdmin: mockRequireAdmin }))
+
+const { mockGetSystemSettingsByKeys, mockUpsertSystemSettings } = vi.hoisted(() => ({
+  mockGetSystemSettingsByKeys: vi.fn(),
+  mockUpsertSystemSettings: vi.fn(),
+}))
+vi.mock("@/lib/system-settings", () => ({
+  getSystemSettingsByKeys: mockGetSystemSettingsByKeys,
+  upsertSystemSettings: mockUpsertSystemSettings,
+}))
+
+import { GET, PUT } from "@/app/api/admin/settings/route"
+
+describe("Admin settings API", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockRequireAdmin.mockResolvedValue({ userId: "admin-1", error: null })
+    mockGetSystemSettingsByKeys.mockResolvedValue({
+      credit_system_enabled: false,
+      astrology_chat_prompt: "prompt",
+    })
+    mockUpsertSystemSettings.mockResolvedValue(undefined)
+  })
+
+  it("GET 성공 시 settings 반환", async () => {
+    const res = await GET()
+    expect(res.status).toBe(200)
+    const json = await res.json()
+    expect(json.settings).toBeDefined()
+  })
+
+  it("GET 권한 실패 시 에러 응답 전달", async () => {
+    mockRequireAdmin.mockResolvedValue({
+      userId: null,
+      error: NextResponse.json({ error: "권한 없음" }, { status: 403 }),
+    })
+    const res = await GET()
+    expect(res.status).toBe(403)
+  })
+
+  it("PUT 유효값 저장", async () => {
+    const req = new NextRequest("http://localhost:3000/api/admin/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        settings: {
+          astrology_chat_prompt: "hello",
+          astrology_report_prompt: "world",
+        },
+      }),
+    })
+
+    const res = await PUT(req)
+    expect(res.status).toBe(200)
+    expect(mockUpsertSystemSettings).toHaveBeenCalled()
+  })
+
+  it("PUT 검증 실패 시 422", async () => {
+    const req = new NextRequest("http://localhost:3000/api/admin/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        settings: {
+          credit_system_enabled: true,
+        },
+      }),
+    })
+    const res = await PUT(req)
+    expect(res.status).toBe(422)
+  })
+})

@@ -97,5 +97,10 @@ describe("BirthInfoSchema", () => {
       const result = BirthInfoSchema.safeParse({ ...validBase, timezone: "" })
       expect(result.success).toBe(false)
     })
+
+    it("timezone이 IANA 형식이 아니면 실패한다", () => {
+      const result = BirthInfoSchema.safeParse({ ...validBase, timezone: "KST" })
+      expect(result.success).toBe(false)
+    })
   })
 })

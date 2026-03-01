@@ -25,6 +25,13 @@ vi.mock("ai", () => ({
 
 vi.mock("@ai-sdk/openai", () => ({ openai: vi.fn().mockReturnValue("gpt-4o-mini-model") }))
 
+const { mockGetStringSystemSetting } = vi.hoisted(() => ({
+  mockGetStringSystemSetting: vi.fn(),
+}))
+vi.mock("@/lib/system-settings", () => ({
+  getStringSystemSetting: mockGetStringSystemSetting,
+}))
+
 import { POST } from "@/app/api/chat/route"
 
 function makeRequest(body: unknown) {
@@ -41,6 +48,7 @@ describe("POST /api/chat", () => {
     mockAuth.mockResolvedValue(null)
     mockIsCreditEnabled.mockReturnValue(false)
     mockToTextStreamResponse.mockReturnValue(new Response("안녕하세요"))
+    mockGetStringSystemSetting.mockResolvedValue("기본 프롬프트")
   })
 
   it("정상 요청에 스트리밍 응답 반환", async () => {
