@@ -111,30 +111,10 @@ export async function interpretSaju<T extends InterpretationType>(
   weekStartDate?: string,
   userId?: string
 ): Promise<InterpretResult<T>> {
-  // 크레딧 차감 (활성화된 경우)
-  if (isCreditEnabled() && userId) {
-    try {
-      const cost =
-        type === "daily"
-          ? CREDIT_COSTS.CHAT_MESSAGE
-          : CREDIT_COSTS.CHAT_MESSAGE * 2;
-      const result = await consumeCredit(
-        userId,
-        cost,
-        type === "daily" ? "오늘의 운세" : "주간 운세"
-      );
-      if (!result.success) {
-        return {
-          success: false,
-          error: "크레딧이 부족합니다",
-          code: "INSUFFICIENT_CREDITS",
-          status: 402,
-        };
-      }
-    } catch (err) {
-      console.warn("크레딧 차감 실패:", err);
-    }
-  }
+  // 크레딧 잔액 확인 (활성화된 경우, 실제 차감은 LLM 성공 후)
+  const creditCost =
+    type === "daily" ? CREDIT_COSTS.CHAT_MESSAGE : CREDIT_COSTS.CHAT_MESSAGE * 2;
+  const creditLabel = type === "daily" ? "오늘의 운세" : "주간 운세";
 
   // DB에서 프롬프트 로드 (없으면 기본값)
   const settingKey =
@@ -158,6 +138,29 @@ export async function interpretSaju<T extends InterpretationType>(
       system: systemPrompt,
       prompt: sajuContext,
     });
+
+    // LLM 성공 후 크레딧 차감
+    if (isCreditEnabled() && userId) {
+      try {
+        const creditResult = await consumeCredit(userId, creditCost, creditLabel);
+        if (!creditResult.success) {
+          return {
+            success: false,
+            error: "크레딧이 부족합니다",
+            code: "INSUFFICIENT_CREDITS",
+            status: 402,
+          };
+        }
+      } catch (err) {
+        console.error("크레딧 차감 실패 (LLM 결과 폐기):", err);
+        return {
+          success: false,
+          error: "크레딧 처리 중 오류가 발생했습니다",
+          code: "CREDIT_ERROR",
+          status: 503,
+        };
+      }
+    }
 
     return { success: true, data: result.object } as InterpretResult<T>;
   } catch (err) {

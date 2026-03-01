@@ -42,7 +42,7 @@ export function useSajuInterpret<T extends InterpretationType>(
     if (!birthInfo) return
 
     // 이미 같은 키로 fetch 완료된 경우 스킵
-    if (fetchedRef.current === fetchKey && data) return
+    if (fetchedRef.current === fetchKey) return
 
     // 진행 중인 요청 취소
     abortRef.current?.abort()

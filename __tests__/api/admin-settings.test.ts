@@ -82,7 +82,7 @@ describe("/api/admin/settings", () => {
 
     expect(response.status).toBe(200)
     expect(mockUpsertSystemSettings).toHaveBeenCalledWith(payload.settings)
-    await expect(response.json()).resolves.toEqual({ ok: true })
+    await expect(response.json()).resolves.toEqual({ settings: payload.settings })
   })
 
   it("PUT returns 422 for invalid payload", async () => {

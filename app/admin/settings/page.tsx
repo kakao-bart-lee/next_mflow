@@ -70,7 +70,7 @@ export default function AdminSettingsPage() {
         const data = await res.json()
         if (!cancelled) {
           const defaults = buildDefaultSettings()
-          setSettings({ ...defaults, ...data })
+          setSettings({ ...defaults, ...(data.settings ?? {}) })
         }
       } catch (err) {
         if (!cancelled) {
@@ -103,7 +103,7 @@ export default function AdminSettingsPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(settings),
+        body: JSON.stringify({ settings }),
       })
 
       if (!res.ok) {

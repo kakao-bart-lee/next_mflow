@@ -13,6 +13,7 @@ export async function getSystemSettingValue<T>(key: string, fallback: T): Promis
     if (!row) return fallback
     return row.value as T
   } catch (err) {
+    console.warn(`SystemSettings 조회 실패 (key: ${key}):`, err)
     return fallback
   }
 }
@@ -39,7 +40,7 @@ export async function getSystemSettingsByKeys(
 
 export async function upsertSystemSettings(settings: Record<string, SystemSettingValue>) {
   const entries = Object.entries(settings)
-  await Promise.all(
+  await prisma.$transaction(
     entries.map(([key, value]) =>
       prisma.systemSettings.upsert({
         where: { key },

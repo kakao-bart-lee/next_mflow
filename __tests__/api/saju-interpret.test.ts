@@ -171,4 +171,33 @@ describe("POST /api/saju/interpret", () => {
       code: "LLM_ERROR",
     })
   })
+
+  it("POST returns 401 when not authenticated", async () => {
+    mockAuth.mockResolvedValue(null)
+
+    const response = await POST(
+      makeRequest({
+        type: "daily",
+        birthInfo: VALID_BIRTH_INFO,
+      })
+    )
+
+    expect(response.status).toBe(401)
+    await expect(response.json()).resolves.toEqual({ error: "로그인이 필요합니다" })
+  })
+
+  it("POST returns 422 when weekly request missing weekStartDate", async () => {
+    const response = await POST(
+      makeRequest({
+        type: "weekly",
+        birthInfo: VALID_BIRTH_INFO,
+        // weekStartDate intentionally omitted
+      })
+    )
+
+    expect(response.status).toBe(422)
+    const json = await response.json()
+    expect(json.error).toBe("입력 정보가 올바르지 않습니다")
+    expect(mockInterpretSaju).not.toHaveBeenCalled()
+  })
 })

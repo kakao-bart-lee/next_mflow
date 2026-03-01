@@ -10,13 +10,26 @@ const InterpretRequestSchema = z.object({
   birthInfo: BirthInfoSchema,
   /** 주간 운세일 때 시작 날짜 (YYYY-MM-DD) */
   weekStartDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+}).superRefine((data, ctx) => {
+  if (data.type === "weekly" && !data.weekStartDate) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "주간 운세 요청 시 weekStartDate는 필수입니다",
+      path: ["weekStartDate"],
+    });
+  }
 });
 
 const service = new FortuneTellerService();
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { error: "로그인이 필요합니다" },
+      { status: 401 }
+    );
+  }
   let body: unknown;
   try {
     body = await req.json();
@@ -58,10 +71,10 @@ export async function POST(req: NextRequest) {
 
   // LLM 해석 생성
   const result = await interpretSaju(
-    type as InterpretationType,
+    type,
     sajuData,
     weekStartDate,
-    session?.user?.id
+    session.user.id
   );
 
   if (!result.success) {

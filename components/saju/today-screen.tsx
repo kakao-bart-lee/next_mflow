@@ -108,6 +108,7 @@ function buildTodayDisplay(result: FortuneResponse): TodayDisplay {
 }
 
 const TAG_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  성장: Leaf,
   시작: Sparkles,
   열정: Flame,
   표현: MessageCircle,

@@ -43,6 +43,13 @@ export async function PUT(req: NextRequest) {
     )
   }
 
-  await upsertSystemSettings(parsed.data.settings)
-  return NextResponse.json({ ok: true })
+  try {
+    await upsertSystemSettings(parsed.data.settings)
+  } catch {
+    return NextResponse.json(
+      { error: "설정 저장 중 오류가 발생했습니다", code: "DB_ERROR" },
+      { status: 500 }
+    )
+  }
+  return NextResponse.json({ settings: parsed.data.settings })
 }
