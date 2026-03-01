@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { streamText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { auth } from "@/lib/auth";
-import { buildSajuSystemPrompt, type SajuAgentContext } from "@/lib/mastra/agents/saju-agent";
+import { buildSajuSystemPrompt, SAJU_EXPERT_PROMPT, type SajuAgentContext } from "@/lib/mastra/agents/saju-agent";
 import { isCreditEnabled, consumeCredit, CREDIT_COSTS } from "@/lib/credit-service";
+import { getStringSystemSetting } from "@/lib/system-settings";
 
 interface ChatRequestBody {
   messages: Array<{ role: "user" | "assistant" | "system"; content: string }>;
@@ -44,8 +45,14 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // DB에서 커스텀 프롬프트 로드 (없으면 코드 기본값 사용)
+  const chatPrompt = await getStringSystemSetting(
+    "saju_agent_prompt",
+    SAJU_EXPERT_PROMPT
+  );
+
   // 사주 컨텍스트를 system 메시지로 주입 (CopilotKit 없이 동일 효과)
-  const systemPrompt = buildSajuSystemPrompt(context ?? {});
+  const systemPrompt = buildSajuSystemPrompt(context ?? {}, chatPrompt);
 
   const result = streamText({
     model: openai(process.env.MASTRA_SAJU_MODEL || "gpt-4o-mini"),

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,6 +17,8 @@ import {
   BookOpen,
 } from "lucide-react"
 import { AIChatPanel } from "./ai-chat-panel"
+import { useSaju } from "@/lib/contexts/saju-context"
+import { useSajuInterpret } from "@/lib/hooks/use-saju-interpret"
 
 const WEEK_DATA = {
   theme: "이번 주는 내면의 힘을 키우는 시간입니다",
@@ -40,6 +42,29 @@ const WEEK_DATA = {
 }
 
 export function WeekScreen() {
+  const { birthInfo } = useSaju()
+  const { data: llmWeekly } = useSajuInterpret("weekly", birthInfo)
+
+  const weekData = useMemo(() => {
+    if (!llmWeekly) return WEEK_DATA
+    
+    const DAY_ICONS: Record<string, typeof Sun> = {
+      "월": Sun, "화": Flame, "수": Droplets,
+      "목": TreePine, "금": Star, "토": Wind, "일": Moon,
+    }
+    
+    return {
+      theme: llmWeekly.theme,
+      range: `${llmWeekly.days[0]?.date ?? ""} - ${llmWeekly.days[6]?.date ?? ""}`,
+      days: llmWeekly.days.map(d => ({
+        ...d,
+        icon: DAY_ICONS[d.day] ?? Sun,
+      })),
+      aiRecap: llmWeekly.aiRecap,
+      prompt: llmWeekly.prompt,
+    }
+  }, [llmWeekly])
+
   const [journalText, setJournalText] = useState("")
   const [journalSaved, setJournalSaved] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
@@ -63,10 +88,10 @@ export function WeekScreen() {
             {/* Week Header */}
             <header className="py-2">
               <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                {WEEK_DATA.range}
+                {weekData.range}
               </p>
               <h1 className="mt-2 text-balance font-serif text-xl font-semibold leading-snug text-foreground lg:text-2xl">
-                {WEEK_DATA.theme}
+                {weekData.theme}
               </h1>
             </header>
 
@@ -95,7 +120,7 @@ export function WeekScreen() {
                 이번 주 예보
               </h2>
               <div className="space-y-2">
-                {WEEK_DATA.days.map((day) => {
+                {weekData.days.map((day) => {
                   const Icon = day.icon
                   const isSelected = selectedDay === day.date
                   return (
@@ -180,11 +205,11 @@ export function WeekScreen() {
           <aside className="hidden lg:block lg:w-72 lg:shrink-0 lg:pt-14">
             <div className="sticky top-6 space-y-6">
               {/* AI Weekly Recap */}
-              <AIRecapCard recap={WEEK_DATA.aiRecap} />
+              <AIRecapCard recap={weekData.aiRecap} />
 
               {/* Journal prompt */}
               <JournalPrompt
-                prompt={WEEK_DATA.prompt}
+                prompt={weekData.prompt}
                 text={journalText}
                 onTextChange={setJournalText}
                 saved={journalSaved}
@@ -196,9 +221,9 @@ export function WeekScreen() {
 
         {/* Mobile: AI recap + Journal below forecast */}
         <div className="mt-8 space-y-6 lg:hidden">
-          <AIRecapCard recap={WEEK_DATA.aiRecap} />
+          <AIRecapCard recap={weekData.aiRecap} />
           <JournalPrompt
-            prompt={WEEK_DATA.prompt}
+            prompt={weekData.prompt}
             text={journalText}
             onTextChange={setJournalText}
             saved={journalSaved}

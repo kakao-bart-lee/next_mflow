@@ -22,6 +22,7 @@ import { DeepDiveSheet } from "./deep-dive-sheet"
 import { AIChatPanel } from "./ai-chat-panel"
 import { ThemeToggle } from "./theme-toggle"
 import { useSaju } from "@/lib/contexts/saju-context"
+import { useSajuInterpret } from "@/lib/hooks/use-saju-interpret"
 import type { FortuneResponse } from "@/lib/saju-core"
 
 /* ─── 오행 기반 오늘의 데이터 매핑 ─── */
@@ -106,7 +107,7 @@ function buildTodayDisplay(result: FortuneResponse): TodayDisplay {
   }
 }
 
-const TAG_ICONS: Record<string, React.ElementType> = {
+const TAG_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   성장: Leaf,
   시작: Sparkles,
   열정: Flame,
@@ -140,16 +141,33 @@ function TodaySkeleton() {
 /* ─── 메인 컴포넌트 ─── */
 
 export function TodayScreen() {
-  const { sajuResult, isLoading } = useSaju()
+  const { sajuResult, birthInfo, isLoading } = useSaju()
   const [checkedActions, setCheckedActions] = useState<Set<string>>(new Set())
   const [deepDiveOpen, setDeepDiveOpen] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
   const [aiActions, setAiActions] = useState<string[]>([])
 
-  const todayData = useMemo(
-    () => (sajuResult ? buildTodayDisplay(sajuResult) : null),
-    [sajuResult],
-  )
+  // LLM 동적 콘텐츠 fetch
+  const { data: llmDaily, isLoading: llmLoading } = useSajuInterpret("daily", birthInfo)
+
+  const todayData = useMemo(() => {
+    if (!sajuResult) return null
+    const staticData = buildTodayDisplay(sajuResult)
+    
+    // LLM 데이터가 있으면 오버라이드
+    if (llmDaily) {
+      return {
+        ...staticData,
+        summary: llmDaily.summary,
+        tags: llmDaily.tags,
+        body: llmDaily.body,
+        actions: llmDaily.actions,
+        avoid: llmDaily.avoid,
+      }
+    }
+    
+    return staticData
+  }, [sajuResult, llmDaily])
 
   const toggleAction = (id: string) => {
     setCheckedActions((prev) => {
@@ -224,6 +242,12 @@ export function TodayScreen() {
                         </Badge>
                       )
                     })}
+                    {llmDaily && !llmLoading && (
+                      <Badge variant="outline" className="rounded-full px-3 py-1 text-xs font-medium gap-1">
+                        <Sparkles className="h-3 w-3" />
+                        AI
+                      </Badge>
+                    )}
                   </div>
 
                   {/* Summary line */}
