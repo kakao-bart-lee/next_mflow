@@ -4,16 +4,15 @@ import { requireAdmin } from "@/lib/auth/admin"
 import { getSystemSettingsByKeys, upsertSystemSettings } from "@/lib/system-settings"
 
 const SUPPORTED_KEYS = [
-  "saju_agent_prompt",
-  "saju_today_prompt",
-  "saju_weekly_prompt",
+  "astrology_chat_prompt",
+  "astrology_report_prompt",
 ] as const
 
 const SettingsPayloadSchema = z.object({
-  settings: z.record(
-    z.enum(SUPPORTED_KEYS),
-    z.string().min(1)
-  ),
+  settings: z.object({
+    astrology_chat_prompt: z.string().min(1),
+    astrology_report_prompt: z.string().min(1),
+  }),
 })
 
 export async function GET() {
@@ -51,5 +50,6 @@ export async function PUT(req: NextRequest) {
       { status: 500 }
     )
   }
+
   return NextResponse.json({ settings: parsed.data.settings })
 }

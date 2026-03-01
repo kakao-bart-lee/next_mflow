@@ -91,6 +91,18 @@ async function seedSystemSettings() {
       value: 1,
       description: "AI 채팅 1회 크레딧 비용",
     },
+    {
+      key: "astrology_chat_prompt",
+      value:
+        "You are an astrology interpretation guide for a destiny decision product. Use Korean honorifics and practical advice.",
+      description: "점성 AI 채팅 시스템 프롬프트",
+    },
+    {
+      key: "astrology_report_prompt",
+      value:
+        "Generate concise Korean astrology interpretations using static planetary influence data.",
+      description: "점성 리포트 생성 시스템 프롬프트",
+    },
   ]
 
   for (const { key, value, description } of settings) {

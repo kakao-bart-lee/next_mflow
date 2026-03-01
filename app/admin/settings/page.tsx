@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -18,118 +18,92 @@ type SettingDef = {
 
 const SETTING_DEFS: SettingDef[] = [
   {
-    key: "saju_agent_prompt",
-    label: "사주 채팅 시스템 프롬프트",
-    description: "AI 사주 해석 에이전트의 기본 시스템 프롬프트",
+    key: "astrology_chat_prompt",
+    label: "점성 채팅 시스템 프롬프트",
+    description: "AI 점성 해석 에이전트의 기본 시스템 프롬프트",
     type: "text",
     default:
-      "You are a saju (사주) fortune-telling expert for a Korean destiny decision product. Use Korean honorifics and give practical, specific advice based on the user's four pillars.",
+      "You are an astrology interpretation guide for a destiny decision product. Use Korean honorifics and practical advice.",
   },
   {
-    key: "saju_today_prompt",
-    label: "오늘의 운세 생성 프롬프트",
-    description: "일일 운세 LLM 생성 시 사용할 프롬프트",
+    key: "astrology_report_prompt",
+    label: "점성 해석 생성 프롬프트",
+    description: "정적 점성 데이터 기반 리포트 생성 시 사용할 프롬프트",
     type: "text",
     default:
-      "Generate a concise daily fortune in Korean based on the user's saju data and today's energy. Keep it practical, encouraging, and grounded in saju theory.",
-  },
-  {
-    key: "saju_weekly_prompt",
-    label: "주간 운세 생성 프롬프트",
-    description: "주간 운세 LLM 생성 시 사용할 프롬프트",
-    type: "text",
-    default:
-      "Generate a 7-day weekly forecast in Korean based on the user's saju data. Include specific advice for each day, grounded in saju principles.",
+      "Generate concise Korean astrology interpretation using static planetary influence data. Keep it practical, specific, and grounded.",
   },
 ]
 
 function buildDefaultSettings(): Record<string, SettingValue> {
-  const defaults: Record<string, SettingValue> = {}
-  SETTING_DEFS.forEach((def) => {
-    defaults[def.key] = def.default
-  })
-  return defaults
+  return SETTING_DEFS.reduce<Record<string, SettingValue>>((acc, def) => {
+    acc[def.key] = def.default
+    return acc
+  }, {})
 }
 
 export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState<Record<string, SettingValue>>({})
+  const [settings, setSettings] = useState<Record<string, SettingValue>>(buildDefaultSettings())
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const defaultSettings = useMemo(() => buildDefaultSettings(), [])
+
   useEffect(() => {
     let cancelled = false
 
-    async function fetchSettings() {
+    async function loadSettings() {
+      setFetching(true)
+      setError(null)
       try {
         const res = await fetch("/api/admin/settings")
         if (!res.ok) {
-          throw new Error("Failed to fetch settings")
+          const data = await res.json().catch(() => ({}))
+          throw new Error(data.error ?? "설정을 불러오지 못했습니다")
         }
-        const data = await res.json()
-        if (!cancelled) {
-          const defaults = buildDefaultSettings()
-          setSettings({ ...defaults, ...(data.settings ?? {}) })
-        }
+        const data = (await res.json()) as { settings?: Record<string, SettingValue> }
+        if (cancelled) return
+        setSettings({
+          ...defaultSettings,
+          ...(data.settings ?? {}),
+        })
       } catch (err) {
-        if (!cancelled) {
-          console.error(err)
-          setError("설정을 불러오는데 실패했습니다.")
-          setSettings(buildDefaultSettings())
-        }
+        if (cancelled) return
+        setError(err instanceof Error ? err.message : "설정을 불러오지 못했습니다")
       } finally {
-        if (!cancelled) {
-          setFetching(false)
-        }
+        if (!cancelled) setFetching(false)
       }
     }
 
-    fetchSettings()
-
+    loadSettings()
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [defaultSettings])
 
   const handleSave = async () => {
     setLoading(true)
     setSaved(false)
     setError(null)
-
     try {
       const res = await fetch("/api/admin/settings", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ settings }),
       })
-
       if (!res.ok) {
-        throw new Error("Failed to save settings")
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error ?? "설정 저장에 실패했습니다")
       }
-
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch (err) {
-      console.error(err)
-      setError("설정 저장에 실패했습니다.")
+      setError(err instanceof Error ? err.message : "설정 저장에 실패했습니다")
     } finally {
       setLoading(false)
     }
-  }
-
-  if (fetching) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-xl font-semibold text-foreground">시스템 설정</h1>
-          <p className="text-sm text-muted-foreground">AI 프롬프트를 설정합니다</p>
-        </div>
-        <div className="text-sm text-muted-foreground">설정을 불러오는 중...</div>
-      </div>
-    )
   }
 
   return (
@@ -140,7 +114,7 @@ export default function AdminSettingsPage() {
       </div>
 
       {error && (
-        <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
+        <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -156,19 +130,21 @@ export default function AdminSettingsPage() {
               <p className="text-xs text-muted-foreground">{def.description}</p>
             </CardHeader>
             <CardContent>
-              <Textarea
-                value={String(settings[def.key] ?? def.default)}
-                onChange={(e) =>
-                  setSettings((s) => ({ ...s, [def.key]: e.target.value }))
-                }
-                className="min-h-[100px] font-mono text-xs"
-              />
+              <div className="space-y-2">
+                <Textarea
+                  value={String(settings[def.key] ?? def.default)}
+                  onChange={(e) => setSettings((s) => ({ ...s, [def.key]: e.target.value }))}
+                  rows={6}
+                  className="font-mono text-xs"
+                  disabled={fetching || loading}
+                />
+              </div>
             </CardContent>
           </Card>
         ))}
 
         <div className="flex items-center gap-3 pt-2">
-          <Button onClick={handleSave} disabled={loading}>
+          <Button onClick={handleSave} disabled={loading || fetching}>
             {loading ? "저장 중…" : "설정 저장"}
           </Button>
           {saved && <p className="text-sm text-green-600">✓ 저장되었습니다</p>}

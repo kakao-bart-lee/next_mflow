@@ -10,10 +10,12 @@ import {
 } from "react"
 import type { BirthInfo } from "@/lib/schemas/birth-info"
 import type { FortuneResponse } from "@/lib/saju-core"
+import type { AstrologyStaticResult } from "@/lib/astrology/static/types"
 
 interface SajuContextValue {
   birthInfo: BirthInfo | null
   sajuResult: FortuneResponse | null
+  astrologyResult: AstrologyStaticResult | null
   isLoading: boolean
   isHydrated: boolean
   error: string | null
@@ -28,6 +30,7 @@ const STORAGE_KEY = "saju_birth_info"
 export function SajuProvider({ children }: { children: ReactNode }) {
   const [birthInfo, setBirthInfoState] = useState<BirthInfo | null>(null)
   const [sajuResult, setSajuResult] = useState<FortuneResponse | null>(null)
+  const [astrologyResult, setAstrologyResult] = useState<AstrologyStaticResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isHydrated, setIsHydrated] = useState(false)
@@ -35,24 +38,54 @@ export function SajuProvider({ children }: { children: ReactNode }) {
   const fetchAnalysis = useCallback(async (info: BirthInfo) => {
     setIsLoading(true)
     setError(null)
-    try {
-      const res = await fetch("/api/saju/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(info),
-      })
-      if (!res.ok) {
-        const data = await res.json()
-        setError(data.error ?? "분석 중 오류가 발생했습니다")
-        return
+    type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string; network: boolean }
+
+    const postAnalysis = async <T,>(url: string): Promise<ApiResult<T>> => {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(info),
+        })
+        if (!res.ok) {
+          let message = "분석 중 오류가 발생했습니다"
+          try {
+            const data = await res.json()
+            message = data.error ?? message
+          } catch {
+            // ignore parse error
+          }
+          return { ok: false, error: message, network: false }
+        }
+        return { ok: true, data: (await res.json()) as T }
+      } catch {
+        return { ok: false, error: "네트워크 오류가 발생했습니다", network: true }
       }
-      const data: FortuneResponse = await res.json()
-      setSajuResult(data)
-    } catch {
-      setError("네트워크 오류가 발생했습니다")
-    } finally {
-      setIsLoading(false)
     }
+
+    const [sajuApi, astrologyApi] = await Promise.all([
+      postAnalysis<FortuneResponse>("/api/saju/analyze"),
+      postAnalysis<AstrologyStaticResult>("/api/astrology/static"),
+    ])
+
+    if (sajuApi.ok) {
+      setSajuResult(sajuApi.data)
+    } else {
+      setSajuResult(null)
+      setError(sajuApi.error)
+    }
+
+    if (astrologyApi.ok) {
+      setAstrologyResult(astrologyApi.data)
+    } else {
+      setAstrologyResult(null)
+    }
+
+    if (!sajuApi.ok && !astrologyApi.ok && sajuApi.network && astrologyApi.network) {
+      setError("네트워크 오류가 발생했습니다")
+    }
+
+    setIsLoading(false)
   }, [])
 
   // SSR-safe hydration: only read localStorage on the client after mount
@@ -96,6 +129,7 @@ export function SajuProvider({ children }: { children: ReactNode }) {
   const clearData = useCallback(() => {
     setBirthInfoState(null)
     setSajuResult(null)
+    setAstrologyResult(null)
     setError(null)
     try {
       localStorage.removeItem(STORAGE_KEY)
@@ -106,7 +140,16 @@ export function SajuProvider({ children }: { children: ReactNode }) {
 
   return (
     <SajuContext.Provider
-      value={{ birthInfo, sajuResult, isLoading, isHydrated, error, setBirthInfo, clearData }}
+      value={{
+        birthInfo,
+        sajuResult,
+        astrologyResult,
+        isLoading,
+        isHydrated,
+        error,
+        setBirthInfo,
+        clearData,
+      }}
     >
       {children}
     </SajuContext.Provider>

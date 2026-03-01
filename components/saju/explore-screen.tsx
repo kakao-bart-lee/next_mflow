@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/tooltip"
 import { useSaju } from "@/lib/contexts/saju-context"
 import type { FortuneResponse } from "@/lib/saju-core"
+import { PLANET_ORDER } from "@/lib/astrology/static/constants"
+import type { PlanetId } from "@/lib/astrology/static/types"
 
 /* ─── 실제 사주 데이터 파생 ─── */
 
@@ -38,6 +40,26 @@ interface FiveElementDisplay {
   value: number
   color: string
   textColor: string
+}
+
+interface PlanetDisplay {
+  id: PlanetId
+  symbol: string
+  name: string
+  sign: string
+  house: number | null
+  sajuMap: string
+  description: string
+}
+
+const PLANET_META: Record<PlanetId, { symbol: string; name: string; sajuMap: string }> = {
+  SUN: { symbol: "☉", name: "태양 (Sun)", sajuMap: "식신 (食神)" },
+  MOON: { symbol: "☽", name: "달 (Moon)", sajuMap: "편인 (偏印)" },
+  MERCURY: { symbol: "☿", name: "수성 (Mercury)", sajuMap: "편관 (偏官)" },
+  VENUS: { symbol: "♀", name: "금성 (Venus)", sajuMap: "정재 (正財)" },
+  MARS: { symbol: "♂", name: "화성 (Mars)", sajuMap: "상관 (傷官)" },
+  JUPITER: { symbol: "♃", name: "목성 (Jupiter)", sajuMap: "정인 (正印)" },
+  SATURN: { symbol: "♄", name: "토성 (Saturn)", sajuMap: "비견 (比肩)" },
 }
 
 const ELEMENT_LABEL: Record<string, string> = {
@@ -93,14 +115,70 @@ function buildFiveElements(result: FortuneResponse): FiveElementDisplay[] {
 
 /* ─── 하드코딩된 점성술 데이터 (추후 astrology API 연결 예정) ─── */
 
-const PLANET_POSITIONS = [
-  { symbol: "☉", name: "태양 (Sun)", sign: "Pisces 10°", house: 12, sajuMap: "식신 (食神)", description: "감성과 직관이 강한 시기. 내면의 표현을 밖으로 드러내는 에너지입니다." },
-  { symbol: "☽", name: "달 (Moon)", sign: "Cancer 5°", house: 4, sajuMap: "편인 (偏印)", description: "가정과 안식에 마음이 향합니다. 직감과 영감이 높아지는 시간." },
-  { symbol: "☿", name: "수성 (Mercury)", sign: "Aquarius 22°", house: 11, sajuMap: "편관 (偏官)", description: "독창적인 아이디어가 떠오르는 시기. 기존 틀을 벗어난 사고가 빛납니다." },
-  { symbol: "♀", name: "금성 (Venus)", sign: "Aries 15°", house: 1, sajuMap: "정재 (正財)", description: "관계에서 주도적인 에너지. 새로운 만남이나 시작에 좋은 기운." },
-  { symbol: "♂", name: "화성 (Mars)", sign: "Gemini 8°", house: 3, sajuMap: "상관 (傷官)", description: "소통과 이동에 활발한 에너지. 적극적 표현이 성과를 만듭니다." },
-  { symbol: "♃", name: "목성 (Jupiter)", sign: "Gemini 2°", house: 3, sajuMap: "정인 (正印)", description: "배움과 교류가 확장되는 시기. 새로운 지식이 행운을 가져옵니다." },
-  { symbol: "♄", name: "토성 (Saturn)", sign: "Pisces 15°", house: 12, sajuMap: "비견 (比肩)", description: "내면의 규율과 성찰이 필요한 시기. 조용한 노력이 결실을 맺습니다." },
+const PLANET_POSITIONS: PlanetDisplay[] = [
+  {
+    id: "SUN",
+    symbol: "☉",
+    name: "태양 (Sun)",
+    sign: "Pisces 10°",
+    house: 12,
+    sajuMap: "식신 (食神)",
+    description: "감성과 직관이 강한 시기. 내면의 표현을 밖으로 드러내는 에너지입니다.",
+  },
+  {
+    id: "MOON",
+    symbol: "☽",
+    name: "달 (Moon)",
+    sign: "Cancer 5°",
+    house: 4,
+    sajuMap: "편인 (偏印)",
+    description: "가정과 안식에 마음이 향합니다. 직감과 영감이 높아지는 시간.",
+  },
+  {
+    id: "MERCURY",
+    symbol: "☿",
+    name: "수성 (Mercury)",
+    sign: "Aquarius 22°",
+    house: 11,
+    sajuMap: "편관 (偏官)",
+    description: "독창적인 아이디어가 떠오르는 시기. 기존 틀을 벗어난 사고가 빛납니다.",
+  },
+  {
+    id: "VENUS",
+    symbol: "♀",
+    name: "금성 (Venus)",
+    sign: "Aries 15°",
+    house: 1,
+    sajuMap: "정재 (正財)",
+    description: "관계에서 주도적인 에너지. 새로운 만남이나 시작에 좋은 기운.",
+  },
+  {
+    id: "MARS",
+    symbol: "♂",
+    name: "화성 (Mars)",
+    sign: "Gemini 8°",
+    house: 3,
+    sajuMap: "상관 (傷官)",
+    description: "소통과 이동에 활발한 에너지. 적극적 표현이 성과를 만듭니다.",
+  },
+  {
+    id: "JUPITER",
+    symbol: "♃",
+    name: "목성 (Jupiter)",
+    sign: "Gemini 2°",
+    house: 3,
+    sajuMap: "정인 (正印)",
+    description: "배움과 교류가 확장되는 시기. 새로운 지식이 행운을 가져옵니다.",
+  },
+  {
+    id: "SATURN",
+    symbol: "♄",
+    name: "토성 (Saturn)",
+    sign: "Pisces 15°",
+    house: 12,
+    sajuMap: "비견 (比肩)",
+    description: "내면의 규율과 성찰이 필요한 시기. 조용한 노력이 결실을 맺습니다.",
+  },
 ]
 
 
@@ -150,7 +228,7 @@ function getTypeLabel(type: "daily" | "weekly" | "special") {
 /* ─── 메인 컴포넌트 ─── */
 
 export function ExploreScreen() {
-  const { sajuResult, isLoading } = useSaju()
+  const { sajuResult, astrologyResult, isLoading } = useSaju()
   const [chatOpen, setChatOpen] = useState(false)
   const [activePlanetIdx, setActivePlanetIdx] = useState<number | null>(null)
   const [expandedTransit, setExpandedTransit] = useState<string | null>(null)
@@ -168,7 +246,31 @@ export function ExploreScreen() {
   const greatFortune = sajuResult?.greatFortune as Record<string, Record<string, string>> | undefined
   const sinyakSingangData = sajuResult?.sinyakSingang as Record<string, string> | undefined
 
-  const activePlanet = activePlanetIdx !== null ? PLANET_POSITIONS[activePlanetIdx] : null
+  const planetPositions = useMemo<PlanetDisplay[]>(() => {
+    if (!astrologyResult) return PLANET_POSITIONS
+
+    return PLANET_ORDER.map((planet) => {
+      const base = PLANET_META[planet]
+      const position = astrologyResult.positions[planet]
+      const influence = astrologyResult.influences[planet]
+      return {
+        id: planet,
+        symbol: base.symbol,
+        name: base.name,
+        sign: `${position.signLabel} ${position.degreeInSign}°`,
+        house: position.house,
+        sajuMap: base.sajuMap,
+        description: influence.interpretation,
+      }
+    })
+  }, [astrologyResult])
+
+  const headlineTitle = astrologyResult?.today.headline ?? "감성의 물결 속에서 직관을 따라가는 시기"
+  const headlineBody =
+    astrologyResult?.today.summary ??
+    "사주의 식신 기운과 태양의 물고기자리 에너지가 함께 흐르고 있습니다. 이성적 판단보다 직관을 신뢰하되, 오행의 토(Earth) 에너지로 현실 감각을 유지하세요."
+
+  const activePlanet = activePlanetIdx !== null ? planetPositions[activePlanetIdx] : null
   const filteredTransits = transitFilter === "all" ? TRANSITS : TRANSITS.filter((t) => t.type === transitFilter)
 
   return (
@@ -202,7 +304,7 @@ export function ExploreScreen() {
                     <span className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
                       {sajuPillar.heavenlyStem}{sajuPillar.earthlyBranch} / {sajuPillar.element}
                     </span>
-                    {PLANET_POSITIONS.slice(0, 3).map((p) => (
+                    {planetPositions.slice(0, 3).map((p) => (
                       <span key={p.name} className="flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs text-secondary-foreground">
                         <span className="text-sm">{p.symbol}</span>
                         {p.sign}
@@ -213,15 +315,21 @@ export function ExploreScreen() {
 
                 {/* Summary */}
                 <h2 className="mt-4 font-serif text-lg font-semibold leading-snug text-foreground">
-                  감성의 물결 속에서 직관을 따라가는 시기
+                  {headlineTitle}
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  사주의{" "}
-                  <TermTooltip term="식신" definition="일간이 생(生)하는 오행 중 음양이 같은 것. 표현, 재능, 식복을 의미합니다." />
-                  {" "}기운과 태양의 물고기자리 에너지가 함께 흐르고 있습니다.
-                  이성적 판단보다 직관을 신뢰하되, 오행의{" "}
-                  <TermTooltip term="토(Earth)" definition="오행 중 안정과 중심을 상징. 균형을 잡아주는 역할을 합니다." />
-                  {" "}에너지로 현실 감각을 유지하세요.
+                  {astrologyResult ? (
+                    headlineBody
+                  ) : (
+                    <>
+                      사주의{" "}
+                      <TermTooltip term="식신" definition="일간이 생(生)하는 오행 중 음양이 같은 것. 표현, 재능, 식복을 의미합니다." />
+                      {" "}기운과 태양의 물고기자리 에너지가 함께 흐르고 있습니다.
+                      이성적 판단보다 직관을 신뢰하되, 오행의{" "}
+                      <TermTooltip term="토(Earth)" definition="오행 중 안정과 중심을 상징. 균형을 잡아주는 역할을 합니다." />
+                      {" "}에너지로 현실 감각을 유지하세요.
+                    </>
+                  )}
                 </p>
 
                 <button
@@ -268,7 +376,10 @@ export function ExploreScreen() {
                       <span className="text-2xl">{activePlanet.symbol}</span>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-semibold text-foreground">{activePlanet.name}</h4>
-                        <p className="mt-0.5 text-xs text-muted-foreground">{activePlanet.sign} / House {activePlanet.house}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {activePlanet.sign}
+                          {activePlanet.house ? ` / House ${activePlanet.house}` : ""}
+                        </p>
                         <div className="mt-2 flex items-center gap-1.5">
                           <BookOpen className="h-3 w-3 text-accent" />
                           <span className="text-xs font-medium text-accent">사주 대응: {activePlanet.sajuMap}</span>
@@ -279,7 +390,7 @@ export function ExploreScreen() {
                   </div>
                 )}
                 <div className="mt-4 flex flex-wrap justify-center gap-2">
-                  {PLANET_POSITIONS.map((p, i) => (
+                  {planetPositions.map((p, i) => (
                     <button
                       key={p.name}
                       onClick={() => setActivePlanetIdx(activePlanetIdx === i ? null : i)}
