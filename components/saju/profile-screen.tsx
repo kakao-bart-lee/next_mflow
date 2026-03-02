@@ -104,7 +104,7 @@ interface UserProfile {
 
 export function ProfileScreen() {
   const { birthInfo, sajuResult, clearData } = useSaju()
-  const { locale, setLocale } = useLocale()
+  const { locale, setLocale, t } = useLocale()
   const router = useRouter()
 
   const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -134,7 +134,7 @@ export function ProfileScreen() {
     <div className="mx-auto max-w-md px-4 pb-8">
       {/* 헤더 */}
       <header className="py-2">
-        <h1 className="text-sm font-medium text-muted-foreground">내 프로필</h1>
+        <h1 className="text-sm font-medium text-muted-foreground">{t.profile.title}</h1>
       </header>
 
       {/* 사용자 정보 */}
@@ -154,7 +154,7 @@ export function ProfileScreen() {
             ) : (
               <>
                 <p className="text-base font-semibold text-foreground truncate">
-                  {profile?.name ?? "사용자"}
+                  {profile?.name ?? "—"}
                 </p>
                 <p className="text-sm text-muted-foreground truncate mt-0.5">
                   {profile?.email ?? ""}
@@ -170,7 +170,7 @@ export function ProfileScreen() {
         <section className="mt-4">
           <div className="rounded-2xl border border-border bg-card p-5">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-foreground">내 사주 명반</h2>
+              <h2 className="text-sm font-semibold text-foreground">{t.profile.myChart}</h2>
               <span className="text-[10px] text-muted-foreground tracking-widest">四柱命盤</span>
             </div>
             <MMyungban pillars={pillars} />
@@ -184,22 +184,22 @@ export function ProfileScreen() {
           <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
             <div className="flex items-center gap-3 px-5 py-3.5">
               <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="text-sm text-muted-foreground">생년월일</span>
+              <span className="text-sm text-muted-foreground">{t.profile.birthDate}</span>
               <span className="ml-auto text-sm font-medium text-foreground">
                 {birthInfo.birthDate}
               </span>
             </div>
             <div className="flex items-center gap-3 px-5 py-3.5">
               <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="text-sm text-muted-foreground">출생시간</span>
+              <span className="text-sm text-muted-foreground">{t.profile.birthTime}</span>
               <span className="ml-auto text-sm font-medium text-foreground">
-                {birthInfo.isTimeUnknown ? "모름" : (birthInfo.birthTime ?? "미입력")}
+                {birthInfo.isTimeUnknown ? t.profile.unknownTime : (birthInfo.birthTime ?? "—")}
               </span>
             </div>
             {birthInfo.locationName && (
               <div className="flex items-center gap-3 px-5 py-3.5">
                 <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="text-sm text-muted-foreground">출생지</span>
+                <span className="text-sm text-muted-foreground">{t.profile.birthPlace}</span>
                 <span className="ml-auto text-sm font-medium text-foreground">
                   {birthInfo.locationName}
                 </span>
@@ -207,9 +207,9 @@ export function ProfileScreen() {
             )}
             <div className="flex items-center gap-3 px-5 py-3.5">
               <User className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="text-sm text-muted-foreground">성별</span>
+              <span className="text-sm text-muted-foreground">{t.profile.gender}</span>
               <span className="ml-auto text-sm font-medium text-foreground">
-                {birthInfo.gender === "M" ? "남성" : "여성"}
+                {birthInfo.gender === "M" ? t.profile.male : t.profile.female}
               </span>
             </div>
           </div>
@@ -222,8 +222,8 @@ export function ProfileScreen() {
           <div className="flex items-center gap-3 rounded-2xl border border-border bg-card px-5 py-4">
             <Coins className="h-5 w-5 text-amber-500 shrink-0" />
             <div>
-              <p className="text-sm font-medium text-foreground">크레딧 잔액</p>
-              <p className="text-xs text-muted-foreground mt-0.5">AI 분석에 사용됩니다</p>
+              <p className="text-sm font-medium text-foreground">{t.profile.credits}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t.profile.creditsDesc}</p>
             </div>
             <span className="ml-auto text-lg font-bold tabular-nums text-foreground">
               {profile.creditBalance.toLocaleString()}
@@ -237,7 +237,7 @@ export function ProfileScreen() {
         <div className="rounded-2xl border border-border bg-card px-5 py-4">
           <div className="flex items-center gap-3">
             <Languages className="h-4 w-4 text-muted-foreground shrink-0" />
-            <span className="text-sm font-medium text-foreground">언어</span>
+            <span className="text-sm font-medium text-foreground">{t.profile.language}</span>
             <div className="ml-auto flex gap-1.5">
               {LOCALES.map(({ value, label }) => (
                 <button
@@ -268,7 +268,7 @@ export function ProfileScreen() {
             className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card px-5 py-4 text-left transition-colors hover:bg-secondary/50"
           >
             <RefreshCw className="h-4 w-4 text-muted-foreground shrink-0" />
-            <span className="text-sm font-medium text-foreground">출생 정보 다시 입력</span>
+            <span className="text-sm font-medium text-foreground">{t.profile.editBirthInfo}</span>
             <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
           </button>
         )}
@@ -278,7 +278,7 @@ export function ProfileScreen() {
           className="flex w-full items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4 text-left transition-colors hover:bg-destructive/10"
         >
           <LogOut className="h-4 w-4 text-destructive shrink-0" />
-          <span className="text-sm font-medium text-destructive">로그아웃</span>
+          <span className="text-sm font-medium text-destructive">{t.profile.logout}</span>
         </button>
       </section>
     </div>

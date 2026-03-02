@@ -2,8 +2,9 @@ import type { Locale } from "."
 
 /**
  * Message dictionary structure.
- * - Korean: complete
- * - English: fill in as needed
+ * - Korean (ko): complete
+ * - English (en): complete
+ * - Japanese (ja): complete
  *
  * Add new sections as screens are translated.
  */
@@ -18,6 +19,7 @@ const messages = {
     nav: {
       today: "오늘",
       week: "이번 주",
+      debate: "토론",
       decision: "결정",
       explore: "탐색",
     },
@@ -26,7 +28,6 @@ const messages = {
       tagline: "오늘을 잘 쓰는 방법을 알려드릴게요",
       step1Label: "기본 정보",
       step2Label: "추가 정보",
-      // Step 0
       whenBorn: "언제 태어나셨나요?",
       whenBornDesc: "정확한 생년월일이 기운을 읽는 데 큰 도움이 됩니다",
       birthDate: "생년월일",
@@ -34,7 +35,6 @@ const messages = {
       timeKnown: "알고 있어요",
       timeUnknown: "모르겠어요",
       timeUnknownMsg: "괜찮아요. 시간 없이도 읽을 수 있는 것들이 있어요.",
-      // Step 1
       tellMore: "조금만 더 알려주세요",
       tellMoreDesc: "태어난 곳의 기운도 함께 읽습니다",
       gender: "성별",
@@ -43,11 +43,27 @@ const messages = {
       birthPlace: "태어난 장소",
       timezone: "시간대",
       dstNote: "서머타임 자동 반영",
-      // Validation
       dateRequired: "날짜를 입력해주세요",
       dateInvalid: "올바른 날짜를 입력해주세요",
       dateFuture: "미래 날짜는 입력할 수 없어요",
       dateTooOld: "1900년 이후 날짜를 입력해주세요",
+    },
+    profile: {
+      title: "내 프로필",
+      myChart: "내 사주 명반",
+      birthInfo: "출생 정보",
+      birthDate: "생년월일",
+      birthTime: "출생시간",
+      birthPlace: "출생지",
+      gender: "성별",
+      male: "남성",
+      female: "여성",
+      unknownTime: "모름",
+      credits: "크레딧 잔액",
+      creditsDesc: "AI 분석에 사용됩니다",
+      language: "언어",
+      editBirthInfo: "출생 정보 다시 입력",
+      logout: "로그아웃",
     },
   },
   en: {
@@ -60,6 +76,7 @@ const messages = {
     nav: {
       today: "Today",
       week: "This Week",
+      debate: "Debate",
       decision: "Decision",
       explore: "Explore",
     },
@@ -68,7 +85,6 @@ const messages = {
       tagline: "Your daily guide to living well",
       step1Label: "Basic info",
       step2Label: "More details",
-      // Step 0
       whenBorn: "When were you born?",
       whenBornDesc: "Your exact birth date helps us read the energy",
       birthDate: "Date of birth",
@@ -76,7 +92,6 @@ const messages = {
       timeKnown: "I know",
       timeUnknown: "Not sure",
       timeUnknownMsg: "No worries. There's still plenty we can read.",
-      // Step 1
       tellMore: "Just a bit more",
       tellMoreDesc: "Where you were born matters too",
       gender: "Gender",
@@ -85,11 +100,84 @@ const messages = {
       birthPlace: "Place of birth",
       timezone: "Timezone",
       dstNote: "DST applied automatically",
-      // Validation
       dateRequired: "Please enter a date",
       dateInvalid: "Please enter a valid date",
       dateFuture: "Date cannot be in the future",
       dateTooOld: "Please enter a date after 1900",
+    },
+    profile: {
+      title: "My Profile",
+      myChart: "My Saju Chart",
+      birthInfo: "Birth Information",
+      birthDate: "Date of Birth",
+      birthTime: "Time of Birth",
+      birthPlace: "Place of Birth",
+      gender: "Gender",
+      male: "Male",
+      female: "Female",
+      unknownTime: "Unknown",
+      credits: "Credit Balance",
+      creditsDesc: "Used for AI analysis",
+      language: "Language",
+      editBirthInfo: "Re-enter Birth Info",
+      logout: "Log Out",
+    },
+  },
+  ja: {
+    common: {
+      next: "次へ",
+      back: "戻る",
+      start: "はじめる",
+      analyzing: "分析中...",
+    },
+    nav: {
+      today: "今日",
+      week: "今週",
+      debate: "討論",
+      decision: "決断",
+      explore: "探索",
+    },
+    onboarding: {
+      brand: "四柱プレイブック",
+      tagline: "今日をうまく使う方法をお伝えします",
+      step1Label: "基本情報",
+      step2Label: "追加情報",
+      whenBorn: "いつ生まれましたか？",
+      whenBornDesc: "正確な生年月日が運勢を読むのに役立ちます",
+      birthDate: "生年月日",
+      birthTime: "出生時刻",
+      timeKnown: "知っています",
+      timeUnknown: "わかりません",
+      timeUnknownMsg: "大丈夫です。時間がなくても読めることがあります。",
+      tellMore: "もう少し教えてください",
+      tellMoreDesc: "生まれた場所のエネルギーも読み取ります",
+      gender: "性別",
+      male: "男性",
+      female: "女性",
+      birthPlace: "出生地",
+      timezone: "タイムゾーン",
+      dstNote: "サマータイム自動反映",
+      dateRequired: "日付を入力してください",
+      dateInvalid: "正しい日付を入力してください",
+      dateFuture: "未来の日付は入力できません",
+      dateTooOld: "1900年以降の日付を入力してください",
+    },
+    profile: {
+      title: "マイプロフィール",
+      myChart: "四柱命盤",
+      birthInfo: "生年月日情報",
+      birthDate: "生年月日",
+      birthTime: "出生時刻",
+      birthPlace: "出生地",
+      gender: "性別",
+      male: "男性",
+      female: "女性",
+      unknownTime: "不明",
+      credits: "クレジット残高",
+      creditsDesc: "AI分析に使用されます",
+      language: "言語",
+      editBirthInfo: "生年月日を再入力",
+      logout: "ログアウト",
     },
   },
 } as const
