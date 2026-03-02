@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -23,6 +23,35 @@ import { LocaleToggle } from "./locale-toggle"
 import { useLocale } from "@/lib/contexts/locale-context"
 import { useSaju } from "@/lib/contexts/saju-context"
 import type { BirthInfo } from "@/lib/schemas/birth-info"
+import type { Locale } from "@/lib/i18n"
+
+// 로케일별 날짜 입력 필드 순서 및 레이블
+type DateFieldKey = "year" | "month" | "day"
+interface DateFieldConfig {
+  field: DateFieldKey
+  label: string
+  placeholder: string
+  maxLength: number
+  flex: string
+}
+
+const DATE_FIELDS: Record<Locale, DateFieldConfig[]> = {
+  ko: [
+    { field: "year",  label: "년도", placeholder: "YYYY", maxLength: 4, flex: "flex-[5]" },
+    { field: "month", label: "월",   placeholder: "MM",   maxLength: 2, flex: "flex-[3]" },
+    { field: "day",   label: "일",   placeholder: "DD",   maxLength: 2, flex: "flex-[3]" },
+  ],
+  ja: [
+    { field: "year",  label: "年", placeholder: "YYYY", maxLength: 4, flex: "flex-[5]" },
+    { field: "month", label: "月", placeholder: "MM",   maxLength: 2, flex: "flex-[3]" },
+    { field: "day",   label: "日", placeholder: "DD",   maxLength: 2, flex: "flex-[3]" },
+  ],
+  en: [
+    { field: "month", label: "Month", placeholder: "MM",   maxLength: 2, flex: "flex-[3]" },
+    { field: "day",   label: "Day",   placeholder: "DD",   maxLength: 2, flex: "flex-[3]" },
+    { field: "year",  label: "Year",  placeholder: "YYYY", maxLength: 4, flex: "flex-[5]" },
+  ],
+}
 
 /* Stagger helper — returns inline animation style with delay */
 function stagger(index: number, baseDelay = 0.1) {
@@ -34,7 +63,7 @@ function stagger(index: number, baseDelay = 0.1) {
 export function OnboardingScreen() {
   const router = useRouter()
   const { setBirthInfo } = useSaju()
-  const { t } = useLocale()
+  const { locale, t } = useLocale()
   const msg = t.onboarding
   const common = t.common
 
@@ -42,6 +71,25 @@ export function OnboardingScreen() {
   const [gender, setGender] = useState<"M" | "F" | "">("")
   const [location, setLocation] = useState<LocationResult | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // 분리 날짜 입력 상태
+  const [dateParts, setDateParts] = useState({ year: "", month: "", day: "" })
+  const fieldRefs: Record<DateFieldKey, React.RefObject<HTMLInputElement | null>> = {
+    year:  useRef<HTMLInputElement>(null),
+    month: useRef<HTMLInputElement>(null),
+    day:   useRef<HTMLInputElement>(null),
+  }
+
+  const dateFields = DATE_FIELDS[locale]
+
+  // 연/월/일 → YYYY-MM-DD 조합 (완성된 경우만 반환)
+  function assembleDateValue(parts: typeof dateParts): string {
+    const { year, month, day } = parts
+    if (year.length === 4 && month.length >= 1 && day.length >= 1) {
+      return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`
+    }
+    return ""
+  }
 
   const step0Schema = z.object({
     birthDate: z
@@ -62,6 +110,7 @@ export function OnboardingScreen() {
     watch,
     trigger,
     getValues,
+    setValue,
     setError,
     formState: { errors },
   } = useForm<Step0Values>({
@@ -70,6 +119,23 @@ export function OnboardingScreen() {
   })
 
   const isTimeUnknown = watch("isTimeUnknown")
+
+  // 날짜 입력 핸들러 — 숫자만 허용, 완성 시 다음 필드로 포커스 이동
+  function handleDatePartChange(field: DateFieldKey, raw: string) {
+    const digits = raw.replace(/\D/g, "")
+    const maxLen = field === "year" ? 4 : 2
+    const value = digits.slice(0, maxLen)
+    const next = { ...dateParts, [field]: value }
+    setDateParts(next)
+    setValue("birthDate", assembleDateValue(next), { shouldValidate: false })
+
+    // 자동 포커스 이동: 현재 필드가 꽉 찼을 때 다음 필드로
+    if (value.length === maxLen) {
+      const currentIndex = dateFields.findIndex((f) => f.field === field)
+      const nextField = dateFields[currentIndex + 1]
+      if (nextField) fieldRefs[nextField.field].current?.focus()
+    }
+  }
 
   const handleStep0Next = async () => {
     const valid = await trigger("birthDate")
@@ -183,25 +249,32 @@ export function OnboardingScreen() {
                 </p>
               </div>
 
-              {/* Birth date */}
+              {/* Birth date — 로케일 순서로 렌더링되는 분리 입력 */}
               <div className="space-y-2.5" style={stagger(1)}>
-                <Label
-                  htmlFor="birthdate"
-                  className="flex items-center gap-2 text-[13px] font-medium text-foreground/80"
-                >
+                <Label className="flex items-center gap-2 text-[13px] font-medium text-foreground/80">
                   <CalendarDays className="h-3.5 w-3.5 text-muted-foreground/60" />
                   {msg.birthDate}
                 </Label>
-                <Input
-                  {...register("birthDate")}
-                  id="birthdate"
-                  type="date"
-                  max={new Date().toISOString().split("T")[0]}
-                  min="1900-01-01"
-                  className={`h-14 rounded-xl border-border/60 bg-card text-foreground shadow-sm shadow-black/[0.03] transition-shadow focus:shadow-md focus:shadow-black/[0.06] ${
-                    errors.birthDate ? "border-destructive" : ""
-                  }`}
-                />
+                <div className="flex gap-2">
+                  {dateFields.map((cfg) => (
+                    <div key={cfg.field} className={`${cfg.flex} space-y-1`}>
+                      <span className="block text-[11px] text-muted-foreground/60">
+                        {cfg.label}
+                      </span>
+                      <input
+                        ref={fieldRefs[cfg.field]}
+                        inputMode="numeric"
+                        placeholder={cfg.placeholder}
+                        maxLength={cfg.maxLength}
+                        value={dateParts[cfg.field]}
+                        onChange={(e) => handleDatePartChange(cfg.field, e.target.value)}
+                        className={`h-14 w-full rounded-xl border bg-card px-3 text-center text-base font-medium tracking-widest text-foreground shadow-sm shadow-black/[0.03] outline-none transition-shadow focus:shadow-md focus:shadow-black/[0.06] focus:ring-1 focus:ring-foreground/20 ${
+                          errors.birthDate ? "border-destructive" : "border-border/60"
+                        }`}
+                      />
+                    </div>
+                  ))}
+                </div>
                 {errors.birthDate && (
                   <div className="flex items-center gap-1.5 text-xs text-destructive">
                     <AlertCircle className="h-3 w-3" />
