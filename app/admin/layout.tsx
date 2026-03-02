@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db/prisma";
 import Link from "next/link";
-import { LayoutDashboard, Users, CreditCard, Star, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, CreditCard, Star, Settings, LogOut, MessageSquare } from "lucide-react";
 
 export const metadata = { title: "관리자 | 사주 플레이북" };
 
@@ -11,6 +11,7 @@ const navItems = [
   { href: "/admin/users", label: "회원 관리", icon: Users },
   { href: "/admin/credits", label: "크레딧 관리", icon: CreditCard },
   { href: "/admin/subscriptions", label: "구독 관리", icon: Star },
+  { href: "/admin/debate", label: "토론 관리", icon: MessageSquare },
   { href: "/admin/settings", label: "시스템 설정", icon: Settings },
 ];
 

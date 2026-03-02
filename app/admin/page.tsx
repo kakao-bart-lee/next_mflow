@@ -1,4 +1,4 @@
-import { Users, BarChart3, CreditCard, Star } from "lucide-react";
+import { Users, BarChart3, CreditCard, Star, MessageSquare } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface StatCard {
@@ -15,16 +15,18 @@ async function getStats() {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    const [totalUsers, newUsers, totalAnalyses, activeSubscriptions] = await Promise.all([
+    const [totalUsers, newUsers, totalAnalyses, activeSubscriptions, totalDebates, monthlyDebates] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
       prisma.analysis.count(),
       prisma.subscription.count({ where: { status: "active" } }),
+      prisma.chatSession.count({ where: { expertId: "debate" } }),
+      prisma.chatSession.count({ where: { expertId: "debate", createdAt: { gte: thirtyDaysAgo } } }),
     ]);
 
-    return { totalUsers, newUsers, totalAnalyses, activeSubscriptions };
+    return { totalUsers, newUsers, totalAnalyses, activeSubscriptions, totalDebates, monthlyDebates };
   } catch {
-    return { totalUsers: 0, newUsers: 0, totalAnalyses: 0, activeSubscriptions: 0 };
+    return { totalUsers: 0, newUsers: 0, totalAnalyses: 0, activeSubscriptions: 0, totalDebates: 0, monthlyDebates: 0 };
   }
 }
 
@@ -55,6 +57,12 @@ export default async function AdminDashboard() {
       value: process.env.ENABLE_CREDIT_SYSTEM === "true" ? "활성" : "비활성",
       sub: "ENABLE_CREDIT_SYSTEM 환경변수",
       icon: CreditCard,
+    },
+    {
+      title: "토론 세션",
+      value: stats.totalDebates.toLocaleString(),
+      sub: `이번 달 ${stats.monthlyDebates}건`,
+      icon: MessageSquare,
     },
   ];
 
