@@ -1,5 +1,10 @@
 import type { BirthInfo } from "@/lib/schemas/birth-info"
 import {
+  inferInputTier,
+  inferTimeAccuracy,
+  resolveAssumedBirthTime,
+} from "@/lib/astrology/shared/input-normalization"
+import {
   BASE_LONGITUDE,
   CHALDEAN_FACES,
   DETRIMENT,
@@ -62,18 +67,6 @@ function parseTimeToMinutes(time: string | null | undefined): number {
   const [hh, mm] = time.split(":").map((v) => Number(v))
   if (Number.isNaN(hh) || Number.isNaN(mm)) return 12 * 60
   return hh * 60 + mm
-}
-
-function getInputGrade(input: BirthInfo): "L0" | "L1" | "L2" | "L3" {
-  const hasDate = Boolean(input.birthDate)
-  const hasTime = !input.isTimeUnknown && Boolean(input.birthTime)
-  const hasLocation =
-    typeof input.latitude === "number" && typeof input.longitude === "number"
-
-  if (hasDate && hasTime && hasLocation) return "L3"
-  if (hasDate && hasLocation) return "L2"
-  if (hasDate && hasTime) return "L1"
-  return "L0"
 }
 
 function isDayChart(input: BirthInfo): boolean {
@@ -328,13 +321,9 @@ export function calculateAstrologyWithOptions(
     Date.UTC(todayPart.yyyy, Math.max(todayPart.mm - 1, 0), todayPart.dd + 6)
   )
 
-  const grade = getInputGrade(input)
-  const assumedTimeLocal = input.isTimeUnknown ? "12:00" : input.birthTime ?? "12:00"
-  const timeAccuracy: "minute" | "hour" | "day" | "unknown" = input.isTimeUnknown
-    ? "unknown"
-    : input.birthTime
-      ? "minute"
-      : "hour"
+  const grade = inferInputTier(input)
+  const assumedTimeLocal = resolveAssumedBirthTime(input)
+  const timeAccuracy = inferTimeAccuracy(input)
 
   return {
     version: "static-v1",

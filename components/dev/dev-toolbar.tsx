@@ -1,7 +1,7 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { ChevronDown, ChevronUp, GripVertical, Monitor } from "lucide-react"
 
@@ -45,7 +45,12 @@ const VIEW_OPTIONS = [
 
 export function DevToolbar(): ReactNode {
   const [collapsed, setCollapsed] = useState(false)
-  const [pos, setPos] = useState<Position | null>(() => loadPos())
+  const [pos, setPos] = useState<Position | null>(null)
+
+  useEffect(() => {
+    const saved = loadPos()
+    if (saved) setPos(saved)
+  }, [])
   const containerRef = useRef<HTMLDivElement>(null)
   const dragOffset = useRef<DragOffset | null>(null)
   const router = useRouter()

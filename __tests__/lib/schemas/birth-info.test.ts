@@ -57,6 +57,12 @@ describe("BirthInfoSchema", () => {
       expect(result.success).toBe(false)
     })
 
+    it("시간 범위가 잘못되면 실패한다", () => {
+      expect(BirthInfoSchema.safeParse({ ...validBase, birthTime: "24:00" }).success).toBe(false)
+      expect(BirthInfoSchema.safeParse({ ...validBase, birthTime: "99:00" }).success).toBe(false)
+      expect(BirthInfoSchema.safeParse({ ...validBase, birthTime: "12:99" }).success).toBe(false)
+    })
+
     it("성별이 M/F 이외이면 실패한다", () => {
       const result = BirthInfoSchema.safeParse({ ...validBase, gender: "male" })
       expect(result.success).toBe(false)

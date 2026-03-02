@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { storage } from "@/lib/mastra/storage"
+import { getStorage } from "@/lib/mastra/storage"
 
 /**
  * GET /api/chat/threads/[threadId]/messages — 특정 대화의 메시지 목록
@@ -18,6 +18,14 @@ export async function GET(
   }
 
   const { threadId } = await params
+  const storage = getStorage()
+  if (!storage) {
+    return NextResponse.json(
+      { error: "채팅 저장소가 설정되지 않았습니다. DATABASE_URL을 확인하세요." },
+      { status: 503 }
+    )
+  }
+
   const memory = storage.stores.memory
 
   try {

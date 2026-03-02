@@ -1,0 +1,5218 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ziwei board snapshots > 20개 고정 샘플 케이스가 결정적으로 유지된다 1`] = `
+[
+  {
+    "assumptions": [],
+    "board": {
+      "body": "천기",
+      "body_branch": "신",
+      "chinese_date": "기사 정축 경진 계미",
+      "five_elements_class": "토오국",
+      "lunar_date": "一九八九年腊月十九",
+      "palaces": [
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            45,
+            54,
+          ],
+          "earthly_branch": "인",
+          "heavenly_stem": "병",
+          "index": 0,
+          "major_star_names": [
+            "탐랑",
+          ],
+          "minor_star_names": [],
+          "name": "재백",
+        },
+        {
+          "adjective_star_count": 0,
+          "decadal_range": [
+            35,
+            44,
+          ],
+          "earthly_branch": "묘",
+          "heavenly_stem": "정",
+          "index": 1,
+          "major_star_names": [
+            "천기",
+            "거문",
+          ],
+          "minor_star_names": [
+            "좌보",
+            "문창",
+          ],
+          "name": "자녀",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            25,
+            34,
+          ],
+          "earthly_branch": "진",
+          "heavenly_stem": "무",
+          "index": 2,
+          "major_star_names": [
+            "자미",
+            "천상",
+          ],
+          "minor_star_names": [
+            "지공",
+          ],
+          "name": "부처",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            15,
+            24,
+          ],
+          "earthly_branch": "사",
+          "heavenly_stem": "기",
+          "index": 3,
+          "major_star_names": [
+            "천량",
+          ],
+          "minor_star_names": [
+            "령성",
+            "타라",
+          ],
+          "name": "형제",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            5,
+            14,
+          ],
+          "earthly_branch": "오",
+          "heavenly_stem": "경",
+          "index": 4,
+          "major_star_names": [
+            "칠살",
+          ],
+          "minor_star_names": [
+            "록존",
+            "지겁",
+          ],
+          "name": "명궁",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            115,
+            124,
+          ],
+          "earthly_branch": "미",
+          "heavenly_stem": "신",
+          "index": 5,
+          "major_star_names": [],
+          "minor_star_names": [
+            "경양",
+          ],
+          "name": "부모",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            105,
+            114,
+          ],
+          "earthly_branch": "신",
+          "heavenly_stem": "임",
+          "index": 6,
+          "major_star_names": [
+            "염정",
+          ],
+          "minor_star_names": [
+            "천월",
+          ],
+          "name": "복덕",
+        },
+        {
+          "adjective_star_count": 6,
+          "decadal_range": [
+            95,
+            104,
+          ],
+          "earthly_branch": "유",
+          "heavenly_stem": "계",
+          "index": 7,
+          "major_star_names": [],
+          "minor_star_names": [],
+          "name": "전택",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            85,
+            94,
+          ],
+          "earthly_branch": "술",
+          "heavenly_stem": "갑",
+          "index": 8,
+          "major_star_names": [
+            "파군",
+          ],
+          "minor_star_names": [
+            "화성",
+          ],
+          "name": "관록",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            75,
+            84,
+          ],
+          "earthly_branch": "해",
+          "heavenly_stem": "을",
+          "index": 9,
+          "major_star_names": [
+            "천동",
+          ],
+          "minor_star_names": [
+            "우필",
+            "문곡",
+            "천마",
+          ],
+          "name": "노복",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            65,
+            74,
+          ],
+          "earthly_branch": "자",
+          "heavenly_stem": "병",
+          "index": 10,
+          "major_star_names": [
+            "무곡",
+            "천부",
+          ],
+          "minor_star_names": [
+            "천괴",
+          ],
+          "name": "천이",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            55,
+            64,
+          ],
+          "earthly_branch": "축",
+          "heavenly_stem": "정",
+          "index": 11,
+          "major_star_names": [
+            "태양",
+            "태음",
+          ],
+          "minor_star_names": [],
+          "name": "질액",
+        },
+      ],
+      "sign": "마갈궁",
+      "solar_date": "1990-01-15",
+      "soul": "파군",
+      "soul_branch": "오",
+      "time": "미시",
+      "time_range": "13:00~15:00",
+      "zodiac": "뱀",
+    },
+    "caseId": "S01-L3-SOLAR",
+    "input_tier": "L3",
+    "meta": {
+      "calendar": "SOLAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": true,
+      "location_is_assumed": false,
+      "time_is_assumed": false,
+    },
+    "shichen_candidates": [
+      {
+        "key": "WEI",
+        "time_index": 7,
+        "time_range": "13:00-14:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [
+      "school_profile: Zhongzhou 알고리즘 설정을 적용했습니다.",
+    ],
+    "board": {
+      "body": "천동",
+      "body_branch": "축",
+      "chinese_date": "계유 신유 임술 갑진",
+      "five_elements_class": "토오국",
+      "lunar_date": "一九九三年八月廿三",
+      "palaces": [
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            95,
+            104,
+          ],
+          "earthly_branch": "인",
+          "heavenly_stem": "갑",
+          "index": 0,
+          "major_star_names": [
+            "칠살",
+          ],
+          "minor_star_names": [
+            "령성",
+          ],
+          "name": "자녀",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            105,
+            114,
+          ],
+          "earthly_branch": "묘",
+          "heavenly_stem": "을",
+          "index": 1,
+          "major_star_names": [
+            "천동",
+          ],
+          "minor_star_names": [
+            "우필",
+            "천괴",
+            "지겁",
+          ],
+          "name": "부처",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            115,
+            124,
+          ],
+          "earthly_branch": "진",
+          "heavenly_stem": "병",
+          "index": 2,
+          "major_star_names": [
+            "무곡",
+          ],
+          "minor_star_names": [],
+          "name": "형제",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            5,
+            14,
+          ],
+          "earthly_branch": "사",
+          "heavenly_stem": "정",
+          "index": 3,
+          "major_star_names": [
+            "태양",
+          ],
+          "minor_star_names": [
+            "천월",
+          ],
+          "name": "명궁",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            15,
+            24,
+          ],
+          "earthly_branch": "오",
+          "heavenly_stem": "무",
+          "index": 4,
+          "major_star_names": [
+            "파군",
+          ],
+          "minor_star_names": [
+            "문창",
+          ],
+          "name": "부모",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            25,
+            34,
+          ],
+          "earthly_branch": "미",
+          "heavenly_stem": "기",
+          "index": 5,
+          "major_star_names": [
+            "천기",
+          ],
+          "minor_star_names": [
+            "지공",
+            "화성",
+          ],
+          "name": "복덕",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            35,
+            44,
+          ],
+          "earthly_branch": "신",
+          "heavenly_stem": "경",
+          "index": 6,
+          "major_star_names": [
+            "자미",
+            "천부",
+          ],
+          "minor_star_names": [
+            "문곡",
+          ],
+          "name": "전택",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            45,
+            54,
+          ],
+          "earthly_branch": "유",
+          "heavenly_stem": "신",
+          "index": 7,
+          "major_star_names": [
+            "태음",
+          ],
+          "minor_star_names": [],
+          "name": "관록",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            55,
+            64,
+          ],
+          "earthly_branch": "술",
+          "heavenly_stem": "임",
+          "index": 8,
+          "major_star_names": [
+            "탐랑",
+          ],
+          "minor_star_names": [],
+          "name": "노복",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            65,
+            74,
+          ],
+          "earthly_branch": "해",
+          "heavenly_stem": "계",
+          "index": 9,
+          "major_star_names": [
+            "거문",
+          ],
+          "minor_star_names": [
+            "좌보",
+            "천마",
+            "타라",
+          ],
+          "name": "천이",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            75,
+            84,
+          ],
+          "earthly_branch": "자",
+          "heavenly_stem": "갑",
+          "index": 10,
+          "major_star_names": [
+            "염정",
+            "천상",
+          ],
+          "minor_star_names": [
+            "록존",
+          ],
+          "name": "질액",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            85,
+            94,
+          ],
+          "earthly_branch": "축",
+          "heavenly_stem": "을",
+          "index": 11,
+          "major_star_names": [
+            "천량",
+          ],
+          "minor_star_names": [
+            "경양",
+          ],
+          "name": "재백",
+        },
+      ],
+      "sign": "천칭궁",
+      "solar_date": "1993-10-08",
+      "soul": "문곡",
+      "soul_branch": "사",
+      "time": "진시",
+      "time_range": "07:00~09:00",
+      "zodiac": "닭",
+    },
+    "caseId": "S02-L3-SOLAR-ZHONGZHOU",
+    "input_tier": "L3",
+    "meta": {
+      "calendar": "SOLAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "ZHONGZHOU",
+    },
+    "quality_flags": {
+      "houses_computed": true,
+      "location_is_assumed": false,
+      "time_is_assumed": false,
+    },
+    "shichen_candidates": [
+      {
+        "key": "CHEN",
+        "time_index": 4,
+        "time_range": "07:00-08:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [
+      "location_missing: 위도/경도 없이 계산했습니다.",
+    ],
+    "board": {
+      "body": "文昌",
+      "body_branch": "申",
+      "chinese_date": "戊辰 戊午 丙午 庚寅",
+      "five_elements_class": "土の五局",
+      "lunar_date": "一九八八年五月初七",
+      "palaces": [
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            105,
+            114,
+          ],
+          "earthly_branch": "寅",
+          "heavenly_stem": "甲",
+          "index": 0,
+          "major_star_names": [
+            "破軍",
+          ],
+          "minor_star_names": [
+            "天馬",
+          ],
+          "name": "夫妻",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            115,
+            124,
+          ],
+          "earthly_branch": "卯",
+          "heavenly_stem": "乙",
+          "index": 1,
+          "major_star_names": [],
+          "minor_star_names": [],
+          "name": "兄弟",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            5,
+            14,
+          ],
+          "earthly_branch": "辰",
+          "heavenly_stem": "丙",
+          "index": 2,
+          "major_star_names": [
+            "廉貞",
+            "天府",
+          ],
+          "minor_star_names": [
+            "火星",
+            "陀羅",
+          ],
+          "name": "命宮",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            15,
+            24,
+          ],
+          "earthly_branch": "巳",
+          "heavenly_stem": "丁",
+          "index": 3,
+          "major_star_names": [
+            "太陰",
+          ],
+          "minor_star_names": [
+            "祿存",
+          ],
+          "name": "父母",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            25,
+            34,
+          ],
+          "earthly_branch": "午",
+          "heavenly_stem": "戊",
+          "index": 4,
+          "major_star_names": [
+            "貪狼",
+          ],
+          "minor_star_names": [
+            "右弼",
+            "文曲",
+            "擎羊",
+          ],
+          "name": "福德",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            35,
+            44,
+          ],
+          "earthly_branch": "未",
+          "heavenly_stem": "己",
+          "index": 5,
+          "major_star_names": [
+            "天同",
+            "巨門",
+          ],
+          "minor_star_names": [
+            "天鉞",
+          ],
+          "name": "田宅",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            45,
+            54,
+          ],
+          "earthly_branch": "申",
+          "heavenly_stem": "庚",
+          "index": 6,
+          "major_star_names": [
+            "武曲",
+            "天相",
+          ],
+          "minor_star_names": [
+            "左輔",
+            "文昌",
+          ],
+          "name": "官祿",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            55,
+            64,
+          ],
+          "earthly_branch": "酉",
+          "heavenly_stem": "辛",
+          "index": 7,
+          "major_star_names": [
+            "太陽",
+            "天梁",
+          ],
+          "minor_star_names": [
+            "地空",
+          ],
+          "name": "僕役",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            65,
+            74,
+          ],
+          "earthly_branch": "戌",
+          "heavenly_stem": "壬",
+          "index": 8,
+          "major_star_names": [
+            "七殺",
+          ],
+          "minor_star_names": [],
+          "name": "遷移",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            75,
+            84,
+          ],
+          "earthly_branch": "亥",
+          "heavenly_stem": "癸",
+          "index": 9,
+          "major_star_names": [
+            "天機",
+          ],
+          "minor_star_names": [],
+          "name": "疾厄",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            85,
+            94,
+          ],
+          "earthly_branch": "子",
+          "heavenly_stem": "甲",
+          "index": 10,
+          "major_star_names": [
+            "紫微",
+          ],
+          "minor_star_names": [
+            "鈴星",
+          ],
+          "name": "財帛",
+        },
+        {
+          "adjective_star_count": 6,
+          "decadal_range": [
+            95,
+            104,
+          ],
+          "earthly_branch": "丑",
+          "heavenly_stem": "乙",
+          "index": 11,
+          "major_star_names": [],
+          "minor_star_names": [
+            "天魁",
+            "地劫",
+          ],
+          "name": "子女",
+        },
+      ],
+      "sign": "ふたご座",
+      "solar_date": "1988-06-20",
+      "soul": "廉貞",
+      "soul_branch": "辰",
+      "time": "寅時",
+      "time_range": "03:00~05:00",
+      "zodiac": "龍",
+    },
+    "caseId": "S03-L1-SOLAR",
+    "input_tier": "L1",
+    "meta": {
+      "calendar": "SOLAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": true,
+      "location_is_assumed": true,
+      "time_is_assumed": false,
+    },
+    "shichen_candidates": [
+      {
+        "key": "YIN",
+        "time_index": 2,
+        "time_range": "03:00-04:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [
+      "birth_time_unknown: local 12:00으로 가정해 명반을 계산했습니다.",
+      "shichen_fallback: 13개 시진 후보(자시 초/정 포함)를 함께 제공합니다.",
+    ],
+    "board": {
+      "body": "天机",
+      "body_branch": "巳",
+      "chinese_date": "丁巳 辛亥 壬辰 丙午",
+      "five_elements_class": "火六局",
+      "lunar_date": "一九七七年十月廿一",
+      "palaces": [
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            96,
+            105,
+          ],
+          "earthly_branch": "寅",
+          "heavenly_stem": "壬",
+          "index": 0,
+          "major_star_names": [
+            "紫微",
+            "天府",
+          ],
+          "minor_star_names": [],
+          "name": "子女",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            106,
+            115,
+          ],
+          "earthly_branch": "卯",
+          "heavenly_stem": "癸",
+          "index": 1,
+          "major_star_names": [
+            "太阴",
+          ],
+          "minor_star_names": [],
+          "name": "夫妻",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            116,
+            125,
+          ],
+          "earthly_branch": "辰",
+          "heavenly_stem": "甲",
+          "index": 2,
+          "major_star_names": [
+            "贪狼",
+          ],
+          "minor_star_names": [
+            "文昌",
+            "铃星",
+          ],
+          "name": "兄弟",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            6,
+            15,
+          ],
+          "earthly_branch": "巳",
+          "heavenly_stem": "乙",
+          "index": 3,
+          "major_star_names": [
+            "巨门",
+          ],
+          "minor_star_names": [
+            "地空",
+            "地劫",
+            "陀罗",
+          ],
+          "name": "命宫",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            16,
+            25,
+          ],
+          "earthly_branch": "午",
+          "heavenly_stem": "丙",
+          "index": 4,
+          "major_star_names": [
+            "廉贞",
+            "天相",
+          ],
+          "minor_star_names": [
+            "禄存",
+          ],
+          "name": "父母",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            26,
+            35,
+          ],
+          "earthly_branch": "未",
+          "heavenly_stem": "丁",
+          "index": 5,
+          "major_star_names": [
+            "天梁",
+          ],
+          "minor_star_names": [
+            "擎羊",
+          ],
+          "name": "福德",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            36,
+            45,
+          ],
+          "earthly_branch": "申",
+          "heavenly_stem": "戊",
+          "index": 6,
+          "major_star_names": [
+            "七杀",
+          ],
+          "minor_star_names": [],
+          "name": "田宅",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            46,
+            55,
+          ],
+          "earthly_branch": "酉",
+          "heavenly_stem": "己",
+          "index": 7,
+          "major_star_names": [
+            "天同",
+          ],
+          "minor_star_names": [
+            "天钺",
+            "火星",
+          ],
+          "name": "官禄",
+        },
+        {
+          "adjective_star_count": 6,
+          "decadal_range": [
+            56,
+            65,
+          ],
+          "earthly_branch": "戌",
+          "heavenly_stem": "庚",
+          "index": 8,
+          "major_star_names": [
+            "武曲",
+          ],
+          "minor_star_names": [
+            "文曲",
+          ],
+          "name": "仆役",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            66,
+            75,
+          ],
+          "earthly_branch": "亥",
+          "heavenly_stem": "辛",
+          "index": 9,
+          "major_star_names": [
+            "太阳",
+          ],
+          "minor_star_names": [
+            "天魁",
+            "天马",
+          ],
+          "name": "迁移",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            76,
+            85,
+          ],
+          "earthly_branch": "子",
+          "heavenly_stem": "壬",
+          "index": 10,
+          "major_star_names": [
+            "破军",
+          ],
+          "minor_star_names": [],
+          "name": "疾厄",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            86,
+            95,
+          ],
+          "earthly_branch": "丑",
+          "heavenly_stem": "癸",
+          "index": 11,
+          "major_star_names": [
+            "天机",
+          ],
+          "minor_star_names": [
+            "左辅",
+            "右弼",
+          ],
+          "name": "财帛",
+        },
+      ],
+      "sign": "射手座",
+      "solar_date": "1977-12-01",
+      "soul": "武曲",
+      "soul_branch": "巳",
+      "time": "午时",
+      "time_range": "11:00~13:00",
+      "zodiac": "蛇",
+    },
+    "caseId": "S04-L2-SOLAR-TIME-UNKNOWN",
+    "input_tier": "L2",
+    "meta": {
+      "calendar": "SOLAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": false,
+      "location_is_assumed": false,
+      "time_is_assumed": true,
+    },
+    "shichen_candidates": [
+      {
+        "key": "ZI_EARLY",
+        "time_index": 0,
+        "time_range": "23:00-23:59",
+      },
+      {
+        "key": "CHOU",
+        "time_index": 1,
+        "time_range": "01:00-02:59",
+      },
+      {
+        "key": "YIN",
+        "time_index": 2,
+        "time_range": "03:00-04:59",
+      },
+      {
+        "key": "MAO",
+        "time_index": 3,
+        "time_range": "05:00-06:59",
+      },
+      {
+        "key": "CHEN",
+        "time_index": 4,
+        "time_range": "07:00-08:59",
+      },
+      {
+        "key": "SI",
+        "time_index": 5,
+        "time_range": "09:00-10:59",
+      },
+      {
+        "key": "WU",
+        "time_index": 6,
+        "time_range": "11:00-12:59",
+      },
+      {
+        "key": "WEI",
+        "time_index": 7,
+        "time_range": "13:00-14:59",
+      },
+      {
+        "key": "SHEN",
+        "time_index": 8,
+        "time_range": "15:00-16:59",
+      },
+      {
+        "key": "YOU",
+        "time_index": 9,
+        "time_range": "17:00-18:59",
+      },
+      {
+        "key": "XU",
+        "time_index": 10,
+        "time_range": "19:00-20:59",
+      },
+      {
+        "key": "HAI",
+        "time_index": 11,
+        "time_range": "21:00-22:59",
+      },
+      {
+        "key": "ZI_LATE",
+        "time_index": 12,
+        "time_range": "00:00-00:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [
+      "birth_time_unknown: local 12:00으로 가정해 명반을 계산했습니다.",
+      "location_missing: 위도/경도 없이 계산했습니다.",
+      "shichen_fallback: 13개 시진 후보(자시 초/정 포함)를 함께 제공합니다.",
+    ],
+    "board": {
+      "body": "advisor",
+      "body_branch": "you",
+      "chinese_date": "yi si - ji mao - bing chen - jia woo",
+      "five_elements_class": "water 2nd",
+      "lunar_date": "一九六五年二月初一",
+      "palaces": [
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            72,
+            81,
+          ],
+          "earthly_branch": "yin",
+          "heavenly_stem": "wu",
+          "index": 0,
+          "major_star_names": [],
+          "minor_star_names": [
+            "tangled",
+          ],
+          "name": "friends",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            62,
+            71,
+          ],
+          "earthly_branch": "mao",
+          "heavenly_stem": "ji",
+          "index": 1,
+          "major_star_names": [
+            "empress",
+          ],
+          "minor_star_names": [
+            "money",
+          ],
+          "name": "surface",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            52,
+            61,
+          ],
+          "earthly_branch": "chen",
+          "heavenly_stem": "geng",
+          "index": 2,
+          "major_star_names": [
+            "moon",
+          ],
+          "minor_star_names": [
+            "scholar",
+            "spark",
+            "driven",
+          ],
+          "name": "health",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            42,
+            51,
+          ],
+          "earthly_branch": "si",
+          "heavenly_stem": "xin",
+          "index": 3,
+          "major_star_names": [
+            "judge",
+            "wolf",
+          ],
+          "minor_star_names": [
+            "officer",
+            "ideologue",
+            "fickle",
+          ],
+          "name": "wealth",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            32,
+            41,
+          ],
+          "earthly_branch": "woo",
+          "heavenly_stem": "ren",
+          "index": 4,
+          "major_star_names": [
+            "advocator",
+          ],
+          "minor_star_names": [],
+          "name": "children",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            22,
+            31,
+          ],
+          "earthly_branch": "wei",
+          "heavenly_stem": "gui",
+          "index": 5,
+          "major_star_names": [
+            "minister",
+          ],
+          "minor_star_names": [],
+          "name": "spouse",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            12,
+            21,
+          ],
+          "earthly_branch": "shen",
+          "heavenly_stem": "jia",
+          "index": 6,
+          "major_star_names": [
+            "fortunate",
+            "sage",
+          ],
+          "minor_star_names": [
+            "aide",
+          ],
+          "name": "siblings",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            2,
+            11,
+          ],
+          "earthly_branch": "you",
+          "heavenly_stem": "yi",
+          "index": 7,
+          "major_star_names": [
+            "general",
+            "marshal",
+          ],
+          "minor_star_names": [
+            "helper",
+            "impulsive",
+          ],
+          "name": "soul",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            112,
+            121,
+          ],
+          "earthly_branch": "xu",
+          "heavenly_stem": "bing",
+          "index": 8,
+          "major_star_names": [
+            "sun",
+          ],
+          "minor_star_names": [
+            "artist",
+          ],
+          "name": "parents",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            102,
+            111,
+          ],
+          "earthly_branch": "hai",
+          "heavenly_stem": "ding",
+          "index": 9,
+          "major_star_names": [],
+          "minor_star_names": [
+            "horse",
+          ],
+          "name": "spirit",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            92,
+            101,
+          ],
+          "earthly_branch": "zi",
+          "heavenly_stem": "wu",
+          "index": 10,
+          "major_star_names": [
+            "advisor",
+          ],
+          "minor_star_names": [
+            "assistant",
+          ],
+          "name": "property",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            82,
+            91,
+          ],
+          "earthly_branch": "chou",
+          "heavenly_stem": "ji",
+          "index": 11,
+          "major_star_names": [
+            "emperor",
+            "rebel",
+          ],
+          "minor_star_names": [],
+          "name": "career",
+        },
+      ],
+      "sign": "pisces",
+      "solar_date": "1965-03-03",
+      "soul": "artist",
+      "soul_branch": "you",
+      "time": "Horse hour",
+      "time_range": "11:00~13:00",
+      "zodiac": "snake",
+    },
+    "caseId": "S05-L0-SOLAR-TIME-UNKNOWN",
+    "input_tier": "L0",
+    "meta": {
+      "calendar": "SOLAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": false,
+      "location_is_assumed": true,
+      "time_is_assumed": true,
+    },
+    "shichen_candidates": [
+      {
+        "key": "ZI_EARLY",
+        "time_index": 0,
+        "time_range": "23:00-23:59",
+      },
+      {
+        "key": "CHOU",
+        "time_index": 1,
+        "time_range": "01:00-02:59",
+      },
+      {
+        "key": "YIN",
+        "time_index": 2,
+        "time_range": "03:00-04:59",
+      },
+      {
+        "key": "MAO",
+        "time_index": 3,
+        "time_range": "05:00-06:59",
+      },
+      {
+        "key": "CHEN",
+        "time_index": 4,
+        "time_range": "07:00-08:59",
+      },
+      {
+        "key": "SI",
+        "time_index": 5,
+        "time_range": "09:00-10:59",
+      },
+      {
+        "key": "WU",
+        "time_index": 6,
+        "time_range": "11:00-12:59",
+      },
+      {
+        "key": "WEI",
+        "time_index": 7,
+        "time_range": "13:00-14:59",
+      },
+      {
+        "key": "SHEN",
+        "time_index": 8,
+        "time_range": "15:00-16:59",
+      },
+      {
+        "key": "YOU",
+        "time_index": 9,
+        "time_range": "17:00-18:59",
+      },
+      {
+        "key": "XU",
+        "time_index": 10,
+        "time_range": "19:00-20:59",
+      },
+      {
+        "key": "HAI",
+        "time_index": 11,
+        "time_range": "21:00-22:59",
+      },
+      {
+        "key": "ZI_LATE",
+        "time_index": 12,
+        "time_range": "00:00-00:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [],
+    "board": {
+      "body": "천량",
+      "body_branch": "미",
+      "chinese_date": "임신 기유 경인 병술",
+      "five_elements_class": "금사국",
+      "lunar_date": "一九九二年八月十五",
+      "palaces": [
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            94,
+            103,
+          ],
+          "earthly_branch": "인",
+          "heavenly_stem": "임",
+          "index": 0,
+          "major_star_names": [
+            "탐랑",
+          ],
+          "minor_star_names": [
+            "문곡",
+            "천마",
+          ],
+          "name": "전택",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            84,
+            93,
+          ],
+          "earthly_branch": "묘",
+          "heavenly_stem": "계",
+          "index": 1,
+          "major_star_names": [
+            "천기",
+            "거문",
+          ],
+          "minor_star_names": [
+            "우필",
+            "천괴",
+          ],
+          "name": "관록",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            74,
+            83,
+          ],
+          "earthly_branch": "진",
+          "heavenly_stem": "갑",
+          "index": 2,
+          "major_star_names": [
+            "자미",
+            "천상",
+          ],
+          "minor_star_names": [],
+          "name": "노복",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            64,
+            73,
+          ],
+          "earthly_branch": "사",
+          "heavenly_stem": "을",
+          "index": 3,
+          "major_star_names": [
+            "천량",
+          ],
+          "minor_star_names": [
+            "천월",
+          ],
+          "name": "천이",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            54,
+            63,
+          ],
+          "earthly_branch": "오",
+          "heavenly_stem": "병",
+          "index": 4,
+          "major_star_names": [
+            "칠살",
+          ],
+          "minor_star_names": [],
+          "name": "질액",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            44,
+            53,
+          ],
+          "earthly_branch": "미",
+          "heavenly_stem": "정",
+          "index": 5,
+          "major_star_names": [],
+          "minor_star_names": [],
+          "name": "재백",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            34,
+            43,
+          ],
+          "earthly_branch": "신",
+          "heavenly_stem": "무",
+          "index": 6,
+          "major_star_names": [
+            "염정",
+          ],
+          "minor_star_names": [
+            "령성",
+          ],
+          "name": "자녀",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            24,
+            33,
+          ],
+          "earthly_branch": "유",
+          "heavenly_stem": "기",
+          "index": 7,
+          "major_star_names": [],
+          "minor_star_names": [
+            "지겁",
+          ],
+          "name": "부처",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            14,
+            23,
+          ],
+          "earthly_branch": "술",
+          "heavenly_stem": "경",
+          "index": 8,
+          "major_star_names": [
+            "파군",
+          ],
+          "minor_star_names": [
+            "타라",
+          ],
+          "name": "형제",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            4,
+            13,
+          ],
+          "earthly_branch": "해",
+          "heavenly_stem": "신",
+          "index": 9,
+          "major_star_names": [
+            "천동",
+          ],
+          "minor_star_names": [
+            "좌보",
+            "록존",
+          ],
+          "name": "명궁",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            114,
+            123,
+          ],
+          "earthly_branch": "자",
+          "heavenly_stem": "임",
+          "index": 10,
+          "major_star_names": [
+            "무곡",
+            "천부",
+          ],
+          "minor_star_names": [
+            "문창",
+            "화성",
+            "경양",
+          ],
+          "name": "부모",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            104,
+            113,
+          ],
+          "earthly_branch": "축",
+          "heavenly_stem": "계",
+          "index": 11,
+          "major_star_names": [
+            "태양",
+            "태음",
+          ],
+          "minor_star_names": [
+            "지공",
+          ],
+          "name": "복덕",
+        },
+      ],
+      "sign": "처녀궁",
+      "solar_date": "1992-9-11",
+      "soul": "거문",
+      "soul_branch": "해",
+      "time": "술시",
+      "time_range": "19:00~21:00",
+      "zodiac": "원숭이",
+    },
+    "caseId": "S06-L3-LUNAR",
+    "input_tier": "L3",
+    "meta": {
+      "calendar": "LUNAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": true,
+      "location_is_assumed": false,
+      "time_is_assumed": false,
+    },
+    "shichen_candidates": [
+      {
+        "key": "XU",
+        "time_index": 10,
+        "time_range": "19:00-20:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [
+      "lunar_leap_month: 윤달 입력으로 계산했습니다.",
+    ],
+    "board": {
+      "body": "火星",
+      "body_branch": "戌",
+      "chinese_date": "甲子 辛未 乙巳 己卯",
+      "five_elements_class": "木三局",
+      "lunar_date": "一九八四年六月十二",
+      "palaces": [
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            103,
+            112,
+          ],
+          "earthly_branch": "寅",
+          "heavenly_stem": "丙",
+          "index": 0,
+          "major_star_names": [
+            "太阳",
+            "巨门",
+          ],
+          "minor_star_names": [
+            "禄存",
+            "天马",
+            "地劫",
+          ],
+          "name": "夫妻",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            113,
+            122,
+          ],
+          "earthly_branch": "卯",
+          "heavenly_stem": "丁",
+          "index": 1,
+          "major_star_names": [
+            "天相",
+          ],
+          "minor_star_names": [
+            "擎羊",
+          ],
+          "name": "兄弟",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            3,
+            12,
+          ],
+          "earthly_branch": "辰",
+          "heavenly_stem": "戊",
+          "index": 2,
+          "major_star_names": [
+            "天机",
+            "天梁",
+          ],
+          "minor_star_names": [],
+          "name": "命宫",
+        },
+        {
+          "adjective_star_count": 6,
+          "decadal_range": [
+            13,
+            22,
+          ],
+          "earthly_branch": "巳",
+          "heavenly_stem": "己",
+          "index": 3,
+          "major_star_names": [
+            "紫微",
+            "七杀",
+          ],
+          "minor_star_names": [
+            "右弼",
+            "火星",
+          ],
+          "name": "父母",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            23,
+            32,
+          ],
+          "earthly_branch": "午",
+          "heavenly_stem": "庚",
+          "index": 4,
+          "major_star_names": [],
+          "minor_star_names": [],
+          "name": "福德",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            33,
+            42,
+          ],
+          "earthly_branch": "未",
+          "heavenly_stem": "辛",
+          "index": 5,
+          "major_star_names": [],
+          "minor_star_names": [
+            "文昌",
+            "文曲",
+            "天钺",
+          ],
+          "name": "田宅",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            43,
+            52,
+          ],
+          "earthly_branch": "申",
+          "heavenly_stem": "壬",
+          "index": 6,
+          "major_star_names": [],
+          "minor_star_names": [
+            "地空",
+          ],
+          "name": "官禄",
+        },
+        {
+          "adjective_star_count": 7,
+          "decadal_range": [
+            53,
+            62,
+          ],
+          "earthly_branch": "酉",
+          "heavenly_stem": "癸",
+          "index": 7,
+          "major_star_names": [
+            "廉贞",
+            "破军",
+          ],
+          "minor_star_names": [
+            "左辅",
+          ],
+          "name": "仆役",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            63,
+            72,
+          ],
+          "earthly_branch": "戌",
+          "heavenly_stem": "甲",
+          "index": 8,
+          "major_star_names": [],
+          "minor_star_names": [],
+          "name": "迁移",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            73,
+            82,
+          ],
+          "earthly_branch": "亥",
+          "heavenly_stem": "乙",
+          "index": 9,
+          "major_star_names": [
+            "天府",
+          ],
+          "minor_star_names": [],
+          "name": "疾厄",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            83,
+            92,
+          ],
+          "earthly_branch": "子",
+          "heavenly_stem": "丙",
+          "index": 10,
+          "major_star_names": [
+            "天同",
+            "太阴",
+          ],
+          "minor_star_names": [],
+          "name": "财帛",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            93,
+            102,
+          ],
+          "earthly_branch": "丑",
+          "heavenly_stem": "丁",
+          "index": 11,
+          "major_star_names": [
+            "武曲",
+            "贪狼",
+          ],
+          "minor_star_names": [
+            "天魁",
+            "铃星",
+            "陀罗",
+          ],
+          "name": "子女",
+        },
+      ],
+      "sign": "巨蟹座",
+      "solar_date": "1984-7-10",
+      "soul": "廉贞",
+      "soul_branch": "辰",
+      "time": "卯时",
+      "time_range": "05:00~07:00",
+      "zodiac": "鼠",
+    },
+    "caseId": "S07-L3-LUNAR-LEAP",
+    "input_tier": "L3",
+    "meta": {
+      "calendar": "LUNAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": true,
+      "location_is_assumed": false,
+      "time_is_assumed": false,
+    },
+    "shichen_candidates": [
+      {
+        "key": "MAO",
+        "time_index": 3,
+        "time_range": "05:00-06:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [
+      "location_missing: 위도/경도 없이 계산했습니다.",
+    ],
+    "board": {
+      "body": "천기",
+      "body_branch": "유",
+      "chinese_date": "신사 무술 계해 계해",
+      "five_elements_class": "목삼국",
+      "lunar_date": "二〇〇一年九月十一",
+      "palaces": [
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            33,
+            42,
+          ],
+          "earthly_branch": "인",
+          "heavenly_stem": "경",
+          "index": 0,
+          "major_star_names": [
+            "탐랑",
+          ],
+          "minor_star_names": [
+            "우필",
+            "천월",
+            "화성",
+          ],
+          "name": "전택",
+        },
+        {
+          "adjective_star_count": 0,
+          "decadal_range": [
+            43,
+            52,
+          ],
+          "earthly_branch": "묘",
+          "heavenly_stem": "신",
+          "index": 1,
+          "major_star_names": [
+            "천기",
+            "거문",
+          ],
+          "minor_star_names": [
+            "문곡",
+          ],
+          "name": "관록",
+        },
+        {
+          "adjective_star_count": 7,
+          "decadal_range": [
+            53,
+            62,
+          ],
+          "earthly_branch": "진",
+          "heavenly_stem": "임",
+          "index": 2,
+          "major_star_names": [
+            "자미",
+            "천상",
+          ],
+          "minor_star_names": [],
+          "name": "노복",
+        },
+        {
+          "adjective_star_count": 7,
+          "decadal_range": [
+            63,
+            72,
+          ],
+          "earthly_branch": "사",
+          "heavenly_stem": "계",
+          "index": 3,
+          "major_star_names": [
+            "천량",
+          ],
+          "minor_star_names": [],
+          "name": "천이",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            73,
+            82,
+          ],
+          "earthly_branch": "오",
+          "heavenly_stem": "갑",
+          "index": 4,
+          "major_star_names": [
+            "칠살",
+          ],
+          "minor_star_names": [
+            "천괴",
+          ],
+          "name": "질액",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            83,
+            92,
+          ],
+          "earthly_branch": "미",
+          "heavenly_stem": "을",
+          "index": 5,
+          "major_star_names": [],
+          "minor_star_names": [],
+          "name": "재백",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            93,
+            102,
+          ],
+          "earthly_branch": "신",
+          "heavenly_stem": "병",
+          "index": 6,
+          "major_star_names": [
+            "염정",
+          ],
+          "minor_star_names": [
+            "타라",
+          ],
+          "name": "자녀",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            103,
+            112,
+          ],
+          "earthly_branch": "유",
+          "heavenly_stem": "정",
+          "index": 7,
+          "major_star_names": [],
+          "minor_star_names": [
+            "록존",
+            "령성",
+          ],
+          "name": "부처",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            113,
+            122,
+          ],
+          "earthly_branch": "술",
+          "heavenly_stem": "무",
+          "index": 8,
+          "major_star_names": [
+            "파군",
+          ],
+          "minor_star_names": [
+            "지겁",
+            "경양",
+          ],
+          "name": "형제",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            3,
+            12,
+          ],
+          "earthly_branch": "해",
+          "heavenly_stem": "기",
+          "index": 9,
+          "major_star_names": [
+            "천동",
+          ],
+          "minor_star_names": [
+            "문창",
+            "천마",
+          ],
+          "name": "명궁",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            13,
+            22,
+          ],
+          "earthly_branch": "자",
+          "heavenly_stem": "경",
+          "index": 10,
+          "major_star_names": [
+            "무곡",
+            "천부",
+          ],
+          "minor_star_names": [
+            "좌보",
+            "지공",
+          ],
+          "name": "부모",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            23,
+            32,
+          ],
+          "earthly_branch": "축",
+          "heavenly_stem": "신",
+          "index": 11,
+          "major_star_names": [
+            "태양",
+            "태음",
+          ],
+          "minor_star_names": [],
+          "name": "복덕",
+        },
+      ],
+      "sign": "천갈궁",
+      "solar_date": "2001-10-27",
+      "soul": "거문",
+      "soul_branch": "해",
+      "time": "해시",
+      "time_range": "21:00~23:00",
+      "zodiac": "뱀",
+    },
+    "caseId": "S08-L1-LUNAR",
+    "input_tier": "L1",
+    "meta": {
+      "calendar": "LUNAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": true,
+      "location_is_assumed": true,
+      "time_is_assumed": false,
+    },
+    "shichen_candidates": [
+      {
+        "key": "HAI",
+        "time_index": 11,
+        "time_range": "21:00-22:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [
+      "birth_time_unknown: local 12:00으로 가정해 명반을 계산했습니다.",
+      "shichen_fallback: 13개 시진 후보(자시 초/정 포함)를 함께 제공합니다.",
+    ],
+    "board": {
+      "body": "天機",
+      "body_branch": "午",
+      "chinese_date": "己亥 丙子 乙酉 壬午",
+      "five_elements_class": "土五局",
+      "lunar_date": "一九五九年冬月三十",
+      "palaces": [
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            45,
+            54,
+          ],
+          "earthly_branch": "寅",
+          "heavenly_stem": "丙",
+          "index": 0,
+          "major_star_names": [
+            "天同",
+            "天梁",
+          ],
+          "minor_star_names": [
+            "左輔",
+          ],
+          "name": "財帛",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            35,
+            44,
+          ],
+          "earthly_branch": "卯",
+          "heavenly_stem": "丁",
+          "index": 1,
+          "major_star_names": [
+            "武曲",
+            "七殺",
+          ],
+          "minor_star_names": [
+            "火星",
+          ],
+          "name": "子女",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            25,
+            34,
+          ],
+          "earthly_branch": "辰",
+          "heavenly_stem": "戊",
+          "index": 2,
+          "major_star_names": [
+            "太陽",
+          ],
+          "minor_star_names": [
+            "文昌",
+            "鈴星",
+          ],
+          "name": "夫妻",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            15,
+            24,
+          ],
+          "earthly_branch": "巳",
+          "heavenly_stem": "己",
+          "index": 3,
+          "major_star_names": [],
+          "minor_star_names": [
+            "天馬",
+            "地空",
+            "地劫",
+            "陀羅",
+          ],
+          "name": "兄弟",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            5,
+            14,
+          ],
+          "earthly_branch": "午",
+          "heavenly_stem": "庚",
+          "index": 4,
+          "major_star_names": [
+            "天機",
+          ],
+          "minor_star_names": [
+            "祿存",
+          ],
+          "name": "命宮",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            115,
+            124,
+          ],
+          "earthly_branch": "未",
+          "heavenly_stem": "辛",
+          "index": 5,
+          "major_star_names": [
+            "紫微",
+            "破軍",
+          ],
+          "minor_star_names": [
+            "擎羊",
+          ],
+          "name": "父母",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            105,
+            114,
+          ],
+          "earthly_branch": "申",
+          "heavenly_stem": "壬",
+          "index": 6,
+          "major_star_names": [],
+          "minor_star_names": [
+            "天鉞",
+          ],
+          "name": "福德",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            95,
+            104,
+          ],
+          "earthly_branch": "酉",
+          "heavenly_stem": "癸",
+          "index": 7,
+          "major_star_names": [
+            "天府",
+          ],
+          "minor_star_names": [],
+          "name": "田宅",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            85,
+            94,
+          ],
+          "earthly_branch": "戌",
+          "heavenly_stem": "甲",
+          "index": 8,
+          "major_star_names": [
+            "太陰",
+          ],
+          "minor_star_names": [
+            "文曲",
+          ],
+          "name": "官祿",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            75,
+            84,
+          ],
+          "earthly_branch": "亥",
+          "heavenly_stem": "乙",
+          "index": 9,
+          "major_star_names": [
+            "廉貞",
+            "貪狼",
+          ],
+          "minor_star_names": [],
+          "name": "僕役",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            65,
+            74,
+          ],
+          "earthly_branch": "子",
+          "heavenly_stem": "丙",
+          "index": 10,
+          "major_star_names": [
+            "巨門",
+          ],
+          "minor_star_names": [
+            "右弼",
+            "天魁",
+          ],
+          "name": "遷移",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            55,
+            64,
+          ],
+          "earthly_branch": "丑",
+          "heavenly_stem": "丁",
+          "index": 11,
+          "major_star_names": [
+            "天相",
+          ],
+          "minor_star_names": [],
+          "name": "疾厄",
+        },
+      ],
+      "sign": "摩羯座",
+      "solar_date": "1959-12-29",
+      "soul": "破軍",
+      "soul_branch": "午",
+      "time": "午時",
+      "time_range": "11:00~13:00",
+      "zodiac": "豬",
+    },
+    "caseId": "S09-L2-LUNAR-TIME-UNKNOWN",
+    "input_tier": "L2",
+    "meta": {
+      "calendar": "LUNAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": false,
+      "location_is_assumed": false,
+      "time_is_assumed": true,
+    },
+    "shichen_candidates": [
+      {
+        "key": "ZI_EARLY",
+        "time_index": 0,
+        "time_range": "23:00-23:59",
+      },
+      {
+        "key": "CHOU",
+        "time_index": 1,
+        "time_range": "01:00-02:59",
+      },
+      {
+        "key": "YIN",
+        "time_index": 2,
+        "time_range": "03:00-04:59",
+      },
+      {
+        "key": "MAO",
+        "time_index": 3,
+        "time_range": "05:00-06:59",
+      },
+      {
+        "key": "CHEN",
+        "time_index": 4,
+        "time_range": "07:00-08:59",
+      },
+      {
+        "key": "SI",
+        "time_index": 5,
+        "time_range": "09:00-10:59",
+      },
+      {
+        "key": "WU",
+        "time_index": 6,
+        "time_range": "11:00-12:59",
+      },
+      {
+        "key": "WEI",
+        "time_index": 7,
+        "time_range": "13:00-14:59",
+      },
+      {
+        "key": "SHEN",
+        "time_index": 8,
+        "time_range": "15:00-16:59",
+      },
+      {
+        "key": "YOU",
+        "time_index": 9,
+        "time_range": "17:00-18:59",
+      },
+      {
+        "key": "XU",
+        "time_index": 10,
+        "time_range": "19:00-20:59",
+      },
+      {
+        "key": "HAI",
+        "time_index": 11,
+        "time_range": "21:00-22:59",
+      },
+      {
+        "key": "ZI_LATE",
+        "time_index": 12,
+        "time_range": "00:00-00:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [
+      "birth_time_unknown: local 12:00으로 가정해 명반을 계산했습니다.",
+      "location_missing: 위도/경도 없이 계산했습니다.",
+      "shichen_fallback: 13개 시진 후보(자시 초/정 포함)를 함께 제공합니다.",
+    ],
+    "board": {
+      "body": "화성",
+      "body_branch": "해",
+      "chinese_date": "무자 정사 신해 갑오",
+      "five_elements_class": "수이국",
+      "lunar_date": "一九四八年四月十八",
+      "palaces": [
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            92,
+            101,
+          ],
+          "earthly_branch": "인",
+          "heavenly_stem": "갑",
+          "index": 0,
+          "major_star_names": [
+            "염정",
+          ],
+          "minor_star_names": [
+            "천마",
+          ],
+          "name": "전택",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            82,
+            91,
+          ],
+          "earthly_branch": "묘",
+          "heavenly_stem": "을",
+          "index": 1,
+          "major_star_names": [],
+          "minor_star_names": [],
+          "name": "관록",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            72,
+            81,
+          ],
+          "earthly_branch": "진",
+          "heavenly_stem": "병",
+          "index": 2,
+          "major_star_names": [
+            "파군",
+          ],
+          "minor_star_names": [
+            "문창",
+            "령성",
+            "타라",
+          ],
+          "name": "노복",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            62,
+            71,
+          ],
+          "earthly_branch": "사",
+          "heavenly_stem": "정",
+          "index": 3,
+          "major_star_names": [
+            "천동",
+          ],
+          "minor_star_names": [
+            "록존",
+            "지공",
+            "지겁",
+          ],
+          "name": "천이",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            52,
+            61,
+          ],
+          "earthly_branch": "오",
+          "heavenly_stem": "무",
+          "index": 4,
+          "major_star_names": [
+            "무곡",
+            "천부",
+          ],
+          "minor_star_names": [
+            "경양",
+          ],
+          "name": "질액",
+        },
+        {
+          "adjective_star_count": 0,
+          "decadal_range": [
+            42,
+            51,
+          ],
+          "earthly_branch": "미",
+          "heavenly_stem": "기",
+          "index": 5,
+          "major_star_names": [
+            "태양",
+            "태음",
+          ],
+          "minor_star_names": [
+            "좌보",
+            "우필",
+            "천월",
+          ],
+          "name": "재백",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            32,
+            41,
+          ],
+          "earthly_branch": "신",
+          "heavenly_stem": "경",
+          "index": 6,
+          "major_star_names": [
+            "탐랑",
+          ],
+          "minor_star_names": [
+            "화성",
+          ],
+          "name": "자녀",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            22,
+            31,
+          ],
+          "earthly_branch": "유",
+          "heavenly_stem": "신",
+          "index": 7,
+          "major_star_names": [
+            "천기",
+            "거문",
+          ],
+          "minor_star_names": [],
+          "name": "부처",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            12,
+            21,
+          ],
+          "earthly_branch": "술",
+          "heavenly_stem": "임",
+          "index": 8,
+          "major_star_names": [
+            "자미",
+            "천상",
+          ],
+          "minor_star_names": [
+            "문곡",
+          ],
+          "name": "형제",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            2,
+            11,
+          ],
+          "earthly_branch": "해",
+          "heavenly_stem": "계",
+          "index": 9,
+          "major_star_names": [
+            "천량",
+          ],
+          "minor_star_names": [],
+          "name": "명궁",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            112,
+            121,
+          ],
+          "earthly_branch": "자",
+          "heavenly_stem": "갑",
+          "index": 10,
+          "major_star_names": [
+            "칠살",
+          ],
+          "minor_star_names": [],
+          "name": "부모",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            102,
+            111,
+          ],
+          "earthly_branch": "축",
+          "heavenly_stem": "을",
+          "index": 11,
+          "major_star_names": [],
+          "minor_star_names": [
+            "천괴",
+          ],
+          "name": "복덕",
+        },
+      ],
+      "sign": "쌍아궁",
+      "solar_date": "1948-5-26",
+      "soul": "거문",
+      "soul_branch": "해",
+      "time": "오시",
+      "time_range": "11:00~13:00",
+      "zodiac": "쥐",
+    },
+    "caseId": "S10-L0-LUNAR-TIME-UNKNOWN",
+    "input_tier": "L0",
+    "meta": {
+      "calendar": "LUNAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": false,
+      "location_is_assumed": true,
+      "time_is_assumed": true,
+    },
+    "shichen_candidates": [
+      {
+        "key": "ZI_EARLY",
+        "time_index": 0,
+        "time_range": "23:00-23:59",
+      },
+      {
+        "key": "CHOU",
+        "time_index": 1,
+        "time_range": "01:00-02:59",
+      },
+      {
+        "key": "YIN",
+        "time_index": 2,
+        "time_range": "03:00-04:59",
+      },
+      {
+        "key": "MAO",
+        "time_index": 3,
+        "time_range": "05:00-06:59",
+      },
+      {
+        "key": "CHEN",
+        "time_index": 4,
+        "time_range": "07:00-08:59",
+      },
+      {
+        "key": "SI",
+        "time_index": 5,
+        "time_range": "09:00-10:59",
+      },
+      {
+        "key": "WU",
+        "time_index": 6,
+        "time_range": "11:00-12:59",
+      },
+      {
+        "key": "WEI",
+        "time_index": 7,
+        "time_range": "13:00-14:59",
+      },
+      {
+        "key": "SHEN",
+        "time_index": 8,
+        "time_range": "15:00-16:59",
+      },
+      {
+        "key": "YOU",
+        "time_index": 9,
+        "time_range": "17:00-18:59",
+      },
+      {
+        "key": "XU",
+        "time_index": 10,
+        "time_range": "19:00-20:59",
+      },
+      {
+        "key": "HAI",
+        "time_index": 11,
+        "time_range": "21:00-22:59",
+      },
+      {
+        "key": "ZI_LATE",
+        "time_index": 12,
+        "time_range": "00:00-00:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [],
+    "board": {
+      "body": "impulsive",
+      "body_branch": "yin",
+      "chinese_date": "wu zi - jia yin - geng zi - bing zi",
+      "five_elements_class": "water 2nd",
+      "lunar_date": "二〇〇八年正月廿三",
+      "palaces": [
+        {
+          "adjective_star_count": 6,
+          "decadal_range": [
+            2,
+            11,
+          ],
+          "earthly_branch": "yin",
+          "heavenly_stem": "jia",
+          "index": 0,
+          "major_star_names": [],
+          "minor_star_names": [
+            "horse",
+            "impulsive",
+          ],
+          "name": "soul",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            112,
+            121,
+          ],
+          "earthly_branch": "mao",
+          "heavenly_stem": "yi",
+          "index": 1,
+          "major_star_names": [
+            "empress",
+          ],
+          "minor_star_names": [],
+          "name": "parents",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            102,
+            111,
+          ],
+          "earthly_branch": "chen",
+          "heavenly_stem": "bing",
+          "index": 2,
+          "major_star_names": [
+            "moon",
+          ],
+          "minor_star_names": [
+            "officer",
+            "artist",
+            "tangled",
+          ],
+          "name": "spirit",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            92,
+            101,
+          ],
+          "earthly_branch": "si",
+          "heavenly_stem": "ding",
+          "index": 3,
+          "major_star_names": [
+            "judge",
+            "wolf",
+          ],
+          "minor_star_names": [
+            "money",
+          ],
+          "name": "property",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            82,
+            91,
+          ],
+          "earthly_branch": "woo",
+          "heavenly_stem": "wu",
+          "index": 4,
+          "major_star_names": [
+            "advocator",
+          ],
+          "minor_star_names": [
+            "driven",
+          ],
+          "name": "career",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            72,
+            81,
+          ],
+          "earthly_branch": "wei",
+          "heavenly_stem": "ji",
+          "index": 5,
+          "major_star_names": [
+            "minister",
+          ],
+          "minor_star_names": [
+            "aide",
+          ],
+          "name": "friends",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            62,
+            71,
+          ],
+          "earthly_branch": "shen",
+          "heavenly_stem": "geng",
+          "index": 6,
+          "major_star_names": [
+            "fortunate",
+            "sage",
+          ],
+          "minor_star_names": [],
+          "name": "surface",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            52,
+            61,
+          ],
+          "earthly_branch": "you",
+          "heavenly_stem": "xin",
+          "index": 7,
+          "major_star_names": [
+            "general",
+            "marshal",
+          ],
+          "minor_star_names": [],
+          "name": "health",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            42,
+            51,
+          ],
+          "earthly_branch": "xu",
+          "heavenly_stem": "ren",
+          "index": 8,
+          "major_star_names": [
+            "sun",
+          ],
+          "minor_star_names": [
+            "helper",
+            "scholar",
+            "spark",
+          ],
+          "name": "wealth",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            32,
+            41,
+          ],
+          "earthly_branch": "hai",
+          "heavenly_stem": "gui",
+          "index": 9,
+          "major_star_names": [],
+          "minor_star_names": [
+            "ideologue",
+            "fickle",
+          ],
+          "name": "children",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            22,
+            31,
+          ],
+          "earthly_branch": "zi",
+          "heavenly_stem": "jia",
+          "index": 10,
+          "major_star_names": [
+            "advisor",
+          ],
+          "minor_star_names": [],
+          "name": "spouse",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            12,
+            21,
+          ],
+          "earthly_branch": "chou",
+          "heavenly_stem": "yi",
+          "index": 11,
+          "major_star_names": [
+            "emperor",
+            "rebel",
+          ],
+          "minor_star_names": [
+            "assistant",
+          ],
+          "name": "siblings",
+        },
+      ],
+      "sign": "pisces",
+      "solar_date": "2008-02-29",
+      "soul": "money",
+      "soul_branch": "yin",
+      "time": "late Rat hour",
+      "time_range": "23:00~00:00",
+      "zodiac": "rat",
+    },
+    "caseId": "S11-L3-SOLAR-EN",
+    "input_tier": "L3",
+    "meta": {
+      "calendar": "SOLAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": true,
+      "location_is_assumed": false,
+      "time_is_assumed": false,
+    },
+    "shichen_candidates": [
+      {
+        "key": "ZI_LATE",
+        "time_index": 12,
+        "time_range": "00:00-00:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [],
+    "board": {
+      "body": "문창",
+      "body_branch": "술",
+      "chinese_date": "임진 경술 정묘 경자",
+      "five_elements_class": "금사국",
+      "lunar_date": "二〇一二年九月十八",
+      "palaces": [
+        {
+          "adjective_star_count": 6,
+          "decadal_range": [
+            44,
+            53,
+          ],
+          "earthly_branch": "인",
+          "heavenly_stem": "임",
+          "index": 0,
+          "major_star_names": [
+            "태양",
+            "거문",
+          ],
+          "minor_star_names": [
+            "우필",
+            "천마",
+            "화성",
+          ],
+          "name": "관록",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            54,
+            63,
+          ],
+          "earthly_branch": "묘",
+          "heavenly_stem": "계",
+          "index": 1,
+          "major_star_names": [
+            "천상",
+          ],
+          "minor_star_names": [
+            "천괴",
+          ],
+          "name": "노복",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            64,
+            73,
+          ],
+          "earthly_branch": "진",
+          "heavenly_stem": "갑",
+          "index": 2,
+          "major_star_names": [
+            "천기",
+            "천량",
+          ],
+          "minor_star_names": [
+            "문곡",
+          ],
+          "name": "천이",
+        },
+        {
+          "adjective_star_count": 6,
+          "decadal_range": [
+            74,
+            83,
+          ],
+          "earthly_branch": "사",
+          "heavenly_stem": "을",
+          "index": 3,
+          "major_star_names": [
+            "자미",
+            "칠살",
+          ],
+          "minor_star_names": [
+            "천월",
+          ],
+          "name": "질액",
+        },
+        {
+          "adjective_star_count": 7,
+          "decadal_range": [
+            84,
+            93,
+          ],
+          "earthly_branch": "오",
+          "heavenly_stem": "병",
+          "index": 4,
+          "major_star_names": [],
+          "minor_star_names": [],
+          "name": "재백",
+        },
+        {
+          "adjective_star_count": 0,
+          "decadal_range": [
+            94,
+            103,
+          ],
+          "earthly_branch": "미",
+          "heavenly_stem": "정",
+          "index": 5,
+          "major_star_names": [],
+          "minor_star_names": [],
+          "name": "자녀",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            104,
+            113,
+          ],
+          "earthly_branch": "신",
+          "heavenly_stem": "무",
+          "index": 6,
+          "major_star_names": [],
+          "minor_star_names": [],
+          "name": "부처",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            114,
+            123,
+          ],
+          "earthly_branch": "유",
+          "heavenly_stem": "기",
+          "index": 7,
+          "major_star_names": [
+            "염정",
+            "파군",
+          ],
+          "minor_star_names": [],
+          "name": "형제",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            4,
+            13,
+          ],
+          "earthly_branch": "술",
+          "heavenly_stem": "경",
+          "index": 8,
+          "major_star_names": [],
+          "minor_star_names": [
+            "문창",
+            "령성",
+            "타라",
+          ],
+          "name": "명궁",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            14,
+            23,
+          ],
+          "earthly_branch": "해",
+          "heavenly_stem": "신",
+          "index": 9,
+          "major_star_names": [
+            "천부",
+          ],
+          "minor_star_names": [
+            "록존",
+            "지공",
+            "지겁",
+          ],
+          "name": "부모",
+        },
+        {
+          "adjective_star_count": 0,
+          "decadal_range": [
+            24,
+            33,
+          ],
+          "earthly_branch": "자",
+          "heavenly_stem": "임",
+          "index": 10,
+          "major_star_names": [
+            "천동",
+            "태음",
+          ],
+          "minor_star_names": [
+            "좌보",
+            "경양",
+          ],
+          "name": "복덕",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            34,
+            43,
+          ],
+          "earthly_branch": "축",
+          "heavenly_stem": "계",
+          "index": 11,
+          "major_star_names": [
+            "무곡",
+            "탐랑",
+          ],
+          "minor_star_names": [],
+          "name": "전택",
+        },
+      ],
+      "sign": "천갈궁",
+      "solar_date": "2012-11-01",
+      "soul": "록존",
+      "soul_branch": "술",
+      "time": "밤에 자시",
+      "time_range": "23:00~00:00",
+      "zodiac": "용",
+    },
+    "caseId": "S12-L3-SOLAR-LATE-ZI",
+    "input_tier": "L3",
+    "meta": {
+      "calendar": "SOLAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": true,
+      "location_is_assumed": false,
+      "time_is_assumed": false,
+    },
+    "shichen_candidates": [
+      {
+        "key": "ZI_LATE",
+        "time_index": 12,
+        "time_range": "00:00-00:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [
+      "birth_time_unknown: local 12:00으로 가정해 명반을 계산했습니다.",
+      "shichen_override: WEI가 우선 적용되었습니다.",
+    ],
+    "board": {
+      "body": "천동",
+      "body_branch": "축",
+      "chinese_date": "기묘 경오 경신 계미",
+      "five_elements_class": "화육국",
+      "lunar_date": "一九九九年五月廿四",
+      "palaces": [
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            36,
+            45,
+          ],
+          "earthly_branch": "인",
+          "heavenly_stem": "병",
+          "index": 0,
+          "major_star_names": [
+            "태양",
+            "거문",
+          ],
+          "minor_star_names": [],
+          "name": "전택",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            46,
+            55,
+          ],
+          "earthly_branch": "묘",
+          "heavenly_stem": "정",
+          "index": 1,
+          "major_star_names": [
+            "천상",
+          ],
+          "minor_star_names": [
+            "문창",
+          ],
+          "name": "관록",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            56,
+            65,
+          ],
+          "earthly_branch": "진",
+          "heavenly_stem": "무",
+          "index": 2,
+          "major_star_names": [
+            "천기",
+            "천량",
+          ],
+          "minor_star_names": [
+            "지공",
+            "화성",
+          ],
+          "name": "노복",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            66,
+            75,
+          ],
+          "earthly_branch": "사",
+          "heavenly_stem": "기",
+          "index": 3,
+          "major_star_names": [
+            "자미",
+            "칠살",
+          ],
+          "minor_star_names": [
+            "천마",
+            "령성",
+            "타라",
+          ],
+          "name": "천이",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            76,
+            85,
+          ],
+          "earthly_branch": "오",
+          "heavenly_stem": "경",
+          "index": 4,
+          "major_star_names": [],
+          "minor_star_names": [
+            "우필",
+            "록존",
+            "지겁",
+          ],
+          "name": "질액",
+        },
+        {
+          "adjective_star_count": 7,
+          "decadal_range": [
+            86,
+            95,
+          ],
+          "earthly_branch": "미",
+          "heavenly_stem": "신",
+          "index": 5,
+          "major_star_names": [],
+          "minor_star_names": [
+            "경양",
+          ],
+          "name": "재백",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            96,
+            105,
+          ],
+          "earthly_branch": "신",
+          "heavenly_stem": "임",
+          "index": 6,
+          "major_star_names": [],
+          "minor_star_names": [
+            "좌보",
+            "천월",
+          ],
+          "name": "자녀",
+        },
+        {
+          "adjective_star_count": 6,
+          "decadal_range": [
+            106,
+            115,
+          ],
+          "earthly_branch": "유",
+          "heavenly_stem": "계",
+          "index": 7,
+          "major_star_names": [
+            "염정",
+            "파군",
+          ],
+          "minor_star_names": [],
+          "name": "부처",
+        },
+        {
+          "adjective_star_count": 0,
+          "decadal_range": [
+            116,
+            125,
+          ],
+          "earthly_branch": "술",
+          "heavenly_stem": "갑",
+          "index": 8,
+          "major_star_names": [],
+          "minor_star_names": [],
+          "name": "형제",
+        },
+        {
+          "adjective_star_count": 0,
+          "decadal_range": [
+            6,
+            15,
+          ],
+          "earthly_branch": "해",
+          "heavenly_stem": "을",
+          "index": 9,
+          "major_star_names": [
+            "천부",
+          ],
+          "minor_star_names": [
+            "문곡",
+          ],
+          "name": "명궁",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            16,
+            25,
+          ],
+          "earthly_branch": "자",
+          "heavenly_stem": "병",
+          "index": 10,
+          "major_star_names": [
+            "천동",
+            "태음",
+          ],
+          "minor_star_names": [
+            "천괴",
+          ],
+          "name": "부모",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            26,
+            35,
+          ],
+          "earthly_branch": "축",
+          "heavenly_stem": "정",
+          "index": 11,
+          "major_star_names": [
+            "무곡",
+            "탐랑",
+          ],
+          "minor_star_names": [],
+          "name": "복덕",
+        },
+      ],
+      "sign": "거해궁",
+      "solar_date": "1999-07-07",
+      "soul": "거문",
+      "soul_branch": "해",
+      "time": "미시",
+      "time_range": "13:00~15:00",
+      "zodiac": "토끼",
+    },
+    "caseId": "S13-L2-SOLAR-SHICHEN-OVERRIDE",
+    "input_tier": "L2",
+    "meta": {
+      "calendar": "SOLAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": false,
+      "location_is_assumed": false,
+      "time_is_assumed": true,
+    },
+    "shichen_candidates": [
+      {
+        "key": "WEI",
+        "time_index": 7,
+        "time_range": "13:00-14:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [
+      "location_missing: 위도/경도 없이 계산했습니다.",
+      "shichen_override: SI가 우선 적용되었습니다.",
+    ],
+    "board": {
+      "body": "화성",
+      "body_branch": "인",
+      "chinese_date": "임자 기유 병진 계사",
+      "five_elements_class": "화육국",
+      "lunar_date": "一九七二年八月十五",
+      "palaces": [
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            106,
+            115,
+          ],
+          "earthly_branch": "인",
+          "heavenly_stem": "임",
+          "index": 0,
+          "major_star_names": [],
+          "minor_star_names": [
+            "천마",
+          ],
+          "name": "부처",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            116,
+            125,
+          ],
+          "earthly_branch": "묘",
+          "heavenly_stem": "계",
+          "index": 1,
+          "major_star_names": [
+            "천부",
+          ],
+          "minor_star_names": [
+            "우필",
+            "천괴",
+            "령성",
+          ],
+          "name": "형제",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            6,
+            15,
+          ],
+          "earthly_branch": "진",
+          "heavenly_stem": "갑",
+          "index": 2,
+          "major_star_names": [
+            "태음",
+          ],
+          "minor_star_names": [
+            "지겁",
+          ],
+          "name": "명궁",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            16,
+            25,
+          ],
+          "earthly_branch": "사",
+          "heavenly_stem": "을",
+          "index": 3,
+          "major_star_names": [
+            "염정",
+            "탐랑",
+          ],
+          "minor_star_names": [
+            "문창",
+            "천월",
+          ],
+          "name": "부모",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            26,
+            35,
+          ],
+          "earthly_branch": "오",
+          "heavenly_stem": "병",
+          "index": 4,
+          "major_star_names": [
+            "거문",
+          ],
+          "minor_star_names": [
+            "지공",
+          ],
+          "name": "복덕",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            36,
+            45,
+          ],
+          "earthly_branch": "미",
+          "heavenly_stem": "정",
+          "index": 5,
+          "major_star_names": [
+            "천상",
+          ],
+          "minor_star_names": [
+            "화성",
+          ],
+          "name": "전택",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            46,
+            55,
+          ],
+          "earthly_branch": "신",
+          "heavenly_stem": "무",
+          "index": 6,
+          "major_star_names": [
+            "천동",
+            "천량",
+          ],
+          "minor_star_names": [],
+          "name": "관록",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            56,
+            65,
+          ],
+          "earthly_branch": "유",
+          "heavenly_stem": "기",
+          "index": 7,
+          "major_star_names": [
+            "무곡",
+            "칠살",
+          ],
+          "minor_star_names": [
+            "문곡",
+          ],
+          "name": "노복",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            66,
+            75,
+          ],
+          "earthly_branch": "술",
+          "heavenly_stem": "경",
+          "index": 8,
+          "major_star_names": [
+            "태양",
+          ],
+          "minor_star_names": [
+            "타라",
+          ],
+          "name": "천이",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            76,
+            85,
+          ],
+          "earthly_branch": "해",
+          "heavenly_stem": "신",
+          "index": 9,
+          "major_star_names": [],
+          "minor_star_names": [
+            "좌보",
+            "록존",
+          ],
+          "name": "질액",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            86,
+            95,
+          ],
+          "earthly_branch": "자",
+          "heavenly_stem": "임",
+          "index": 10,
+          "major_star_names": [
+            "천기",
+          ],
+          "minor_star_names": [
+            "경양",
+          ],
+          "name": "재백",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            96,
+            105,
+          ],
+          "earthly_branch": "축",
+          "heavenly_stem": "계",
+          "index": 11,
+          "major_star_names": [
+            "자미",
+            "파군",
+          ],
+          "minor_star_names": [],
+          "name": "자녀",
+        },
+      ],
+      "sign": "처녀궁",
+      "solar_date": "1972-09-22",
+      "soul": "염정",
+      "soul_branch": "진",
+      "time": "사시",
+      "time_range": "09:00~11:00",
+      "zodiac": "쥐",
+    },
+    "caseId": "S14-L1-SOLAR-SHICHEN-OVERRIDE",
+    "input_tier": "L1",
+    "meta": {
+      "calendar": "SOLAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": true,
+      "location_is_assumed": true,
+      "time_is_assumed": false,
+    },
+    "shichen_candidates": [
+      {
+        "key": "SI",
+        "time_index": 5,
+        "time_range": "09:00-10:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [
+      "school_profile: Zhongzhou 알고리즘 설정을 적용했습니다.",
+    ],
+    "board": {
+      "body": "火星",
+      "body_branch": "子",
+      "chinese_date": "丙子 壬辰 己亥 壬申",
+      "five_elements_class": "火六局",
+      "lunar_date": "一九九六年三月十五",
+      "palaces": [
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            66,
+            75,
+          ],
+          "earthly_branch": "寅",
+          "heavenly_stem": "庚",
+          "index": 0,
+          "major_star_names": [],
+          "minor_star_names": [
+            "文昌",
+            "天马",
+          ],
+          "name": "迁移",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            56,
+            65,
+          ],
+          "earthly_branch": "卯",
+          "heavenly_stem": "辛",
+          "index": 1,
+          "major_star_names": [
+            "天府",
+          ],
+          "minor_star_names": [
+            "地空",
+          ],
+          "name": "疾厄",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            46,
+            55,
+          ],
+          "earthly_branch": "辰",
+          "heavenly_stem": "壬",
+          "index": 2,
+          "major_star_names": [
+            "太阴",
+          ],
+          "minor_star_names": [
+            "陀罗",
+          ],
+          "name": "财帛",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            36,
+            45,
+          ],
+          "earthly_branch": "巳",
+          "heavenly_stem": "癸",
+          "index": 3,
+          "major_star_names": [
+            "廉贞",
+            "贪狼",
+          ],
+          "minor_star_names": [
+            "禄存",
+          ],
+          "name": "子女",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            26,
+            35,
+          ],
+          "earthly_branch": "午",
+          "heavenly_stem": "甲",
+          "index": 4,
+          "major_star_names": [
+            "巨门",
+          ],
+          "minor_star_names": [
+            "左辅",
+            "铃星",
+            "擎羊",
+          ],
+          "name": "夫妻",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            16,
+            25,
+          ],
+          "earthly_branch": "未",
+          "heavenly_stem": "乙",
+          "index": 5,
+          "major_star_names": [
+            "天相",
+          ],
+          "minor_star_names": [
+            "地劫",
+          ],
+          "name": "兄弟",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            6,
+            15,
+          ],
+          "earthly_branch": "申",
+          "heavenly_stem": "丙",
+          "index": 6,
+          "major_star_names": [
+            "天同",
+            "天梁",
+          ],
+          "minor_star_names": [
+            "右弼",
+          ],
+          "name": "命宫",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            116,
+            125,
+          ],
+          "earthly_branch": "酉",
+          "heavenly_stem": "丁",
+          "index": 7,
+          "major_star_names": [
+            "武曲",
+            "七杀",
+          ],
+          "minor_star_names": [
+            "天钺",
+          ],
+          "name": "父母",
+        },
+        {
+          "adjective_star_count": 6,
+          "decadal_range": [
+            106,
+            115,
+          ],
+          "earthly_branch": "戌",
+          "heavenly_stem": "戊",
+          "index": 8,
+          "major_star_names": [
+            "太阳",
+          ],
+          "minor_star_names": [
+            "火星",
+          ],
+          "name": "福德",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            96,
+            105,
+          ],
+          "earthly_branch": "亥",
+          "heavenly_stem": "己",
+          "index": 9,
+          "major_star_names": [],
+          "minor_star_names": [
+            "天魁",
+          ],
+          "name": "田宅",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            86,
+            95,
+          ],
+          "earthly_branch": "子",
+          "heavenly_stem": "庚",
+          "index": 10,
+          "major_star_names": [
+            "天机",
+          ],
+          "minor_star_names": [
+            "文曲",
+          ],
+          "name": "官禄",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            76,
+            85,
+          ],
+          "earthly_branch": "丑",
+          "heavenly_stem": "辛",
+          "index": 11,
+          "major_star_names": [
+            "紫微",
+            "破军",
+          ],
+          "minor_star_names": [],
+          "name": "仆役",
+        },
+      ],
+      "sign": "金牛座",
+      "solar_date": "1996-5-2",
+      "soul": "贪狼",
+      "soul_branch": "申",
+      "time": "申时",
+      "time_range": "15:00~17:00",
+      "zodiac": "鼠",
+    },
+    "caseId": "S15-L3-LUNAR-ZHONGZHOU",
+    "input_tier": "L3",
+    "meta": {
+      "calendar": "LUNAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "ZHONGZHOU",
+    },
+    "quality_flags": {
+      "houses_computed": true,
+      "location_is_assumed": false,
+      "time_is_assumed": false,
+    },
+    "shichen_candidates": [
+      {
+        "key": "SHEN",
+        "time_index": 8,
+        "time_range": "15:00-16:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [
+      "birth_time_unknown: local 12:00으로 가정해 명반을 계산했습니다.",
+      "location_missing: 위도/경도 없이 계산했습니다.",
+      "shichen_fallback: 13개 시진 후보(자시 초/정 포함)를 함께 제공합니다.",
+    ],
+    "board": {
+      "body": "Hỏa Tinh",
+      "body_branch": "Mão",
+      "chinese_date": "Canh Ngọ - Ất Dậu - Quý Tỵ - Mậu Ngọ",
+      "five_elements_class": "Thổ Ngũ Cục",
+      "lunar_date": "一九三〇年八月十九",
+      "palaces": [
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            115,
+            124,
+          ],
+          "earthly_branch": "Dần",
+          "heavenly_stem": "Mậu",
+          "index": 0,
+          "major_star_names": [
+            "Tham Lang",
+          ],
+          "minor_star_names": [],
+          "name": "Huynh Đệ",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            5,
+            14,
+          ],
+          "earthly_branch": "Mão",
+          "heavenly_stem": "Kỷ",
+          "index": 1,
+          "major_star_names": [
+            "Thiên Cơ",
+            "Cự Môn",
+          ],
+          "minor_star_names": [
+            "Hữu Bật",
+          ],
+          "name": "Mệnh",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            15,
+            24,
+          ],
+          "earthly_branch": "Thìn",
+          "heavenly_stem": "Canh",
+          "index": 2,
+          "major_star_names": [
+            "Tử Vi",
+            "Thiên Tướng",
+          ],
+          "minor_star_names": [
+            "Văn Xương",
+          ],
+          "name": "Phụ Mẫu",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            25,
+            34,
+          ],
+          "earthly_branch": "Tỵ",
+          "heavenly_stem": "Tân",
+          "index": 3,
+          "major_star_names": [
+            "Thiên Lương",
+          ],
+          "minor_star_names": [
+            "Địa Không",
+            "Địa Kiếp",
+          ],
+          "name": "Phúc Đức",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            35,
+            44,
+          ],
+          "earthly_branch": "Ngọ",
+          "heavenly_stem": "Nhâm",
+          "index": 4,
+          "major_star_names": [
+            "Thất Sát",
+          ],
+          "minor_star_names": [],
+          "name": "Điền Trạch",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            45,
+            54,
+          ],
+          "earthly_branch": "Mùi",
+          "heavenly_stem": "Quý",
+          "index": 5,
+          "major_star_names": [],
+          "minor_star_names": [
+            "Thiên Việt",
+            "Hỏa Tinh",
+            "Đà La",
+          ],
+          "name": "Quan Lộc",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            55,
+            64,
+          ],
+          "earthly_branch": "Thân",
+          "heavenly_stem": "Giáp",
+          "index": 6,
+          "major_star_names": [
+            "Liêm Trinh",
+          ],
+          "minor_star_names": [
+            "Lộc Tồn",
+            "Thiên Mã",
+          ],
+          "name": "Nô Bộc",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            65,
+            74,
+          ],
+          "earthly_branch": "Dậu",
+          "heavenly_stem": "Ất",
+          "index": 7,
+          "major_star_names": [],
+          "minor_star_names": [
+            "Linh Tinh",
+            "Kình Dương",
+          ],
+          "name": "Thiên Di",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            75,
+            84,
+          ],
+          "earthly_branch": "Tuất",
+          "heavenly_stem": "Bính",
+          "index": 8,
+          "major_star_names": [
+            "Phá Quân",
+          ],
+          "minor_star_names": [
+            "Văn Khúc",
+          ],
+          "name": "Tật Ách",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            85,
+            94,
+          ],
+          "earthly_branch": "Hợi",
+          "heavenly_stem": "Đinh",
+          "index": 9,
+          "major_star_names": [
+            "Thiên Đồng",
+          ],
+          "minor_star_names": [
+            "Tả Phù",
+          ],
+          "name": "Tài Bạch",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            95,
+            104,
+          ],
+          "earthly_branch": "Tý",
+          "heavenly_stem": "Mậu",
+          "index": 10,
+          "major_star_names": [
+            "Vũ Khúc",
+            "Thiên Phủ",
+          ],
+          "minor_star_names": [],
+          "name": "Tử Nữ",
+        },
+        {
+          "adjective_star_count": 0,
+          "decadal_range": [
+            105,
+            114,
+          ],
+          "earthly_branch": "Sửu",
+          "heavenly_stem": "Kỷ",
+          "index": 11,
+          "major_star_names": [
+            "Thái Dương",
+            "Thái Âm",
+          ],
+          "minor_star_names": [
+            "Thiên Khôi",
+          ],
+          "name": "Phu Thê",
+        },
+      ],
+      "sign": "Cung Thiên Bình",
+      "solar_date": "1930-10-10",
+      "soul": "Văn Khúc",
+      "soul_branch": "Mão",
+      "time": "Giờ ngọ",
+      "time_range": "11:00~13:00",
+      "zodiac": "Ngựa",
+    },
+    "caseId": "S16-L0-SOLAR-VI",
+    "input_tier": "L0",
+    "meta": {
+      "calendar": "SOLAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": false,
+      "location_is_assumed": true,
+      "time_is_assumed": true,
+    },
+    "shichen_candidates": [
+      {
+        "key": "ZI_EARLY",
+        "time_index": 0,
+        "time_range": "23:00-23:59",
+      },
+      {
+        "key": "CHOU",
+        "time_index": 1,
+        "time_range": "01:00-02:59",
+      },
+      {
+        "key": "YIN",
+        "time_index": 2,
+        "time_range": "03:00-04:59",
+      },
+      {
+        "key": "MAO",
+        "time_index": 3,
+        "time_range": "05:00-06:59",
+      },
+      {
+        "key": "CHEN",
+        "time_index": 4,
+        "time_range": "07:00-08:59",
+      },
+      {
+        "key": "SI",
+        "time_index": 5,
+        "time_range": "09:00-10:59",
+      },
+      {
+        "key": "WU",
+        "time_index": 6,
+        "time_range": "11:00-12:59",
+      },
+      {
+        "key": "WEI",
+        "time_index": 7,
+        "time_range": "13:00-14:59",
+      },
+      {
+        "key": "SHEN",
+        "time_index": 8,
+        "time_range": "15:00-16:59",
+      },
+      {
+        "key": "YOU",
+        "time_index": 9,
+        "time_range": "17:00-18:59",
+      },
+      {
+        "key": "XU",
+        "time_index": 10,
+        "time_range": "19:00-20:59",
+      },
+      {
+        "key": "HAI",
+        "time_index": 11,
+        "time_range": "21:00-22:59",
+      },
+      {
+        "key": "ZI_LATE",
+        "time_index": 12,
+        "time_range": "00:00-00:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [],
+    "board": {
+      "body": "天同",
+      "body_branch": "午",
+      "chinese_date": "丁酉 壬子 丁酉 丙午",
+      "five_elements_class": "水の二局",
+      "lunar_date": "二〇一七年冬月十九",
+      "palaces": [
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            82,
+            91,
+          ],
+          "earthly_branch": "寅",
+          "heavenly_stem": "壬",
+          "index": 0,
+          "major_star_names": [
+            "廉貞",
+          ],
+          "minor_star_names": [
+            "左輔",
+          ],
+          "name": "財帛",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            92,
+            101,
+          ],
+          "earthly_branch": "卯",
+          "heavenly_stem": "癸",
+          "index": 1,
+          "major_star_names": [],
+          "minor_star_names": [],
+          "name": "子女",
+        },
+        {
+          "adjective_star_count": 0,
+          "decadal_range": [
+            102,
+            111,
+          ],
+          "earthly_branch": "辰",
+          "heavenly_stem": "甲",
+          "index": 2,
+          "major_star_names": [
+            "破軍",
+          ],
+          "minor_star_names": [
+            "文昌",
+            "鈴星",
+          ],
+          "name": "夫妻",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            112,
+            121,
+          ],
+          "earthly_branch": "巳",
+          "heavenly_stem": "乙",
+          "index": 3,
+          "major_star_names": [
+            "天同",
+          ],
+          "minor_star_names": [
+            "地空",
+            "地劫",
+            "陀羅",
+          ],
+          "name": "兄弟",
+        },
+        {
+          "adjective_star_count": 6,
+          "decadal_range": [
+            2,
+            11,
+          ],
+          "earthly_branch": "午",
+          "heavenly_stem": "丙",
+          "index": 4,
+          "major_star_names": [
+            "武曲",
+            "天府",
+          ],
+          "minor_star_names": [
+            "祿存",
+          ],
+          "name": "命宮",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            12,
+            21,
+          ],
+          "earthly_branch": "未",
+          "heavenly_stem": "丁",
+          "index": 5,
+          "major_star_names": [
+            "太陽",
+            "太陰",
+          ],
+          "minor_star_names": [
+            "擎羊",
+          ],
+          "name": "父母",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            22,
+            31,
+          ],
+          "earthly_branch": "申",
+          "heavenly_stem": "戊",
+          "index": 6,
+          "major_star_names": [
+            "貪狼",
+          ],
+          "minor_star_names": [],
+          "name": "福德",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            32,
+            41,
+          ],
+          "earthly_branch": "酉",
+          "heavenly_stem": "己",
+          "index": 7,
+          "major_star_names": [
+            "天機",
+            "巨門",
+          ],
+          "minor_star_names": [
+            "天鉞",
+            "火星",
+          ],
+          "name": "田宅",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            42,
+            51,
+          ],
+          "earthly_branch": "戌",
+          "heavenly_stem": "庚",
+          "index": 8,
+          "major_star_names": [
+            "紫微",
+            "天相",
+          ],
+          "minor_star_names": [
+            "文曲",
+          ],
+          "name": "官祿",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            52,
+            61,
+          ],
+          "earthly_branch": "亥",
+          "heavenly_stem": "辛",
+          "index": 9,
+          "major_star_names": [
+            "天梁",
+          ],
+          "minor_star_names": [
+            "天魁",
+            "天馬",
+          ],
+          "name": "僕役",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            62,
+            71,
+          ],
+          "earthly_branch": "子",
+          "heavenly_stem": "壬",
+          "index": 10,
+          "major_star_names": [
+            "七殺",
+          ],
+          "minor_star_names": [
+            "右弼",
+          ],
+          "name": "遷移",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            72,
+            81,
+          ],
+          "earthly_branch": "丑",
+          "heavenly_stem": "癸",
+          "index": 11,
+          "major_star_names": [],
+          "minor_star_names": [],
+          "name": "疾厄",
+        },
+      ],
+      "sign": "やぎ座",
+      "solar_date": "2018-01-05",
+      "soul": "破軍",
+      "soul_branch": "午",
+      "time": "午時",
+      "time_range": "11:00~13:00",
+      "zodiac": "雞",
+    },
+    "caseId": "S17-L3-SOLAR-JA",
+    "input_tier": "L3",
+    "meta": {
+      "calendar": "SOLAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": true,
+      "location_is_assumed": false,
+      "time_is_assumed": false,
+    },
+    "shichen_candidates": [
+      {
+        "key": "WU",
+        "time_index": 6,
+        "time_range": "11:00-12:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [
+      "birth_time_unknown: local 12:00으로 가정해 명반을 계산했습니다.",
+      "shichen_override: CHOU가 우선 적용되었습니다.",
+    ],
+    "board": {
+      "body": "천동",
+      "body_branch": "인",
+      "chinese_date": "신유 신축 기축 을축",
+      "five_elements_class": "토오국",
+      "lunar_date": "一九八一年腊月十二",
+      "palaces": [
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            105,
+            114,
+          ],
+          "earthly_branch": "인",
+          "heavenly_stem": "경",
+          "index": 0,
+          "major_star_names": [],
+          "minor_star_names": [
+            "천월",
+          ],
+          "name": "복덕",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            95,
+            104,
+          ],
+          "earthly_branch": "묘",
+          "heavenly_stem": "신",
+          "index": 1,
+          "major_star_names": [
+            "천부",
+          ],
+          "minor_star_names": [
+            "좌보",
+          ],
+          "name": "전택",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            85,
+            94,
+          ],
+          "earthly_branch": "진",
+          "heavenly_stem": "임",
+          "index": 2,
+          "major_star_names": [
+            "태음",
+          ],
+          "minor_star_names": [
+            "화성",
+          ],
+          "name": "관록",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            75,
+            84,
+          ],
+          "earthly_branch": "사",
+          "heavenly_stem": "계",
+          "index": 3,
+          "major_star_names": [
+            "염정",
+            "탐랑",
+          ],
+          "minor_star_names": [
+            "문곡",
+          ],
+          "name": "노복",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            65,
+            74,
+          ],
+          "earthly_branch": "오",
+          "heavenly_stem": "갑",
+          "index": 4,
+          "major_star_names": [
+            "거문",
+          ],
+          "minor_star_names": [
+            "천괴",
+          ],
+          "name": "천이",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            55,
+            64,
+          ],
+          "earthly_branch": "미",
+          "heavenly_stem": "을",
+          "index": 5,
+          "major_star_names": [
+            "천상",
+          ],
+          "minor_star_names": [],
+          "name": "질액",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            45,
+            54,
+          ],
+          "earthly_branch": "신",
+          "heavenly_stem": "병",
+          "index": 6,
+          "major_star_names": [
+            "천동",
+            "천량",
+          ],
+          "minor_star_names": [
+            "타라",
+          ],
+          "name": "재백",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            35,
+            44,
+          ],
+          "earthly_branch": "유",
+          "heavenly_stem": "정",
+          "index": 7,
+          "major_star_names": [
+            "무곡",
+            "칠살",
+          ],
+          "minor_star_names": [
+            "문창",
+            "록존",
+          ],
+          "name": "자녀",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            25,
+            34,
+          ],
+          "earthly_branch": "술",
+          "heavenly_stem": "무",
+          "index": 8,
+          "major_star_names": [
+            "태양",
+          ],
+          "minor_star_names": [
+            "지공",
+            "경양",
+          ],
+          "name": "부처",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            15,
+            24,
+          ],
+          "earthly_branch": "해",
+          "heavenly_stem": "기",
+          "index": 9,
+          "major_star_names": [],
+          "minor_star_names": [
+            "우필",
+            "천마",
+            "령성",
+          ],
+          "name": "형제",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            5,
+            14,
+          ],
+          "earthly_branch": "자",
+          "heavenly_stem": "경",
+          "index": 10,
+          "major_star_names": [
+            "천기",
+          ],
+          "minor_star_names": [
+            "지겁",
+          ],
+          "name": "명궁",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            115,
+            124,
+          ],
+          "earthly_branch": "축",
+          "heavenly_stem": "신",
+          "index": 11,
+          "major_star_names": [
+            "자미",
+            "파군",
+          ],
+          "minor_star_names": [],
+          "name": "부모",
+        },
+      ],
+      "sign": "마갈궁",
+      "solar_date": "1982-1-6",
+      "soul": "탐랑",
+      "soul_branch": "자",
+      "time": "축시",
+      "time_range": "01:00~03:00",
+      "zodiac": "닭",
+    },
+    "caseId": "S18-L2-LUNAR-SHICHEN",
+    "input_tier": "L2",
+    "meta": {
+      "calendar": "LUNAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": false,
+      "location_is_assumed": false,
+      "time_is_assumed": true,
+    },
+    "shichen_candidates": [
+      {
+        "key": "CHOU",
+        "time_index": 1,
+        "time_range": "01:00-02:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [
+      "location_missing: 위도/경도 없이 계산했습니다.",
+    ],
+    "board": {
+      "body": "minister",
+      "body_branch": "mao",
+      "chinese_date": "gui wei - wu woo - gui hai - xin you",
+      "five_elements_class": "wood 3rd",
+      "lunar_date": "二〇〇三年五月二十",
+      "palaces": [
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            53,
+            62,
+          ],
+          "earthly_branch": "yin",
+          "heavenly_stem": "jia",
+          "index": 0,
+          "major_star_names": [
+            "fortunate",
+            "sage",
+          ],
+          "minor_star_names": [
+            "ideologue",
+          ],
+          "name": "friends",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            63,
+            72,
+          ],
+          "earthly_branch": "mao",
+          "heavenly_stem": "yi",
+          "index": 1,
+          "major_star_names": [
+            "general",
+            "marshal",
+          ],
+          "minor_star_names": [
+            "assistant",
+          ],
+          "name": "surface",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            73,
+            82,
+          ],
+          "earthly_branch": "chen",
+          "heavenly_stem": "bing",
+          "index": 2,
+          "major_star_names": [
+            "sun",
+          ],
+          "minor_star_names": [],
+          "name": "health",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            83,
+            92,
+          ],
+          "earthly_branch": "si",
+          "heavenly_stem": "ding",
+          "index": 3,
+          "major_star_names": [],
+          "minor_star_names": [
+            "aide",
+            "horse",
+          ],
+          "name": "wealth",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            93,
+            102,
+          ],
+          "earthly_branch": "woo",
+          "heavenly_stem": "wu",
+          "index": 4,
+          "major_star_names": [
+            "advisor",
+          ],
+          "minor_star_names": [
+            "helper",
+            "impulsive",
+          ],
+          "name": "children",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            103,
+            112,
+          ],
+          "earthly_branch": "wei",
+          "heavenly_stem": "ji",
+          "index": 5,
+          "major_star_names": [
+            "emperor",
+            "rebel",
+          ],
+          "minor_star_names": [
+            "spark",
+          ],
+          "name": "spouse",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            113,
+            122,
+          ],
+          "earthly_branch": "shen",
+          "heavenly_stem": "geng",
+          "index": 6,
+          "major_star_names": [],
+          "minor_star_names": [
+            "officer",
+            "fickle",
+          ],
+          "name": "siblings",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            3,
+            12,
+          ],
+          "earthly_branch": "you",
+          "heavenly_stem": "xin",
+          "index": 7,
+          "major_star_names": [
+            "empress",
+          ],
+          "minor_star_names": [],
+          "name": "soul",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            13,
+            22,
+          ],
+          "earthly_branch": "xu",
+          "heavenly_stem": "ren",
+          "index": 8,
+          "major_star_names": [
+            "moon",
+          ],
+          "minor_star_names": [],
+          "name": "parents",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            23,
+            32,
+          ],
+          "earthly_branch": "hai",
+          "heavenly_stem": "gui",
+          "index": 9,
+          "major_star_names": [
+            "judge",
+            "wolf",
+          ],
+          "minor_star_names": [
+            "tangled",
+          ],
+          "name": "spirit",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            33,
+            42,
+          ],
+          "earthly_branch": "zi",
+          "heavenly_stem": "jia",
+          "index": 10,
+          "major_star_names": [
+            "advocator",
+          ],
+          "minor_star_names": [
+            "money",
+          ],
+          "name": "property",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            43,
+            52,
+          ],
+          "earthly_branch": "chou",
+          "heavenly_stem": "yi",
+          "index": 11,
+          "major_star_names": [
+            "minister",
+          ],
+          "minor_star_names": [
+            "scholar",
+            "artist",
+            "driven",
+          ],
+          "name": "career",
+        },
+      ],
+      "sign": "gemini",
+      "solar_date": "2003-6-19",
+      "soul": "artist",
+      "soul_branch": "you",
+      "time": "Rooster hour",
+      "time_range": "17:00~19:00",
+      "zodiac": "sheep",
+    },
+    "caseId": "S19-L1-LUNAR-EN",
+    "input_tier": "L1",
+    "meta": {
+      "calendar": "LUNAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": true,
+      "location_is_assumed": true,
+      "time_is_assumed": false,
+    },
+    "shichen_candidates": [
+      {
+        "key": "YOU",
+        "time_index": 9,
+        "time_range": "17:00-18:59",
+      },
+    ],
+  },
+  {
+    "assumptions": [],
+    "board": {
+      "body": "impulsive",
+      "body_branch": "chou",
+      "chinese_date": "ren zi - ding wei - ding wei - bing woo",
+      "five_elements_class": "wood 3rd",
+      "lunar_date": "一九一二年六月十七",
+      "palaces": [
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            13,
+            22,
+          ],
+          "earthly_branch": "yin",
+          "heavenly_stem": "ren",
+          "index": 0,
+          "major_star_names": [
+            "general",
+            "minister",
+          ],
+          "minor_star_names": [
+            "horse",
+          ],
+          "name": "parents",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            23,
+            32,
+          ],
+          "earthly_branch": "mao",
+          "heavenly_stem": "gui",
+          "index": 1,
+          "major_star_names": [
+            "sun",
+            "sage",
+          ],
+          "minor_star_names": [
+            "assistant",
+          ],
+          "name": "spirit",
+        },
+        {
+          "adjective_star_count": 3,
+          "decadal_range": [
+            33,
+            42,
+          ],
+          "earthly_branch": "chen",
+          "heavenly_stem": "jia",
+          "index": 2,
+          "major_star_names": [
+            "marshal",
+          ],
+          "minor_star_names": [
+            "scholar",
+            "spark",
+          ],
+          "name": "property",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            43,
+            52,
+          ],
+          "earthly_branch": "si",
+          "heavenly_stem": "yi",
+          "index": 3,
+          "major_star_names": [
+            "advisor",
+          ],
+          "minor_star_names": [
+            "helper",
+            "aide",
+            "ideologue",
+            "fickle",
+          ],
+          "name": "career",
+        },
+        {
+          "adjective_star_count": 5,
+          "decadal_range": [
+            53,
+            62,
+          ],
+          "earthly_branch": "woo",
+          "heavenly_stem": "bing",
+          "index": 4,
+          "major_star_names": [
+            "emperor",
+          ],
+          "minor_star_names": [],
+          "name": "friends",
+        },
+        {
+          "adjective_star_count": 1,
+          "decadal_range": [
+            63,
+            72,
+          ],
+          "earthly_branch": "wei",
+          "heavenly_stem": "ding",
+          "index": 5,
+          "major_star_names": [],
+          "minor_star_names": [],
+          "name": "surface",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            73,
+            82,
+          ],
+          "earthly_branch": "shen",
+          "heavenly_stem": "wu",
+          "index": 6,
+          "major_star_names": [
+            "rebel",
+          ],
+          "minor_star_names": [
+            "impulsive",
+          ],
+          "name": "health",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            83,
+            92,
+          ],
+          "earthly_branch": "you",
+          "heavenly_stem": "ji",
+          "index": 7,
+          "major_star_names": [],
+          "minor_star_names": [
+            "officer",
+          ],
+          "name": "wealth",
+        },
+        {
+          "adjective_star_count": 4,
+          "decadal_range": [
+            93,
+            102,
+          ],
+          "earthly_branch": "xu",
+          "heavenly_stem": "geng",
+          "index": 8,
+          "major_star_names": [
+            "judge",
+            "empress",
+          ],
+          "minor_star_names": [
+            "artist",
+            "tangled",
+          ],
+          "name": "children",
+        },
+        {
+          "adjective_star_count": 0,
+          "decadal_range": [
+            103,
+            112,
+          ],
+          "earthly_branch": "hai",
+          "heavenly_stem": "xin",
+          "index": 9,
+          "major_star_names": [
+            "moon",
+          ],
+          "minor_star_names": [
+            "money",
+          ],
+          "name": "spouse",
+        },
+        {
+          "adjective_star_count": 2,
+          "decadal_range": [
+            113,
+            122,
+          ],
+          "earthly_branch": "zi",
+          "heavenly_stem": "ren",
+          "index": 10,
+          "major_star_names": [
+            "wolf",
+          ],
+          "minor_star_names": [
+            "driven",
+          ],
+          "name": "siblings",
+        },
+        {
+          "adjective_star_count": 6,
+          "decadal_range": [
+            3,
+            12,
+          ],
+          "earthly_branch": "chou",
+          "heavenly_stem": "gui",
+          "index": 11,
+          "major_star_names": [
+            "fortunate",
+            "advocator",
+          ],
+          "minor_star_names": [],
+          "name": "soul",
+        },
+      ],
+      "sign": "leo",
+      "solar_date": "1912-07-30",
+      "soul": "advocator",
+      "soul_branch": "chou",
+      "time": "Horse hour",
+      "time_range": "11:00~13:00",
+      "zodiac": "rat",
+    },
+    "caseId": "S20-L3-SOLAR-UTC",
+    "input_tier": "L3",
+    "meta": {
+      "calendar": "SOLAR",
+      "engine": "iztro",
+      "engine_version": "2.5.8",
+      "plugins": [],
+      "policy_version": "ziwei-v1.1.0",
+      "school": "DEFAULT",
+    },
+    "quality_flags": {
+      "houses_computed": true,
+      "location_is_assumed": false,
+      "time_is_assumed": false,
+    },
+    "shichen_candidates": [
+      {
+        "key": "WU",
+        "time_index": 6,
+        "time_range": "11:00-12:59",
+      },
+    ],
+  },
+]
+`;

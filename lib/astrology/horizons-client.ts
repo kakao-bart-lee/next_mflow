@@ -1,8 +1,11 @@
 import type { BirthInfo } from "@/lib/schemas/birth-info"
 import { PLANET_ORDER } from "@/lib/astrology/static/constants"
 import type { PlanetId } from "@/lib/astrology/static/types"
-
-type TimeAccuracy = "minute" | "hour" | "day" | "unknown"
+import {
+  hasLocation,
+  toHarunaBirthPayload,
+  toHarunaLocationPayload,
+} from "@/lib/astrology/shared/input-normalization"
 
 interface HorizonsPosition {
   lon_deg: number
@@ -37,17 +40,6 @@ export class HorizonsClientError extends Error {
   }
 }
 
-function getTimeAccuracy(input: BirthInfo): TimeAccuracy {
-  if (input.isTimeUnknown) return "unknown"
-  if (input.birthTime) return "minute"
-  return "day"
-}
-
-function getLocalDateTime(input: BirthInfo): string {
-  const time = input.isTimeUnknown ? "12:00" : input.birthTime ?? "12:00"
-  return `${input.birthDate}T${time}:00`
-}
-
 function getBaseUrl(): string {
   const baseUrl = process.env.HARUNA_HORIZONS_BASE_URL?.trim()
   if (!baseUrl) {
@@ -62,8 +54,13 @@ function getBaseUrl(): string {
 
 function mapServiceError(status: number, payload: unknown): HorizonsClientError {
   const baseMessage = "Haruna Horizons 요청 중 오류가 발생했습니다"
-  if (payload && typeof payload === "object" && "error" in payload) {
-    const err = (payload as { error?: { code?: string; message?: string; details?: unknown } }).error
+  const err =
+    payload && typeof payload === "object"
+      ? ((payload as { error?: { code?: string; message?: string; details?: unknown } }).error ??
+        (payload as { detail?: { error?: { code?: string; message?: string; details?: unknown } } }).detail
+          ?.error)
+      : undefined
+  if (err) {
     if (err?.code === "invalid_request") {
       return new HorizonsClientError(err.message ?? baseMessage, 400, "HORIZONS_INVALID_REQUEST", err.details)
     }
@@ -134,7 +131,7 @@ function getTimeoutMs(): number {
 }
 
 export async function fetchHorizonsEphemeris(input: BirthInfo): Promise<HorizonsEphemerisResponse> {
-  if (typeof input.latitude !== "number" || typeof input.longitude !== "number") {
+  if (!hasLocation(input)) {
     throw new HorizonsClientError(
       "점성술 계산에는 위치(latitude, longitude)가 필요합니다",
       422,
@@ -143,25 +140,7 @@ export async function fetchHorizonsEphemeris(input: BirthInfo): Promise<Horizons
   }
 
   const baseUrl = getBaseUrl()
-  const body = {
-    birth: {
-      local_datetime: getLocalDateTime(input),
-      timezone: input.timezone,
-      time_accuracy: getTimeAccuracy(input),
-    },
-    location: {
-      longitude_deg: input.longitude,
-      latitude_deg: input.latitude,
-      altitude_m: 0.0,
-    },
-    bodies: PLANET_ORDER,
-    options: {
-      precision: "STANDARD",
-      frame_mode: "TRUE_ECLIPTIC_OF_DATE",
-      observer_mode: "GEOCENTRIC",
-      with_velocity: false,
-    },
-  }
+  const body = buildHorizonsPositionsRequestBody(input)
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -215,4 +194,27 @@ export async function fetchHorizonsEphemeris(input: BirthInfo): Promise<Horizons
   }
 
   return validateResponseShape(payload)
+}
+
+export function buildHorizonsPositionsRequestBody(input: BirthInfo) {
+  const location = toHarunaLocationPayload(input, 0.0)
+  if (!location) {
+    throw new HorizonsClientError(
+      "점성술 계산에는 위치(latitude, longitude)가 필요합니다",
+      422,
+      "ASTROLOGY_LOCATION_REQUIRED"
+    )
+  }
+
+  return {
+    birth: toHarunaBirthPayload(input),
+    location,
+    bodies: PLANET_ORDER,
+    options: {
+      precision: "STANDARD",
+      frame_mode: "TRUE_ECLIPTIC_OF_DATE",
+      observer_mode: "GEOCENTRIC",
+      with_velocity: false,
+    },
+  }
 }

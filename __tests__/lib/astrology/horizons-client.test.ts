@@ -109,6 +109,21 @@ describe("fetchHorizonsEphemeris", () => {
     })
   })
 
+  it("detail.error envelope도 내부 코드로 매핑", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: false,
+      status: 422,
+      json: async () => ({
+        detail: { error: { code: "unsupported_option", message: "unsupported", details: [] } },
+      }),
+    } as Response)
+
+    await expect(fetchHorizonsEphemeris(BASE_INPUT)).rejects.toMatchObject({
+      code: "HORIZONS_UNSUPPORTED_OPTION",
+      status: 422,
+    })
+  })
+
   it("base url 미설정 시 not configured 에러", async () => {
     vi.stubEnv("HARUNA_HORIZONS_BASE_URL", "")
     await expect(fetchHorizonsEphemeris(BASE_INPUT)).rejects.toBeInstanceOf(HorizonsClientError)

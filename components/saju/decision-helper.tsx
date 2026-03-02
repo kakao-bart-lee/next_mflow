@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
-import { AlertCircle, ArrowRight, RotateCcw, Sparkles, ChevronDown, MessageCircle } from "lucide-react"
+import { AlertCircle, ArrowRight, RotateCcw, Sparkles } from "lucide-react"
 import { DeepDiveSheet } from "./deep-dive-sheet"
 import { AIChatPanel } from "./ai-chat-panel"
+import { WhyThisResult } from "./why-this-result"
 import { useSaju } from "@/lib/contexts/saju-context"
 
 const QUESTIONS = [
@@ -378,34 +379,16 @@ export function DecisionHelper() {
                 </div>
               )}
 
-              {/* AI chat trigger */}
-              <button
-                onClick={() => setChatOpen(true)}
-                className="mt-5 flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
-                type="button"
-              >
-                <MessageCircle className="h-3.5 w-3.5" />
-                이 결정에 대해 더 깊이 대화하기
-              </button>
-
               {/* Seal */}
               <div className="mt-5 flex justify-end">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-accent/30">
-                  <span className="font-serif text-[10px] font-bold text-accent">
-                    {"決"}
-                  </span>
+                  <Sparkles className="h-4 w-4 text-accent" />
                 </div>
               </div>
             </div>
 
             {/* Evidence trigger */}
-            <button
-              onClick={() => setDeepDiveOpen(true)}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-secondary/30 px-4 py-3.5 text-sm text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground"
-            >
-              <span>왜 이렇게 나왔나요?</span>
-              <ChevronDown className="h-4 w-4" />
-            </button>
+            <WhyThisResult onClick={() => setDeepDiveOpen(true)} className="mt-4" />
 
             {/* Reset */}
             <div className="mt-6 flex justify-center">
@@ -423,7 +406,16 @@ export function DecisionHelper() {
         )}
       </div>
 
-      <DeepDiveSheet open={deepDiveOpen} onOpenChange={setDeepDiveOpen} />
+      <DeepDiveSheet
+        open={deepDiveOpen}
+        onOpenChange={setDeepDiveOpen}
+        context="decision"
+        contextData={{ decisionResult: aiResult ?? undefined }}
+        onOpenChat={() => {
+          setDeepDiveOpen(false)
+          setChatOpen(true)
+        }}
+      />
       <AIChatPanel open={chatOpen} onOpenChange={setChatOpen} context="decision" />
     </>
   )
