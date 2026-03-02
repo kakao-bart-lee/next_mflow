@@ -182,7 +182,7 @@ function ChatContent({
                 className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                   msg.role === "user"
                     ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-secondary-foreground"
+                    : "border border-border/30 bg-card/80 text-foreground backdrop-blur-sm"
                 }`}
               >
                 {msg.role === "assistant" && (
@@ -206,7 +206,7 @@ function ChatContent({
           {/* Loading dots — shown while waiting for the AI to start responding */}
           {status === "submitted" && (
             <div className="flex justify-start">
-              <div className="rounded-2xl bg-secondary px-4 py-3">
+              <div className="rounded-2xl border border-border/30 bg-card/80 px-4 py-3 backdrop-blur-sm">
                 <div className="flex items-center gap-1.5">
                   <Sparkles className="h-3 w-3 text-accent" />
                   <div className="flex gap-1">
@@ -231,7 +231,7 @@ function ChatContent({
                 setInput(prompt)
                 textareaRef.current?.focus()
               }}
-              className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              className="rounded-full border border-border/40 bg-card/40 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur-sm transition-colors hover:bg-card/70 hover:text-foreground"
               type="button"
             >
               {prompt}
@@ -241,7 +241,7 @@ function ChatContent({
       )}
 
       {/* Input area */}
-      <div className="border-t border-border p-3">
+      <div className="border-t border-border/20 bg-background/40 p-3 backdrop-blur-sm">
         <div className="flex items-end gap-2">
           <button
             onClick={handleReset}
@@ -287,8 +287,8 @@ export function AIChatPanel({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-[85vh]">
-          <DrawerHeader className="border-b border-border pb-3 text-left">
+        <DrawerContent className="h-[85vh] border-border/20 bg-card/95 backdrop-blur-xl">
+          <DrawerHeader className="border-b border-border/20 pb-3 text-left">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-accent" />
@@ -315,8 +315,8 @@ export function AIChatPanel({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="flex w-full max-w-md flex-col bg-card p-0 sm:max-w-lg">
-        <SheetHeader className="border-b border-border px-4 py-3">
+      <SheetContent side="right" className="flex w-full max-w-md flex-col border-border/20 bg-card/95 p-0 backdrop-blur-xl sm:max-w-lg">
+        <SheetHeader className="border-b border-border/20 px-4 py-3">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-accent" />
             <SheetTitle className="font-serif text-base text-foreground">

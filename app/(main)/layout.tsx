@@ -8,6 +8,7 @@ import { logoutAction } from "@/lib/auth/actions"
 import { useSaju } from "@/lib/contexts/saju-context"
 import { BottomNav } from "@/components/saju/bottom-nav"
 import { DevToolbar } from "@/components/dev/dev-toolbar"
+import { DevThemeSwitcher } from "@/components/dev/dev-theme-switcher"
 import { ThemeToggle } from "@/components/saju/theme-toggle"
 import { StarfieldBg } from "@/components/starfield-bg"
 import {
@@ -100,6 +101,7 @@ export default function MainLayout({ children }: MainLayoutProps): ReactNode {
       </main>
 
       <BottomNav />
+      <DevThemeSwitcher />
       <DevToolbar />
     </div>
   )

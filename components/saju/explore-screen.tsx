@@ -282,15 +282,44 @@ export function ExploreScreen() {
   return (
     <>
       <div className="mx-auto w-full max-w-2xl px-5 pb-8 pt-6 lg:max-w-5xl lg:px-8">
-        {/* Full-width header — spans both columns on desktop */}
-        <header className="py-2">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">탐색</p>
-          <h1 className="mt-2 text-balance font-serif text-xl font-semibold leading-snug text-foreground lg:text-2xl">
-            나의 하늘과 사주
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            동양의 사주와 서양의 점성술을 하나의 시선으로 읽습니다
-          </p>
+        {/* Hero banner */}
+        <header className="relative overflow-hidden rounded-2xl border border-border/30 p-6 lg:p-8"
+          style={{
+            background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 12%, transparent), color-mix(in srgb, var(--accent) 8%, transparent))",
+          }}
+        >
+          {/* Ambient glow */}
+          <div
+            className="pointer-events-none absolute inset-0 z-0"
+            style={{
+              background: "radial-gradient(ellipse 70% 80% at 20% 50%, color-mix(in srgb, var(--primary) 15%, transparent), transparent 65%)",
+            }}
+          />
+
+          <div className="relative z-10">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">탐색</p>
+            <h1 className="mt-2 text-balance font-serif text-xl font-semibold leading-snug text-foreground lg:text-2xl">
+              나의 하늘과 사주
+            </h1>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              동양의 사주와 서양의 점성술을 하나의 시선으로 읽습니다
+            </p>
+
+            {/* Planet symbol row */}
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {["☉", "☽", "☿", "♀", "♂", "♃", "♄"].map((sym) => (
+                <span
+                  key={sym}
+                  className="flex h-7 w-7 items-center justify-center rounded-full border border-border/30 bg-card/30 text-sm text-muted-foreground backdrop-blur-sm"
+                >
+                  {sym}
+                </span>
+              ))}
+              <span className="ml-1 flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 text-xs font-medium text-primary">
+                사주 + 점성술
+              </span>
+            </div>
+          </div>
         </header>
 
         <div className="lg:flex lg:gap-10">
@@ -298,7 +327,7 @@ export function ExploreScreen() {
           <div className="lg:max-w-2xl lg:flex-1">
             {/* ─── 1. Headline: Fused reading ─── */}
             <section className="mt-6" aria-label="오늘의 융합 해석">
-              <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-6">
                 {/* Saju pillar + planet pills */}
                 {isLoading ? (
                   <div className="flex gap-2">
@@ -355,7 +384,7 @@ export function ExploreScreen() {
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">차트와 사주 매핑</h2>
                 <Sparkles className="h-4 w-4 text-accent/60" />
               </div>
-              <div className="mt-3 rounded-2xl border border-border bg-card p-5">
+              <div className="mt-3 rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
                 {/* Size mode toggle */}
                 <div className="mb-3 flex justify-end">
                   <div className="inline-flex rounded-full border border-border p-0.5 text-xs">
@@ -419,7 +448,7 @@ export function ExploreScreen() {
             {/* ─── 3. Five Elements (실제 데이터) ─── */}
             <section className="mt-6" aria-label="오행 에너지">
               <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">오행 에너지 분포</h2>
-              <div className="mt-3 rounded-2xl border border-border bg-card p-5">
+              <div className="mt-3 rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
                 {isLoading ? (
                   <div className="space-y-3">
                     {[...Array(5)].map((_, i) => (
@@ -533,7 +562,7 @@ export function ExploreScreen() {
           <aside className="hidden lg:block lg:w-80 lg:shrink-0">
             <div className="sticky top-6 space-y-6">
               {/* Saju pillar card */}
-              <div className="rounded-xl border border-border bg-card p-5">
+              <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">나의 사주 일주</h3>
                 {isLoading ? (
                   <div className="mt-3 flex items-center gap-3">
@@ -562,7 +591,7 @@ export function ExploreScreen() {
 
               {/* Current Daewoon */}
               {sajuResult && (
-                <div className="rounded-xl border border-border bg-card p-5">
+                <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">대운 / 세운</h3>
                   <div className="mt-3 space-y-2">
                     {greatFortune?.current_period && (
@@ -585,7 +614,7 @@ export function ExploreScreen() {
               )}
 
               {/* AI prompt */}
-              <div className="rounded-xl border border-border bg-card p-5">
+              <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-accent" />
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI 통합 해석</h3>

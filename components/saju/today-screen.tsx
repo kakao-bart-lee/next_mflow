@@ -392,7 +392,7 @@ export function TodayScreen() {
               {isLoading ? (
                 <TodaySkeleton />
               ) : todayData ? (
-                <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-6 lg:p-8">
+                <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-6 lg:p-8 animate-glow-pulse">
                   {/* Theme chips */}
                   <div className="flex gap-2">
                     {todayData.tags.map((tag) => {

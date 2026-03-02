@@ -282,3 +282,81 @@
 .animate-fade-in-up {
   animation: fade-in-up 0.6s ease-out both;
 }
+
+/* ─── Moonlit Mist (Light) — Lavender + Steel Blue ─── */
+[data-palette="moonlit"]:not(.dark) {
+  --background: #F0EBF4;
+  --foreground: #1E1840;
+
+  --card: #FFFFFF;
+  --card-foreground: #1E1840;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #1E1840;
+
+  --primary: #7C5CBF;
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #EDE8F5;
+  --secondary-foreground: #1E1840;
+
+  --muted: #EDE8F5;
+  --muted-foreground: #6B738A;
+
+  --accent: #9BB5CC;
+  --accent-foreground: #1E1840;
+
+  --destructive: #C45B3E;
+  --destructive-foreground: #F0EBF4;
+
+  --border: #D4CCE8;
+  --input: #D4CCE8;
+  --ring: #A492D4;
+
+  --gold: #7C5CBF;
+  --lavender: #A492D4;
+  --rain-blue: #9BB5CC;
+
+  --star-gold-r: 124; --star-gold-g: 92; --star-gold-b: 191;
+  --star-lavender-r: 164; --star-lavender-g: 146; --star-lavender-b: 212;
+  --rain-r: 155; --rain-g: 181; --rain-b: 204;
+}
+
+/* ─── Moonlit Night (Dark) — Soft Violet + Cyan ─── */
+[data-palette="moonlit"].dark {
+  --background: #0D0B1A;
+  --foreground: #E8E4F5;
+
+  --card: #141228;
+  --card-foreground: #E8E4F5;
+
+  --popover: #141228;
+  --popover-foreground: #E8E4F5;
+
+  --primary: #A78BFA;
+  --primary-foreground: #0D0B1A;
+
+  --secondary: #1E1840;
+  --secondary-foreground: #A0AABB;
+
+  --muted: #1E1840;
+  --muted-foreground: #A0AABB;
+
+  --accent: #67E8F9;
+  --accent-foreground: #0D0B1A;
+
+  --destructive: #FF4D4D;
+  --destructive-foreground: #E8E4F5;
+
+  --border: #2A2550;
+  --input: #2A2550;
+  --ring: #7C5CBF;
+
+  --gold: #A78BFA;
+  --lavender: #7C5CBF;
+  --rain-blue: #67E8F9;
+
+  --star-gold-r: 167; --star-gold-g: 139; --star-gold-b: 250;
+  --star-lavender-r: 124; --star-lavender-g: 92; --star-lavender-b: 191;
+  --rain-r: 103; --rain-g: 232; --rain-b: 249;
+}
