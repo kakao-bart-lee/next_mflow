@@ -1,6 +1,6 @@
 "use client"
 
-import { DecisionHelper } from "@/components/saju/decision-helper"
+import { DecisionHub } from "@/components/saju/decision-hub"
 import { useRequireBirthInfo } from "@/lib/hooks/use-require-birth-info"
 
 export default function DecisionPage() {
@@ -8,5 +8,5 @@ export default function DecisionPage() {
 
   if (isGuarding) return null
 
-  return <DecisionHelper />
+  return <DecisionHub />
 }

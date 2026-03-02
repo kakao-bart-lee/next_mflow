@@ -12,7 +12,6 @@ import {
   TreePine,
   Moon,
   Send,
-  MessageCircle,
   Sparkles,
   BookOpen,
   ChevronLeft,
@@ -21,6 +20,8 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { AIChatPanel } from "./ai-chat-panel"
+import { DeepDiveSheet } from "./deep-dive-sheet"
+import { WhyThisResult } from "./why-this-result"
 import { useSaju } from "@/lib/contexts/saju-context"
 import { useSajuInterpret } from "@/lib/hooks/use-saju-interpret"
 import type { PlanetId } from "@/lib/astrology/static/types"
@@ -172,6 +173,8 @@ export function WeekScreen() {
   const [journalLoading, setJournalLoading] = useState(false)
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [weekOffset, setWeekOffset] = useState(0)
+  const [deepDiveOpen, setDeepDiveOpen] = useState(false)
+  const [deepDiveDay, setDeepDiveDay] = useState<string | null>(null)
 
   const currentWeekMonday = useMemo(() => getCurrentWeekMonday(), [])
 
@@ -207,7 +210,7 @@ export function WeekScreen() {
           highlight: day.intensity === "high",
         })),
         aiRecap: {
-          summary: "점성 정적 분석 기반 주간 리캡",
+          summary: "데이터 기반 주간 리캡",
           keywords: astrologyResult.ranking.slice(0, 3).map((p) => PLANET_KEYWORD[p]),
           emotionPattern: astrologyResult.today.summary,
           suggestion: astrologyResult.today.actions[0] ?? "이번 주 핵심 과제 하나를 명확히 정해보세요.",
@@ -354,25 +357,6 @@ export function WeekScreen() {
                 )}
               </header>
 
-              {/* AI chat trigger */}
-              <button
-                onClick={() => setChatOpen(true)}
-                className="mt-4 flex w-full items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-left transition-colors hover:bg-primary/10"
-                type="button"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                  <MessageCircle className="h-4 w-4 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">
-                    {weekOffset === 0 ? "이번 주" : "다음 주"} 흐름에 대해 AI와 대화하기
-                  </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    궁금한 날을 더 깊이 탐색하거나, 주간 플랜을 함께 세워보세요
-                  </p>
-                </div>
-              </button>
-
               {/* 7일 예보 */}
               <section className="mt-6" aria-label="7일 예보">
                 <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -441,14 +425,13 @@ export function WeekScreen() {
                           {isSelected && (
                             <div className="ml-16 mt-1 rounded-lg border border-border bg-secondary/30 p-3 animate-in fade-in slide-in-from-top-1 duration-200">
                               <p className="text-sm text-muted-foreground">{day.note}</p>
-                              <button
-                                onClick={() => setChatOpen(true)}
-                                className="mt-2 flex items-center gap-1.5 text-xs font-medium text-primary transition-colors hover:text-primary/80"
-                                type="button"
-                              >
-                                <MessageCircle className="h-3 w-3" />
-                                이 날에 대해 더 알아보기
-                              </button>
+                              <WhyThisResult
+                                onClick={() => {
+                                  setDeepDiveOpen(true)
+                                  setDeepDiveDay(day.date)
+                                }}
+                                className="mt-2 py-2 text-xs"
+                              />
                             </div>
                           )}
                         </div>
@@ -456,6 +439,14 @@ export function WeekScreen() {
                     })}
                   </div>
                 )}
+              </section>
+
+              {/* 주간 전체 "왜 이렇게 나왔나요?" */}
+              <section className="mt-6">
+                <WhyThisResult onClick={() => {
+                  setDeepDiveOpen(true)
+                  setDeepDiveDay(null)
+                }} />
               </section>
             </div>
 
@@ -494,6 +485,16 @@ export function WeekScreen() {
         )}
       </div>
 
+      <DeepDiveSheet
+        open={deepDiveOpen}
+        onOpenChange={setDeepDiveOpen}
+        context="weekly"
+        contextData={{ dayDate: deepDiveDay ?? undefined }}
+        onOpenChat={() => {
+          setDeepDiveOpen(false)
+          setChatOpen(true)
+        }}
+      />
       <AIChatPanel open={chatOpen} onOpenChange={setChatOpen} context="week" />
     </>
   )
@@ -516,29 +517,29 @@ const MOCK_WEEK_RECAPS: WeekRecap[] = [
     theme: "흔들렸지만 중심을 잃지 않은 한 주",
     keywords: ["관계", "인내", "자기돌봄"],
     reflection:
-      "이 주는 외부의 자극이 많았고, 그 안에서 자신의 감정을 다스리는 것이 주된 과제였어요. 일주(日柱)의 수(水) 기운이 감정의 파고를 높였지만, 시주(時柱)의 토(土)가 서서히 안정감을 만들어줬습니다.",
+      "이 주는 외부의 자극이 많았고, 그 안에서 자신의 감정을 다스리는 것이 주된 과제였어요. 감정의 파도가 높았지만 안정의 에너지가 서서히 균형을 잡아줬습니다.",
     insight: "흔들리는 것 자체가 살아있다는 증거예요. 이 주의 경험이 다음 주 결정의 토대가 됩니다.",
   },
   {
     theme: "새로운 방향을 조심스럽게 탐색한 한 주",
     keywords: ["시작", "탐색", "설렘"],
     reflection:
-      "월주(月柱)의 목(木) 기운이 활발해지면서 새로운 아이디어와 만남의 기회가 생겼던 주였어요. 다만 아직 결실보다는 씨앗을 심는 단계였기에, 서두르지 않는 것이 중요했습니다.",
+      "성장의 에너지가 활발해지면서 새로운 아이디어와 만남의 기회가 생겼던 주였어요. 다만 아직 결실보다는 씨앗을 심는 단계였기에, 서두르지 않는 것이 중요했습니다.",
     insight: "이 주에 심은 씨앗이 어떤 모습으로 자라고 있는지 지금 한 번 돌아보세요.",
   },
   {
     theme: "내면의 목소리에 귀 기울인 조용한 한 주",
     keywords: ["휴식", "성찰", "재충전"],
     reflection:
-      "년주(年柱)와 일주(日柱)의 오행이 충(沖)하며 에너지 소모가 컸던 주였어요. 몸과 마음 모두 회복을 원하는 신호를 보내고 있었고, 그 신호를 잘 받아들인 것이 이 주의 가장 큰 성취입니다.",
+      "에너지의 충돌로 소모가 컸던 주였어요. 몸과 마음 모두 회복을 원하는 신호를 보내고 있었고, 그 신호를 잘 받아들인 것이 이 주의 가장 큰 성취입니다.",
     insight: "쉬는 것도 앞으로 나아가는 방법 중 하나임을 이 주가 증명해줬어요.",
   },
   {
     theme: "실행과 결단이 요구되었던 한 주",
     keywords: ["결정", "행동", "전환점"],
     reflection:
-      "화(火) 기운이 강했던 이 주는 망설임보다는 행동이 더 큰 의미를 가졌어요. 미뤄왔던 결정들을 하나씩 처리하면서 시주(時柱)의 금(金) 기운이 그 결정들을 단단하게 다져줬습니다.",
-    insight: "이 주에 내린 결정들을 신뢰하세요. 그 선택은 지금의 기운과 잘 맞닿아 있었습니다.",
+      "열정의 에너지가 강했던 이 주는 망설임보다는 행동이 더 큰 의미를 가졌어요. 미뤄왔던 결정들을 하나씩 처리하면서 결단의 에너지가 그 선택들을 단단하게 다져줬습니다.",
+    insight: "이 주에 내린 결정들을 신뢰하세요. 그 선택은 지금의 흐름과 잘 맞닿아 있었습니다.",
   },
 ]
 

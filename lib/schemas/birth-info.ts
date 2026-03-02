@@ -9,6 +9,14 @@ function isValidIanaTimeZone(value: string): boolean {
   }
 }
 
+export function isValidHourMinute(value: string): boolean {
+  const [hh, mm] = value.split(":");
+  const hour = Number(hh);
+  const minute = Number(mm);
+  if (!Number.isInteger(hour) || !Number.isInteger(minute)) return false;
+  return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
+}
+
 /**
  * 생년월일 + 위치 정보 스키마
  *
@@ -22,6 +30,7 @@ export const BirthInfoSchema = z
     birthTime: z
       .string()
       .regex(/^\d{2}:\d{2}$/, "HH:mm 형식이어야 합니다")
+      .refine(isValidHourMinute, "유효한 시각이어야 합니다 (00:00~23:59)")
       .nullable()
       .optional(),
     isTimeUnknown: z.boolean(),

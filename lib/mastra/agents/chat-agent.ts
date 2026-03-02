@@ -1,7 +1,7 @@
 import { Agent } from "@mastra/core/agent"
 import { Memory } from "@mastra/memory"
 import { getModel } from "@/lib/mastra/model"
-import { storage } from "@/lib/mastra/storage"
+import { getStorage } from "@/lib/mastra/storage"
 
 const CHAT_INSTRUCTIONS = `You are an astrology interpretation guide for a destiny decision product.
 
@@ -31,16 +31,21 @@ use that data directly for personalized interpretation.
  * - lastMessages: 30 (최근 30개 메시지 컨텍스트)
  * - generateTitle: true (첫 메시지로 thread 제목 자동 생성)
  */
+const storage = getStorage()
+const memory = storage
+  ? new Memory({
+      storage,
+      options: {
+        lastMessages: 30,
+      },
+    })
+  : undefined
+
 export const chatAgent = new Agent({
   id: "chat-agent",
   name: "운세 상담사",
   description: "사주/점성술 기반 운세 상담 에이전트 (채팅 지속성 지원)",
   instructions: CHAT_INSTRUCTIONS,
   model: getModel("MASTRA_ASTROLOGY_MODEL"),
-  memory: new Memory({
-    storage,
-    options: {
-      lastMessages: 30,
-    },
-  }),
+  ...(memory ? { memory } : {}),
 })

@@ -15,14 +15,42 @@ declare global {
   var pgStore: PostgresStore | undefined
 }
 
-function getPgStore(): PostgresStore {
-  if (!global.pgStore) {
-    global.pgStore = new PostgresStore({
-      id: "mastra-storage",
-      connectionString: process.env.DATABASE_URL!,
-    })
+function resolveStorageConfig(): { id: string; connectionString: string } | null {
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    return null
   }
+
+  const connectionString = process.env.DATABASE_URL?.trim()
+  if (!connectionString) {
+    return null
+  }
+
+  const id = (process.env.MASTRA_STORAGE_ID ?? "mastra-storage").trim()
+  if (!id) {
+    return null
+  }
+
+  return { id, connectionString }
+}
+
+export function getStorage(): PostgresStore | null {
+  if (global.pgStore) {
+    return global.pgStore
+  }
+
+  const config = resolveStorageConfig()
+  if (!config) {
+    return null
+  }
+
+  global.pgStore = new PostgresStore(config)
   return global.pgStore
 }
 
-export const storage = getPgStore()
+export function requireStorage(): PostgresStore {
+  const storage = getStorage()
+  if (!storage) {
+    throw new Error("Mastra storage is unavailable: set DATABASE_URL (and optional MASTRA_STORAGE_ID).")
+  }
+  return storage
+}

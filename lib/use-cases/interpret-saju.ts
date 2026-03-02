@@ -73,10 +73,10 @@ export const DecisionFortuneSchema = z.object({
   headline: z.string().describe("결정 가이드 한줄 요약 (20자 내외)"),
   body: z
     .string()
-    .describe("사주 기반 결정 조언 (3-5문장, 오행과 십신 흐름 반영)"),
+    .describe("데이터 기반 결정 조언 (3-5문장, 에너지 흐름 반영)"),
   reasoning: z
     .string()
-    .describe("사주 관점에서 이 선택을 추천하는 이유 (2-3문장)"),
+    .describe("분석 관점에서 이 선택을 추천하는 이유 (2-3문장)"),
   caution: z.string().describe("선택 시 주의할 점 (1문장)"),
   keywords: z.array(z.string()).max(3).describe("핵심 키워드"),
 });
@@ -89,31 +89,34 @@ export type DecisionFortune = z.infer<typeof DecisionFortuneSchema>;
 // Default prompts (DB에 설정이 없을 때 사용)
 // =============================================================================
 
-const DEFAULT_TODAY_PROMPT = `당신은 사주명리학 전문가입니다. 사용자의 사주 데이터를 기반으로 오늘의 운세를 작성합니다.
+const DEFAULT_TODAY_PROMPT = `당신은 라이프 가이드 전문가입니다. 사용자의 분석 데이터를 기반으로 오늘의 운세를 작성합니다.
 
 규칙:
 - 한국어 존댓말 사용
-- 사주 데이터의 오행, 십신, 신약신강 정보를 반영하여 구체적으로 작성
+- 분석 데이터의 에너지 흐름 정보를 반영하여 구체적으로 작성
 - 추상적 표현 대신 실질적인 조언 제공
-- 긍정적이되 현실적인 톤 유지`;
+- 긍정적이되 현실적인 톤 유지
+- 사주/점성술 전문 용어를 직접 사용하지 마세요. 부드러운 일상 표현으로 치환하세요.`;
 
-const DEFAULT_WEEKLY_PROMPT = `당신은 사주명리학 전문가입니다. 사용자의 사주 데이터를 기반으로 7일간의 주간 운세를 작성합니다.
+const DEFAULT_WEEKLY_PROMPT = `당신은 라이프 가이드 전문가입니다. 사용자의 분석 데이터를 기반으로 7일간의 주간 운세를 작성합니다.
 
 규칙:
 - 한국어 존댓말 사용
 - 각 요일별로 차별화된 키워드와 조언 제공
-- 사주의 오행 흐름에 기반한 에너지 변화를 반영
+- 에너지 흐름에 기반한 변화를 반영
 - highlight는 7일 중 가장 중요한 1-2일만 true
-- 실천 가능한 구체적 제안 포함`;
+- 실천 가능한 구체적 제안 포함
+- 사주/점성술 전문 용어를 직접 사용하지 마세요. 부드러운 일상 표현으로 치환하세요.`;
 
-const DEFAULT_DECISION_PROMPT = `당신은 사주명리학 전문가입니다. 사용자가 두 가지 선택지 사이에서 고민하고 있습니다.
-사주 데이터의 오행 균형, 십신 관계, 현재 대운을 분석하여 어떤 선택이 지금 기운과 더 맞는지 조언해주세요.
+const DEFAULT_DECISION_PROMPT = `당신은 라이프 가이드 전문가입니다. 사용자가 두 가지 선택지 사이에서 고민하고 있습니다.
+분석 데이터의 에너지 균형과 현재 흐름을 분석하여 어떤 선택이 지금 에너지와 더 맞는지 조언해주세요.
 
 규칙:
 - 한국어 존댓말 사용
-- 사주 데이터를 구체적으로 인용하여 설명
+- 분석 데이터를 구체적으로 인용하여 설명
 - 단정적이기보다 방향성 제시
-- 선택지 A와 B 모두의 장단점을 언급하되, 하나를 추천`;
+- 선택지 A와 B 모두의 장단점을 언급하되, 하나를 추천
+- 사주/점성술 전문 용어를 직접 사용하지 마세요. 부드러운 일상 표현으로 치환하세요.`;
 
 // =============================================================================
 // Interpretation functions
@@ -145,7 +148,7 @@ export type InterpretResult<T extends InterpretationType> =
 const MOCK_DAILY: DailyFortune = {
   summary: "[MOCK] 오늘은 집중력이 높은 날입니다",
   tags: ["집중", "성취", "소통"],
-  body: "[MOCK] 오늘의 사주 에너지는 매우 활발합니다. 목(木)의 기운이 강하게 작용하여 새로운 시작에 유리한 날입니다. 오전 중 중요한 결정을 마무리하세요.",
+  body: "[MOCK] 오늘은 에너지가 활발한 날입니다. 성장의 에너지가 강하게 작용하여 새로운 시작에 유리합니다. 오전 중 중요한 결정을 마무리하세요.",
   actions: [
     { id: "1", text: "오전 중 가장 중요한 업무 먼저 처리하기" },
     { id: "2", text: "주변 사람들과 적극적으로 소통하기" },
@@ -167,7 +170,7 @@ function buildMockWeekly(weekStartDate?: string): WeeklyFortune {
     "한 주를 마무리하는 날",
   ];
   return {
-    theme: "[MOCK] 목(木)의 기운으로 성장하는 한 주",
+    theme: "[MOCK] 성장의 에너지로 나아가는 한 주",
     days: dayNames.map((day, i) => {
       const d = new Date(start);
       d.setDate(d.getDate() + i);
@@ -191,9 +194,9 @@ function buildMockWeekly(weekStartDate?: string): WeeklyFortune {
 
 const MOCK_DECISION: DecisionFortune = {
   recommendation: "A",
-  headline: "[MOCK] 현재 기운은 A 선택에 유리합니다",
-  body: "[MOCK] 현재 사주의 오행 흐름을 분석하면 목(木)의 기운이 강하게 작용하고 있습니다. 이는 새로운 시작과 성장을 상징하므로 A 선택이 지금의 에너지와 더 잘 맞습니다.",
-  reasoning: "십신 분석 결과 비겁(比劫)이 강한 시기로, 독립적인 행동이 유리합니다. A 선택이 이 기운을 잘 활용합니다.",
+  headline: "[MOCK] 현재 흐름은 A 선택에 유리합니다",
+  body: "[MOCK] 현재 에너지 흐름을 분석하면 성장의 에너지가 강하게 작용하고 있습니다. 새로운 시작과 도전에 적합한 시기이므로 A 선택이 지금의 에너지와 더 잘 맞습니다.",
+  reasoning: "분석 결과 독립적인 행동이 유리한 시기입니다. A 선택이 이 에너지를 잘 활용합니다.",
   caution: "결정 후 초반 3개월은 인내심을 갖고 추진하세요",
   keywords: ["성장", "독립", "도전"],
 };

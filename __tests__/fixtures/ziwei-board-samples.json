@@ -1,0 +1,331 @@
+[
+  {
+    "caseId": "S01-L3-SOLAR",
+    "payload": {
+      "birthDate": "1990-01-15",
+      "birthTime": "14:30",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "M",
+      "latitude": 37.5665,
+      "longitude": 126.978,
+      "calendar": "SOLAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "ko-KR"
+    }
+  },
+  {
+    "caseId": "S02-L3-SOLAR-ZHONGZHOU",
+    "payload": {
+      "birthDate": "1993-10-08",
+      "birthTime": "07:45",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "F",
+      "latitude": 35.1796,
+      "longitude": 129.0756,
+      "calendar": "SOLAR",
+      "school": "ZHONGZHOU",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "ko-KR"
+    }
+  },
+  {
+    "caseId": "S03-L1-SOLAR",
+    "payload": {
+      "birthDate": "1988-06-20",
+      "birthTime": "03:10",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Tokyo",
+      "gender": "M",
+      "calendar": "SOLAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "ja-JP"
+    }
+  },
+  {
+    "caseId": "S04-L2-SOLAR-TIME-UNKNOWN",
+    "payload": {
+      "birthDate": "1977-12-01",
+      "birthTime": null,
+      "isTimeUnknown": true,
+      "timezone": "Asia/Shanghai",
+      "gender": "F",
+      "latitude": 31.2304,
+      "longitude": 121.4737,
+      "calendar": "SOLAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "zh-CN"
+    }
+  },
+  {
+    "caseId": "S05-L0-SOLAR-TIME-UNKNOWN",
+    "payload": {
+      "birthDate": "1965-03-03",
+      "birthTime": null,
+      "isTimeUnknown": true,
+      "timezone": "UTC",
+      "gender": "M",
+      "calendar": "SOLAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "en-US"
+    }
+  },
+  {
+    "caseId": "S06-L3-LUNAR",
+    "payload": {
+      "birthDate": "1992-08-15",
+      "birthTime": "19:20",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "F",
+      "latitude": 37.5,
+      "longitude": 127.0,
+      "calendar": "LUNAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "ko-KR"
+    }
+  },
+  {
+    "caseId": "S07-L3-LUNAR-LEAP",
+    "payload": {
+      "birthDate": "1984-06-12",
+      "birthTime": "05:55",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Shanghai",
+      "gender": "M",
+      "latitude": 39.9042,
+      "longitude": 116.4074,
+      "calendar": "LUNAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": true,
+      "language": "zh-CN"
+    }
+  },
+  {
+    "caseId": "S08-L1-LUNAR",
+    "payload": {
+      "birthDate": "2001-09-11",
+      "birthTime": "22:40",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "F",
+      "calendar": "LUNAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "ko-KR"
+    }
+  },
+  {
+    "caseId": "S09-L2-LUNAR-TIME-UNKNOWN",
+    "payload": {
+      "birthDate": "1959-11-30",
+      "birthTime": null,
+      "isTimeUnknown": true,
+      "timezone": "Asia/Taipei",
+      "gender": "M",
+      "latitude": 25.033,
+      "longitude": 121.5654,
+      "calendar": "LUNAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "zh-TW"
+    }
+  },
+  {
+    "caseId": "S10-L0-LUNAR-TIME-UNKNOWN",
+    "payload": {
+      "birthDate": "1948-04-18",
+      "birthTime": null,
+      "isTimeUnknown": true,
+      "timezone": "Asia/Seoul",
+      "gender": "F",
+      "calendar": "LUNAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "ko-KR"
+    }
+  },
+  {
+    "caseId": "S11-L3-SOLAR-EN",
+    "payload": {
+      "birthDate": "2008-02-29",
+      "birthTime": "00:20",
+      "isTimeUnknown": false,
+      "timezone": "America/New_York",
+      "gender": "F",
+      "latitude": 40.7128,
+      "longitude": -74.006,
+      "calendar": "SOLAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "en-US"
+    }
+  },
+  {
+    "caseId": "S12-L3-SOLAR-LATE-ZI",
+    "payload": {
+      "birthDate": "2012-11-01",
+      "birthTime": "00:50",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "M",
+      "latitude": 35.9078,
+      "longitude": 127.7669,
+      "calendar": "SOLAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "ko-KR"
+    }
+  },
+  {
+    "caseId": "S13-L2-SOLAR-SHICHEN-OVERRIDE",
+    "payload": {
+      "birthDate": "1999-07-07",
+      "birthTime": null,
+      "isTimeUnknown": true,
+      "timezone": "Asia/Seoul",
+      "gender": "F",
+      "latitude": 37.4563,
+      "longitude": 126.7052,
+      "calendar": "SOLAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "shichen": "WEI",
+      "language": "ko-KR"
+    }
+  },
+  {
+    "caseId": "S14-L1-SOLAR-SHICHEN-OVERRIDE",
+    "payload": {
+      "birthDate": "1972-09-22",
+      "birthTime": "09:35",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "M",
+      "calendar": "SOLAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "shichen": "SI",
+      "language": "ko-KR"
+    }
+  },
+  {
+    "caseId": "S15-L3-LUNAR-ZHONGZHOU",
+    "payload": {
+      "birthDate": "1996-03-15",
+      "birthTime": "16:05",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Shanghai",
+      "gender": "F",
+      "latitude": 23.1291,
+      "longitude": 113.2644,
+      "calendar": "LUNAR",
+      "school": "ZHONGZHOU",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "zh-CN"
+    }
+  },
+  {
+    "caseId": "S16-L0-SOLAR-VI",
+    "payload": {
+      "birthDate": "1930-10-10",
+      "birthTime": null,
+      "isTimeUnknown": true,
+      "timezone": "Asia/Ho_Chi_Minh",
+      "gender": "M",
+      "calendar": "SOLAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "vi-VN"
+    }
+  },
+  {
+    "caseId": "S17-L3-SOLAR-JA",
+    "payload": {
+      "birthDate": "2018-01-05",
+      "birthTime": "11:11",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Tokyo",
+      "gender": "F",
+      "latitude": 35.6762,
+      "longitude": 139.6503,
+      "calendar": "SOLAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "ja-JP"
+    }
+  },
+  {
+    "caseId": "S18-L2-LUNAR-SHICHEN",
+    "payload": {
+      "birthDate": "1981-12-12",
+      "birthTime": null,
+      "isTimeUnknown": true,
+      "timezone": "Asia/Seoul",
+      "gender": "M",
+      "latitude": 34.6937,
+      "longitude": 135.5023,
+      "calendar": "LUNAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "shichen": "CHOU",
+      "language": "ko-KR"
+    }
+  },
+  {
+    "caseId": "S19-L1-LUNAR-EN",
+    "payload": {
+      "birthDate": "2003-05-20",
+      "birthTime": "18:00",
+      "isTimeUnknown": false,
+      "timezone": "America/Los_Angeles",
+      "gender": "F",
+      "calendar": "LUNAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "en-US"
+    }
+  },
+  {
+    "caseId": "S20-L3-SOLAR-UTC",
+    "payload": {
+      "birthDate": "1912-07-30",
+      "birthTime": "12:00",
+      "isTimeUnknown": false,
+      "timezone": "UTC",
+      "gender": "M",
+      "latitude": 51.5072,
+      "longitude": -0.1276,
+      "calendar": "SOLAR",
+      "school": "DEFAULT",
+      "fixLeap": true,
+      "isLeapMonth": false,
+      "language": "en-US"
+    }
+  }
+]

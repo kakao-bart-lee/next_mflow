@@ -113,8 +113,13 @@ const VIEW_OPTIONS = [
 
 export function DevToolbar(): ReactNode {
   const [collapsed, setCollapsed] = useState(false)
-  const [pos, setPos] = useState<Position | null>(() => loadPos())
+  const [pos, setPos] = useState<Position | null>(null)
   const [activePaletteId, setActivePaletteId] = useState<string>("cosmic-dark")
+
+  useEffect(() => {
+    const saved = loadPos()
+    if (saved) setPos(saved)
+  }, [])
   const containerRef = useRef<HTMLDivElement>(null)
   const dragOffset = useRef<DragOffset | null>(null)
   const router = useRouter()
