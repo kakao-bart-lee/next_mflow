@@ -338,7 +338,7 @@ export function OnboardingScreen() {
               <div style={stagger(3)}>
                 <Button
                   onClick={handleStep0Next}
-                  disabled={!watch("birthDate")}
+                  disabled={!watch("birthDate") || (!isTimeUnknown && !watch("birthTime"))}
                   className="h-14 w-full rounded-xl bg-foreground font-medium text-background transition-all hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground"
                 >
                   {common.next}
