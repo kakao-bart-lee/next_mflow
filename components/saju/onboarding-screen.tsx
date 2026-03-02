@@ -391,7 +391,7 @@ export function OnboardingScreen() {
               </div>
 
               {/* Location */}
-              <div className="space-y-3" style={stagger(2)}>
+              <div className="relative z-10 space-y-3" style={stagger(2)}>
                 <Label className="text-[13px] font-medium text-foreground/80">
                   {msg.birthPlace}
                 </Label>
