@@ -376,25 +376,6 @@ export function ExploreScreen() {
                   </div>
                 </div>
                 <SolarSystemView activePlanetIdx={activePlanetIdx} onPlanetClick={(i: number) => setActivePlanetIdx(activePlanetIdx === i ? null : i)} sizeMode={planetSizeMode} />
-                {activePlanet && (
-                  <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-4 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl">{activePlanet.symbol}</span>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold text-foreground">{activePlanet.name}</h4>
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                          {activePlanet.sign}
-                          {activePlanet.house ? ` / House ${activePlanet.house}` : ""}
-                        </p>
-                        <div className="mt-2 flex items-center gap-1.5">
-                          <BookOpen className="h-3 w-3 text-accent" />
-                          <span className="text-xs font-medium text-accent">사주 대응: {activePlanet.sajuMap}</span>
-                        </div>
-                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{activePlanet.description}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
                 <div className="mt-4 flex flex-wrap justify-center gap-2">
                   {planetPositions.map((p, i) => (
                     <button
@@ -413,6 +394,25 @@ export function ExploreScreen() {
                 <p className="mt-3 text-center text-[11px] text-muted-foreground/70">
                   행성을 탭하면 점성술 위치와 사주 십신 매핑을 함께 볼 수 있습니다
                 </p>
+                {activePlanet && (
+                  <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">{activePlanet.symbol}</span>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-semibold text-foreground">{activePlanet.name}</h4>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {activePlanet.sign}
+                          {activePlanet.house ? ` / House ${activePlanet.house}` : ""}
+                        </p>
+                        <div className="mt-2 flex items-center gap-1.5">
+                          <BookOpen className="h-3 w-3 text-accent" />
+                          <span className="text-xs font-medium text-accent">사주 대응: {activePlanet.sajuMap}</span>
+                        </div>
+                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{activePlanet.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
 

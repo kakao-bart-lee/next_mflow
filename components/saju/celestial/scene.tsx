@@ -35,13 +35,15 @@ export const DEFAULT_PLANET_DEGREES = [340, 95, 310, 15, 68, 62, 345]
  */
 export type PlanetSizeMode = "physical" | "influence"
 
+// orbitSpeed: rad/s, 실제 공전 주기 비율 기반 (달 27일 → 토성 10759일)
+// 시각적으로 차이가 드러나도록 log 스케일 적용
 const ORBITING_PLANETS = [
-  { posIdx: 2, color: "#8B93A1", physicalSize: 0.06, influenceSize: 0.09, orbitRadius: 0.85, rotSpeed: 0.25, texture: "/textures/planets/mercury.jpg" },
-  { posIdx: 3, color: "#D4886C", physicalSize: 0.09, influenceSize: 0.11, orbitRadius: 1.10, rotSpeed: 0.15, texture: "/textures/planets/venus.jpg" },
-  { posIdx: 1, color: "#C4C9D2", physicalSize: 0.05, influenceSize: 0.16, orbitRadius: 1.40, rotSpeed: 0.18, texture: "/textures/planets/moon.jpg" },
-  { posIdx: 4, color: "#C15839", physicalSize: 0.07, influenceSize: 0.10, orbitRadius: 2.00, rotSpeed: 0.20, texture: "/textures/planets/mars.jpg" },
-  { posIdx: 5, color: "#B8935A", physicalSize: 0.18, influenceSize: 0.14, orbitRadius: 2.90, rotSpeed: 0.08, texture: "/textures/planets/jupiter.jpg" },
-  { posIdx: 6, color: "#A89670", physicalSize: 0.16, influenceSize: 0.12, orbitRadius: 3.40, rotSpeed: 0.06, texture: "/textures/planets/saturn.jpg" },
+  { posIdx: 2, color: "#8B93A1", physicalSize: 0.06, influenceSize: 0.09, orbitRadius: 0.85, rotSpeed: 0.25, orbitSpeed: 0.28, texture: "/textures/planets/mercury.jpg" },
+  { posIdx: 3, color: "#D4886C", physicalSize: 0.09, influenceSize: 0.11, orbitRadius: 1.10, rotSpeed: 0.15, orbitSpeed: 0.13, texture: "/textures/planets/venus.jpg" },
+  { posIdx: 1, color: "#C4C9D2", physicalSize: 0.05, influenceSize: 0.16, orbitRadius: 1.40, rotSpeed: 0.18, orbitSpeed: 0.08, texture: "/textures/planets/moon.jpg" },
+  { posIdx: 4, color: "#C15839", physicalSize: 0.07, influenceSize: 0.10, orbitRadius: 2.00, rotSpeed: 0.20, orbitSpeed: 0.055, texture: "/textures/planets/mars.jpg" },
+  { posIdx: 5, color: "#B8935A", physicalSize: 0.18, influenceSize: 0.14, orbitRadius: 2.90, rotSpeed: 0.08, orbitSpeed: 0.018, texture: "/textures/planets/jupiter.jpg" },
+  { posIdx: 6, color: "#A89670", physicalSize: 0.16, influenceSize: 0.12, orbitRadius: 3.40, rotSpeed: 0.06, orbitSpeed: 0.007, texture: "/textures/planets/saturn.jpg" },
 ]
 
 /* ─── Central Sun (clickable, shows Sun info at index 0) ─── */
@@ -151,6 +153,7 @@ function SceneContent({ activePlanetIdx, onPlanetClick, planetDegrees, sizeMode 
               orbitRadius={cfg.orbitRadius}
               degree={degrees[cfg.posIdx] ?? DEFAULT_PLANET_DEGREES[cfg.posIdx]}
               rotationSpeed={cfg.rotSpeed}
+              orbitSpeed={cfg.orbitSpeed}
               texturePath={cfg.texture}
               isActive={activePlanetIdx === cfg.posIdx}
               onClick={() => onPlanetClick(cfg.posIdx)}
@@ -165,8 +168,6 @@ function SceneContent({ activePlanetIdx, onPlanetClick, planetDegrees, sizeMode 
         enablePan={false}
         minPolarAngle={Math.PI / 6}
         maxPolarAngle={Math.PI / 2.5}
-        autoRotate
-        autoRotateSpeed={0.15}
         makeDefault
       />
     </>

@@ -12,6 +12,8 @@ interface PlanetMeshProps {
   orbitRadius: number
   degree: number
   rotationSpeed: number
+  /** 공전 속도 (rad/s). entry animation 완료 후 적용됩니다. */
+  orbitSpeed: number
   texturePath: string
   isActive: boolean
   onClick: () => void
@@ -24,14 +26,8 @@ function easeOutBack(t: number): number {
   return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2)
 }
 
-/** Smooth deceleration (for position transitions) */
-function easeOutCubic(t: number): number {
-  return 1 - Math.pow(1 - t, 3)
-}
-
 const ENTRY_DURATION = 1.4
 const ENTRY_STAGGER = 0.12
-const TRANSITION_DURATION = 0.8
 
 export function PlanetMesh({
   index,
@@ -40,6 +36,7 @@ export function PlanetMesh({
   orbitRadius,
   degree,
   rotationSpeed,
+  orbitSpeed,
   texturePath,
   isActive,
   onClick,
@@ -49,11 +46,8 @@ export function PlanetMesh({
   const elapsed = useRef(0)
   const pointerDownAt = useRef(0)
 
-  // Transition state: tracks degree changes after initial entry
-  const prevDegree = useRef(degree)
-  const transFromX = useRef(0)
-  const transFromZ = useRef(0)
-  const transElapsed = useRef(Infinity) // Infinity = no active transition
+  // 공전 각도: degree 기반으로 초기화, entry 완료 후 orbitSpeed로 누적
+  const currentOrbitAngle = useRef(((degree - 90) * Math.PI) / 180)
 
   // Smooth size transition via scale (geometry stays constant at initial size)
   const baseSize = useRef(size)
@@ -76,39 +70,29 @@ export function PlanetMesh({
       }
     }
 
-    // Compute current target from degree prop
-    const angleRad = ((degree - 90) * Math.PI) / 180
+    const entryT = Math.max(0, elapsed.current - index * ENTRY_STAGGER)
+    const entryProgress = Math.min(1, entryT / ENTRY_DURATION)
+
+    if (entryProgress >= 1) {
+      // Entry 완료 후: 개별 공전 속도로 각도 누적
+      currentOrbitAngle.current += delta * orbitSpeed
+    }
+
+    const angleRad = currentOrbitAngle.current
     const tgtX = Math.cos(angleRad) * orbitRadius
     const tgtZ = Math.sin(angleRad) * orbitRadius
 
-    // Detect degree change → start transition from current position
-    if (prevDegree.current !== degree) {
-      transFromX.current = groupRef.current?.position.x ?? 0
-      transFromZ.current = groupRef.current?.position.z ?? 0
-      transElapsed.current = 0
-      prevDegree.current = degree
-    }
-
     if (groupRef.current) {
-      // Phase 1: Initial entry — spring from center to orbit
-      const entryT = Math.max(0, elapsed.current - index * ENTRY_STAGGER)
-      const entryProgress = Math.min(1, entryT / ENTRY_DURATION)
-
       if (entryProgress < 1) {
+        // Phase 1: Initial entry — spring from center to orbit (초기 각도 기준)
+        const initialAngle = ((degree - 90) * Math.PI) / 180
+        const initX = Math.cos(initialAngle) * orbitRadius
+        const initZ = Math.sin(initialAngle) * orbitRadius
         const eased = easeOutBack(entryProgress)
-        groupRef.current.position.x = tgtX * eased
-        groupRef.current.position.z = tgtZ * eased
-      } else if (transElapsed.current < TRANSITION_DURATION) {
-        // Phase 2: Smooth transition to new degree
-        transElapsed.current += delta
-        const p = Math.min(1, transElapsed.current / TRANSITION_DURATION)
-        const eased = easeOutCubic(p)
-        groupRef.current.position.x =
-          transFromX.current + (tgtX - transFromX.current) * eased
-        groupRef.current.position.z =
-          transFromZ.current + (tgtZ - transFromZ.current) * eased
+        groupRef.current.position.x = initX * eased
+        groupRef.current.position.z = initZ * eased
       } else {
-        // Phase 3: Settled at target
+        // Phase 2+: 공전 궤도 추적
         groupRef.current.position.x = tgtX
         groupRef.current.position.z = tgtZ
       }
