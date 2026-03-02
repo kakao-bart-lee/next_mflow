@@ -16,3 +16,10 @@ playwright-report/
 
 # Mastra Memory
 mastra-memory.db
+
+# Agent / tool artifacts
+.agent/
+.agents/
+.omx/
+.claude/worktrees/
+dogfood-output/
