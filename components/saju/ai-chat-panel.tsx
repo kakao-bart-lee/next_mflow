@@ -20,7 +20,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { ArrowUp, X, Sparkles, RotateCcw } from "lucide-react"
+import { ArrowUp, X, Sparkles, RotateCcw, User } from "lucide-react"
 import { useSaju } from "@/lib/contexts/saju-context"
 
 interface AIChatPanelProps {
@@ -176,26 +176,28 @@ function ChatContent({
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              className={`flex items-end gap-2 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"} animate-in fade-in duration-200`}
             >
+              {/* Avatar */}
+              <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
+                msg.role === "assistant" ? "bg-primary/15" : "bg-ring/15"
+              }`}>
+                {msg.role === "assistant" ? (
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                ) : (
+                  <User className="h-3.5 w-3.5 text-ring" />
+                )}
+              </div>
+
+              {/* Bubble */}
               <div
-                className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed text-foreground whitespace-pre-wrap ${
                   msg.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "border border-border/30 bg-card/80 text-foreground backdrop-blur-sm"
+                    ? "rounded-2xl rounded-br-md border border-primary/20 bg-primary/15"
+                    : "rounded-2xl rounded-bl-md border border-border/30 bg-card/80 backdrop-blur-sm"
                 }`}
               >
-                {msg.role === "assistant" && (
-                  <div className="mb-1.5 flex items-center gap-1.5">
-                    <Sparkles className="h-3 w-3 text-accent" />
-                    <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                      플레이북
-                    </span>
-                  </div>
-                )}
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                  {getMessageText(msg)}
-                </p>
+                {getMessageText(msg)}
               </div>
             </div>
           ))}
@@ -205,15 +207,15 @@ function ChatContent({
 
           {/* Loading dots — shown while waiting for the AI to start responding */}
           {status === "submitted" && (
-            <div className="flex justify-start">
-              <div className="rounded-2xl border border-border/30 bg-card/80 px-4 py-3 backdrop-blur-sm">
-                <div className="flex items-center gap-1.5">
-                  <Sparkles className="h-3 w-3 text-accent" />
-                  <div className="flex gap-1">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-muted-foreground" style={{ animationDelay: "0ms" }} />
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-muted-foreground" style={{ animationDelay: "150ms" }} />
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-muted-foreground" style={{ animationDelay: "300ms" }} />
-                  </div>
+            <div className="flex items-end gap-2 animate-in fade-in duration-200">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/15">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+              </div>
+              <div className="rounded-2xl rounded-bl-md border border-border/30 bg-card/80 px-4 py-3 backdrop-blur-sm">
+                <div className="flex gap-1.5">
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/40" style={{ animationDelay: "0ms" }} />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/40" style={{ animationDelay: "150ms" }} />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/40" style={{ animationDelay: "300ms" }} />
                 </div>
               </div>
             </div>
@@ -290,11 +292,16 @@ export function AIChatPanel({
         <DrawerContent className="h-[85vh] border-border/20 bg-card/95 backdrop-blur-xl">
           <DrawerHeader className="border-b border-border/20 pb-3 text-left">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-accent" />
-                <DrawerTitle className="font-serif text-base text-foreground">
-                  AI와 대화하기
-                </DrawerTitle>
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <DrawerTitle className="font-serif text-sm font-medium text-foreground">
+                    AI 통합 해석
+                  </DrawerTitle>
+                  <p className="text-[10px] text-muted-foreground">사주 + 점성술 통합 분석</p>
+                </div>
               </div>
               <DrawerClose className="rounded-full p-1 text-muted-foreground hover:text-foreground">
                 <X className="h-5 w-5" />
@@ -317,11 +324,16 @@ export function AIChatPanel({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="flex w-full max-w-md flex-col border-border/20 bg-card/95 p-0 backdrop-blur-xl sm:max-w-lg">
         <SheetHeader className="border-b border-border/20 px-4 py-3">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-accent" />
-            <SheetTitle className="font-serif text-base text-foreground">
-              AI와 대화하기
-            </SheetTitle>
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15">
+              <Sparkles className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <SheetTitle className="font-serif text-sm font-medium text-foreground">
+                AI 통합 해석
+              </SheetTitle>
+              <p className="text-[10px] text-muted-foreground">사주 + 점성술 통합 분석</p>
+            </div>
           </div>
         </SheetHeader>
         <ChatContent

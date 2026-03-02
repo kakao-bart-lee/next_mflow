@@ -283,39 +283,31 @@ export function ExploreScreen() {
     <>
       <div className="mx-auto w-full max-w-2xl px-5 pb-8 pt-6 lg:max-w-5xl lg:px-8">
         {/* Hero banner */}
-        <header className="relative overflow-hidden rounded-2xl border border-border/30 p-6 lg:p-8"
+        <header className="relative overflow-hidden rounded-2xl border border-border/40 bg-card/40 px-5 py-5 backdrop-blur-sm lg:px-7 lg:py-6"
           style={{
-            background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 12%, transparent), color-mix(in srgb, var(--accent) 8%, transparent))",
+            background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 6%, var(--card)), color-mix(in srgb, var(--accent) 4%, var(--card)))",
           }}
         >
-          {/* Ambient glow */}
-          <div
-            className="pointer-events-none absolute inset-0 z-0"
-            style={{
-              background: "radial-gradient(ellipse 70% 80% at 20% 50%, color-mix(in srgb, var(--primary) 15%, transparent), transparent 65%)",
-            }}
-          />
-
           <div className="relative z-10">
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">탐색</p>
-            <h1 className="mt-2 text-balance font-serif text-xl font-semibold leading-snug text-foreground lg:text-2xl">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground/70">탐색</p>
+            <h1 className="mt-1.5 text-balance font-serif text-xl font-semibold leading-snug text-foreground lg:text-2xl">
               나의 하늘과 사주
             </h1>
-            <p className="mt-1.5 text-sm text-muted-foreground">
-              동양의 사주와 서양의 점성술을 하나의 시선으로 읽습니다
+            <p className="mt-1 text-sm text-muted-foreground">
+              동양의 사주와 서양의 점성술을 하나의 시선으로
             </p>
 
             {/* Planet symbol row */}
-            <div className="mt-4 flex flex-wrap gap-1.5">
+            <div className="mt-3 flex flex-wrap gap-1.5">
               {["☉", "☽", "☿", "♀", "♂", "♃", "♄"].map((sym) => (
                 <span
                   key={sym}
-                  className="flex h-7 w-7 items-center justify-center rounded-full border border-border/30 bg-card/30 text-sm text-muted-foreground backdrop-blur-sm"
+                  className="flex h-6 w-6 items-center justify-center rounded-full border border-border/30 bg-background/30 text-xs text-muted-foreground"
                 >
                   {sym}
                 </span>
               ))}
-              <span className="ml-1 flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 text-xs font-medium text-primary">
+              <span className="ml-1 flex items-center rounded-full border border-primary/20 bg-primary/10 px-2.5 text-[11px] font-medium text-primary">
                 사주 + 점성술
               </span>
             </div>
