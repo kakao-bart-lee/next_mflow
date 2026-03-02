@@ -9,8 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MessageSquare, RotateCcw } from "lucide-react"
-import { SAJU_MASTER_PERSONA } from "@/lib/mastra/agents/saju-master-agent"
-import { ASTROLOGER_PERSONA } from "@/lib/mastra/agents/astrologer-agent"
+import { SAJU_MASTER_PERSONA, ASTROLOGER_PERSONA } from "@/lib/mastra/personas"
 
 // =============================================================================
 // Setting definitions
