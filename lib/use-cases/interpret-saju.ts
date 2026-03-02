@@ -8,6 +8,7 @@ import {
   consumeCredit,
   CREDIT_COSTS,
 } from "@/lib/credit-service";
+import { logLlmUsage } from "@/lib/llm-usage";
 
 // =============================================================================
 // Schemas — LLM 응답 구조 정의
@@ -187,11 +188,22 @@ export async function interpretSaju<T extends InterpretationType>(
           : DecisionFortuneSchema;
     const model = openai(process.env.MASTRA_SAJU_MODEL || "gpt-4o-mini");
 
+    const startTime = Date.now();
     const result = await generateObject({
       model,
       schema,
       system: systemPrompt,
       prompt: sajuContext,
+    });
+
+    void logLlmUsage({
+      endpoint: `interpret-${type}`,
+      modelId: process.env.MASTRA_SAJU_MODEL || "gpt-4o-mini",
+      userId,
+      inputTokens: result.usage.inputTokens ?? 0,
+      outputTokens: result.usage.outputTokens ?? 0,
+      latencyMs: Date.now() - startTime,
+      method: "generateObject",
     });
 
     // LLM 성공 후 크레딧 차감

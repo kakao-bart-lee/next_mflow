@@ -4,6 +4,7 @@ import { openai } from "@ai-sdk/openai"
 import { auth } from "@/lib/auth"
 import { isCreditEnabled, consumeCredit, CREDIT_COSTS } from "@/lib/credit-service"
 import { getStringSystemSetting } from "@/lib/system-settings"
+import { logLlmUsage } from "@/lib/llm-usage"
 
 interface ChatRequestBody {
   messages: Array<{ role: "user" | "assistant" | "system"; content: string }>
@@ -93,10 +94,23 @@ export async function POST(req: NextRequest) {
   )
   const systemPrompt = buildAstrologySystemPrompt(context ?? {}, chatPrompt, reportGuide)
 
+  const modelId = process.env.MASTRA_ASTROLOGY_MODEL || process.env.MASTRA_SAJU_MODEL || "gpt-4o-mini"
+  const startTime = Date.now()
   const result = streamText({
-    model: openai(process.env.MASTRA_ASTROLOGY_MODEL || process.env.MASTRA_SAJU_MODEL || "gpt-4o-mini"),
+    model: openai(modelId),
     system: systemPrompt,
     messages,
+    onFinish: async ({ usage }) => {
+      void logLlmUsage({
+        endpoint: "chat",
+        modelId,
+        userId: session?.user?.id,
+        inputTokens: usage.inputTokens ?? 0,
+        outputTokens: usage.outputTokens ?? 0,
+        latencyMs: Date.now() - startTime,
+        method: "streamText",
+      })
+    },
   })
 
   return result.toTextStreamResponse()

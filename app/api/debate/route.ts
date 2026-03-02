@@ -127,6 +127,7 @@ export async function POST(req: NextRequest) {
             astrologyApiResult.data,
             writer,
             debateSettings,
+            userId,
           )
 
       // 크레딧 차감 (토론 완료 후, fail-closed)

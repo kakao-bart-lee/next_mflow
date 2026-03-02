@@ -35,6 +35,9 @@ model User {
   // 구독 시스템
   subscriptions Subscription[]
 
+  // LLM 사용량 추적
+  llmUsageLogs  LlmUsageLog[]
+
   // 관리자
   isAdmin       Boolean   @default(false)
   isSuspended   Boolean   @default(false)
@@ -113,6 +116,8 @@ model ChatMessage {
   // "user" | "assistant" | "system"
   role      String
   content   String @db.Text
+  // 토론 시스템: { agent: "saju-master"|"astrologer"|"synthesis", turn: number, avatar: string }
+  metadata  Json?
 
   session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
@@ -247,4 +252,44 @@ model SystemSettings {
   createdAt DateTime @default(now())
 
   @@index([key])
+}
+
+// ──────────────────────────────────────────
+// LLM 토큰 사용량 추적
+// ──────────────────────────────────────────
+
+model LlmModel {
+  id               String   @id @default(cuid())
+  modelId          String   @unique       // "gpt-4o-mini"
+  displayName      String                 // "GPT-4o Mini"
+  provider         String   @default("openai")
+  inputPricePer1M  Float                  // 입력 토큰 1M당 USD
+  outputPricePer1M Float                  // 출력 토큰 1M당 USD
+  isActive         Boolean  @default(true)
+  usageLogs        LlmUsageLog[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([provider])
+}
+
+model LlmUsageLog {
+  id           String   @id @default(cuid())
+  endpoint     String   // "chat" | "interpret-daily" | "debate-turn-1" 등
+  modelId      String
+  userId       String?
+  inputTokens  Int
+  outputTokens Int
+  costUsd      Float    // 로그 시점 비정규화 비용
+  latencyMs    Int?
+  method       String   // "streamText" | "generateObject"
+  metadata     Json?
+  model        LlmModel @relation(fields: [modelId], references: [modelId])
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+
+  @@index([endpoint])
+  @@index([modelId])
+  @@index([userId])
+  @@index([createdAt])
 }

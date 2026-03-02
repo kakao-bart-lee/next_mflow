@@ -6,6 +6,7 @@ import type { AstrologyStaticResult } from "@/lib/astrology/static/types"
 import { SAJU_MASTER_PERSONA, buildSajuMasterContext } from "@/lib/mastra/agents/saju-master-agent"
 import { ASTROLOGER_PERSONA, buildAstrologerContext } from "@/lib/mastra/agents/astrologer-agent"
 import { getSystemSettingsByKeys } from "@/lib/system-settings"
+import { logLlmUsage } from "@/lib/llm-usage"
 
 // =============================================================================
 // Settings
@@ -149,6 +150,7 @@ export async function runDebate(
   astrologyResult: AstrologyStaticResult,
   writer: WritableStreamDefaultWriter<Uint8Array>,
   settings?: DebateSettings,
+  userId?: string,
 ): Promise<DebateSummary> {
   const encoder = new TextEncoder()
   const turnTexts: Record<number, string> = {}
@@ -183,6 +185,7 @@ export async function runDebate(
       : astrologerPersona
 
     let fullText = ""
+    const turnStart = Date.now()
 
     const result = streamText({
       model: openai(model),
@@ -195,6 +198,18 @@ export async function runDebate(
       emit({ type: "text-delta", agent: config.agent, delta: chunk })
     }
 
+    const usage = await result.usage
+    void logLlmUsage({
+      endpoint: `debate-turn-${config.turn}`,
+      modelId: model,
+      userId,
+      inputTokens: usage.inputTokens ?? 0,
+      outputTokens: usage.outputTokens ?? 0,
+      latencyMs: Date.now() - turnStart,
+      method: "streamText",
+      metadata: { agent: config.agent, turn: config.turn },
+    })
+
     turnTexts[config.turn] = fullText
     emit({ type: "turn-end", agent: config.agent, turn: config.turn })
   }
@@ -202,12 +217,23 @@ export async function runDebate(
   // 종합 요약 (structured output)
   emit({ type: "synthesis-start" })
 
+  const synthesisStart = Date.now()
   const synthesisPrompt = buildSynthesisPrompt(turnTexts)
   const summaryResult = await generateObject({
     model: openai(model),
     schema: DebateSummarySchema,
     system: synthesisSystem,
     prompt: synthesisPrompt,
+  })
+
+  void logLlmUsage({
+    endpoint: "debate-synthesis",
+    modelId: model,
+    userId,
+    inputTokens: summaryResult.usage.inputTokens ?? 0,
+    outputTokens: summaryResult.usage.outputTokens ?? 0,
+    latencyMs: Date.now() - synthesisStart,
+    method: "generateObject",
   })
 
   const summary = summaryResult.object

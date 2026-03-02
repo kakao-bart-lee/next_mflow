@@ -350,12 +350,56 @@ async function seedChatSessions(users: { devUser: { id: string } }) {
   console.log("✓ 샘플 채팅 세션 생성됨")
 }
 
+// ── 6. LLM 모델 단가 ─────────────────────────────
+async function seedLlmModels() {
+  const models = [
+    {
+      modelId: "gpt-4o-mini",
+      displayName: "GPT-4o Mini",
+      provider: "openai",
+      inputPricePer1M: 0.15,
+      outputPricePer1M: 0.60,
+    },
+    {
+      modelId: "gpt-4o",
+      displayName: "GPT-4o",
+      provider: "openai",
+      inputPricePer1M: 2.50,
+      outputPricePer1M: 10.00,
+    },
+    {
+      modelId: "gpt-4.1-mini",
+      displayName: "GPT-4.1 Mini",
+      provider: "openai",
+      inputPricePer1M: 0.40,
+      outputPricePer1M: 1.60,
+    },
+    {
+      modelId: "gpt-4.1",
+      displayName: "GPT-4.1",
+      provider: "openai",
+      inputPricePer1M: 2.00,
+      outputPricePer1M: 8.00,
+    },
+  ]
+
+  for (const model of models) {
+    await prisma.llmModel.upsert({
+      where: { modelId: model.modelId },
+      update: model,
+      create: model,
+    })
+  }
+  console.log("✓ LLM 모델 단가 4개 생성됨")
+}
+
 // ── 메인 ─────────────────────────────────────────
 async function main() {
   console.log("\n🌱 시드 데이터 삽입 시작...\n")
 
   await seedPlans()
   await seedSystemSettings()
+  await seedLlmModels()
   const users = await seedUsers()
   await seedAnalyses(users)
   await seedChatSessions(users)

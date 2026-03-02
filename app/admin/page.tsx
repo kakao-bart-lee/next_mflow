@@ -1,4 +1,4 @@
-import { Users, BarChart3, CreditCard, Star, MessageSquare } from "lucide-react";
+import { Users, BarChart3, CreditCard, Star, MessageSquare, Cpu, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface StatCard {
@@ -15,18 +15,28 @@ async function getStats() {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    const [totalUsers, newUsers, totalAnalyses, activeSubscriptions, totalDebates, monthlyDebates] = await Promise.all([
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [totalUsers, newUsers, totalAnalyses, activeSubscriptions, totalDebates, monthlyDebates, llmUsage] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
       prisma.analysis.count(),
       prisma.subscription.count({ where: { status: "active" } }),
       prisma.chatSession.count({ where: { expertId: "debate" } }),
       prisma.chatSession.count({ where: { expertId: "debate", createdAt: { gte: thirtyDaysAgo } } }),
+      prisma.llmUsageLog.aggregate({
+        where: { createdAt: { gte: thisMonthStart } },
+        _sum: { costUsd: true, inputTokens: true, outputTokens: true },
+        _count: true,
+      }),
     ]);
 
-    return { totalUsers, newUsers, totalAnalyses, activeSubscriptions, totalDebates, monthlyDebates };
+    const monthlyCostUsd = llmUsage._sum.costUsd ?? 0;
+    const monthlyTokens = (llmUsage._sum.inputTokens ?? 0) + (llmUsage._sum.outputTokens ?? 0);
+
+    return { totalUsers, newUsers, totalAnalyses, activeSubscriptions, totalDebates, monthlyDebates, monthlyCostUsd, monthlyTokens };
   } catch {
-    return { totalUsers: 0, newUsers: 0, totalAnalyses: 0, activeSubscriptions: 0, totalDebates: 0, monthlyDebates: 0 };
+    return { totalUsers: 0, newUsers: 0, totalAnalyses: 0, activeSubscriptions: 0, totalDebates: 0, monthlyDebates: 0, monthlyCostUsd: 0, monthlyTokens: 0 };
   }
 }
 
@@ -63,6 +73,18 @@ export default async function AdminDashboard() {
       value: stats.totalDebates.toLocaleString(),
       sub: `이번 달 ${stats.monthlyDebates}건`,
       icon: MessageSquare,
+    },
+    {
+      title: "이번 달 API 비용",
+      value: `$${stats.monthlyCostUsd.toFixed(2)}`,
+      sub: "LLM 토큰 비용 (USD)",
+      icon: Cpu,
+    },
+    {
+      title: "이번 달 토큰 사용",
+      value: stats.monthlyTokens.toLocaleString(),
+      sub: "입력 + 출력 토큰 합계",
+      icon: Activity,
     },
   ];
 
