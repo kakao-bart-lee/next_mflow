@@ -1,7 +1,6 @@
 import { Agent } from "@mastra/core/agent"
 import { Memory } from "@mastra/memory"
 import { getModel } from "@/lib/mastra/model"
-import { storage } from "@/lib/mastra/storage"
 import { sajuMasterAgent } from "./saju-master-agent"
 import { astrologerAgent } from "./astrologer-agent"
 
@@ -39,5 +38,5 @@ export const fortuneOrchestrator = new Agent({
   instructions: ORCHESTRATOR_INSTRUCTIONS,
   model: getModel("MASTRA_SAJU_MODEL"),
   agents: { sajuMasterAgent, astrologerAgent },
-  memory: new Memory({ storage, options: { lastMessages: 20 } }),
+  memory: new Memory({ options: { lastMessages: 20 } }),
 })

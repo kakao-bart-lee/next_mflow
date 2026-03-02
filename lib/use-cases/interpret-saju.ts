@@ -7,7 +7,7 @@ import {
   CREDIT_COSTS,
 } from "@/lib/credit-service";
 import { logLlmUsage } from "@/lib/llm-usage";
-import { fortuneOrchestrator } from "@/lib/mastra/agents/fortune-orchestrator";
+import { fortuneOrchestrator } from "@/lib/mastra";
 
 // =============================================================================
 // Schemas — LLM 응답 구조 정의
@@ -138,6 +138,66 @@ export type InterpretResult<T extends InterpretationType> =
     }
   | { success: false; error: string; code: string; status: number };
 
+// =============================================================================
+// MOCK_LLM fixture — MOCK_LLM=true 환경에서 LLM 호출 없이 반환할 고정 데이터
+// =============================================================================
+
+const MOCK_DAILY: DailyFortune = {
+  summary: "[MOCK] 오늘은 집중력이 높은 날입니다",
+  tags: ["집중", "성취", "소통"],
+  body: "[MOCK] 오늘의 사주 에너지는 매우 활발합니다. 목(木)의 기운이 강하게 작용하여 새로운 시작에 유리한 날입니다. 오전 중 중요한 결정을 마무리하세요.",
+  actions: [
+    { id: "1", text: "오전 중 가장 중요한 업무 먼저 처리하기" },
+    { id: "2", text: "주변 사람들과 적극적으로 소통하기" },
+  ],
+  avoid: "충동적인 지출과 감정적인 판단은 피하세요",
+};
+
+function buildMockWeekly(weekStartDate?: string): WeeklyFortune {
+  const start = weekStartDate ? new Date(weekStartDate) : new Date();
+  const dayNames = ["월", "화", "수", "목", "금", "토", "일"] as const;
+  const keywords = ["집중", "소통", "성장", "균형", "도전", "휴식", "정리"];
+  const notes = [
+    "새로운 시작에 좋은 날",
+    "대화와 협력이 빛나는 날",
+    "핵심 업무에 집중하세요",
+    "안정적인 흐름을 유지하세요",
+    "적극적인 도전이 필요합니다",
+    "충분한 휴식을 취하세요",
+    "한 주를 마무리하는 날",
+  ];
+  return {
+    theme: "[MOCK] 목(木)의 기운으로 성장하는 한 주",
+    days: dayNames.map((day, i) => {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      return {
+        day,
+        date: `${d.getMonth() + 1}/${d.getDate()}`,
+        keyword: keywords[i],
+        note: notes[i],
+        highlight: i === 2,
+      };
+    }),
+    aiRecap: {
+      summary: "[MOCK] 집중과 성장이 교차하는 한 주였습니다",
+      keywords: ["성장", "도전", "균형"],
+      emotionPattern: "초반에는 활발하고 후반으로 갈수록 안정을 찾아가는 흐름입니다",
+      suggestion: "이번 주 배운 것을 정리하고 다음 주 목표를 설정해 보세요",
+    },
+    prompt: "이번 한 주 동안 가장 잘 한 선택은 무엇이었나요?",
+  };
+}
+
+const MOCK_DECISION: DecisionFortune = {
+  recommendation: "A",
+  headline: "[MOCK] 현재 기운은 A 선택에 유리합니다",
+  body: "[MOCK] 현재 사주의 오행 흐름을 분석하면 목(木)의 기운이 강하게 작용하고 있습니다. 이는 새로운 시작과 성장을 상징하므로 A 선택이 지금의 에너지와 더 잘 맞습니다.",
+  reasoning: "십신 분석 결과 비겁(比劫)이 강한 시기로, 독립적인 행동이 유리합니다. A 선택이 이 기운을 잘 활용합니다.",
+  caution: "결정 후 초반 3개월은 인내심을 갖고 추진하세요",
+  keywords: ["성장", "독립", "도전"],
+};
+
 /**
  * 사주 해석 생성 — LLM을 이용하여 오늘의 운세 / 주간 운세 생성
  */
@@ -148,6 +208,17 @@ export async function interpretSaju<T extends InterpretationType>(
   userId?: string,
   decisionContext?: DecisionContext
 ): Promise<InterpretResult<T>> {
+  // MOCK_LLM=true: structured output validation 우회 — fixture 즉시 반환
+  if (process.env.MOCK_LLM === "true") {
+    const data =
+      type === "daily"
+        ? MOCK_DAILY
+        : type === "weekly"
+          ? buildMockWeekly(weekStartDate)
+          : MOCK_DECISION;
+    return { success: true, data } as InterpretResult<T>;
+  }
+
   // 크레딧 잔액 확인 (활성화된 경우, 실제 차감은 LLM 성공 후)
   const creditCost =
     type === "weekly" ? CREDIT_COSTS.CHAT_MESSAGE * 2 : CREDIT_COSTS.CHAT_MESSAGE;

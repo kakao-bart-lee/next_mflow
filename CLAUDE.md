@@ -92,6 +92,16 @@ Optional:
 - **Comments**: Korean for domain logic, English for technical
 - **TypeScript**: `strict: true`, never use `as any` / `@ts-ignore`
 
+## ADR
+
+Architecture Decision Records → `docs/adr/`. 새로운 아키텍처 결정은 반드시 ADR로 기록한다.
+
+| ADR | 요약 |
+|-----|------|
+| [001](docs/adr/001-nextjs-proxy-convention.md) | Next.js 16: `middleware.ts` → `proxy.ts` |
+| [002](docs/adr/002-mastra-memory-storage-binding.md) | Mastra 에이전트는 `lib/mastra/index.ts`를 통해서만 import |
+| [003](docs/adr/003-mock-llm-structured-output.md) | MOCK_LLM structured output은 use-case 레이어에서 fixture로 처리 |
+
 ## Gotchas
 
 - **Port 4830**: Dev server, Playwright, Prisma Studio all use non-standard ports (4830, 4830, 6830)
