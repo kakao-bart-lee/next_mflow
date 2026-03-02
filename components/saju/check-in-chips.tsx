@@ -96,11 +96,11 @@ export function CheckInChips() {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+    <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
+      <h3 className="text-sm font-semibold text-foreground">
         오늘의 체크인
       </h3>
-      <p className="mt-1 text-sm text-muted-foreground">
+      <p className="mt-1 text-xs text-muted-foreground">
         지금 기분은 어떤가요?
       </p>
 
@@ -110,10 +110,10 @@ export function CheckInChips() {
             key={mood.id}
             onClick={() => handleSelect(mood.id)}
             disabled={saved}
-            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
               selected === mood.id
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-secondary/50 text-secondary-foreground hover:bg-secondary"
+                ? "border-primary/50 bg-primary/10 text-primary"
+                : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/30 hover:text-foreground"
             } ${saved && selected !== mood.id ? "opacity-40" : ""}`}
             type="button"
             aria-pressed={selected === mood.id}
