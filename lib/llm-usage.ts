@@ -12,7 +12,7 @@ export interface LlmUsageLogParams {
   inputTokens: number
   outputTokens: number
   latencyMs?: number
-  method: "streamText" | "generateObject"
+  method: "streamText" | "generateObject" | "orchestrator.generate"
   metadata?: Record<string, unknown>
 }
 

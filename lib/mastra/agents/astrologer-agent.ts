@@ -1,22 +1,21 @@
 import { Agent } from "@mastra/core/agent"
-import { openai } from "@ai-sdk/openai"
 import type { AstrologyStaticResult } from "@/lib/astrology/static/types"
 import type { DebatePhase } from "./saju-master-agent"
 import { ASTROLOGER_PERSONA } from "@/lib/mastra/personas"
-
-const DEFAULT_MODEL = "gpt-4o-mini"
+import { getModel } from "@/lib/mastra/model"
 
 export { ASTROLOGER_PERSONA }
 
 /**
- * 점성술사 에이전트 — 토론 시스템 전용
- * 결정론적 턴 오케스트레이터(run-debate.ts)에 의해 호출됩니다.
+ * 점성술사 에이전트 — stateless 전문가
+ * 오케스트레이터(fortuneOrchestrator) 또는 토론 오케스트레이터(run-debate.ts)에 의해 호출.
  */
 export const astrologerAgent = new Agent({
   id: "astrologer",
   name: "점성술사",
+  description: "행성 배치와 하우스를 분석하여 점성술적 운세를 해석하는 전문가",
   instructions: ASTROLOGER_PERSONA,
-  model: openai(process.env.MASTRA_ASTROLOGY_MODEL || process.env.MASTRA_SAJU_MODEL || DEFAULT_MODEL),
+  model: getModel("MASTRA_ASTROLOGY_MODEL"),
 })
 
 /**

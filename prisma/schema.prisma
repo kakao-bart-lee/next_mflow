@@ -282,7 +282,7 @@ model LlmUsageLog {
   outputTokens Int
   costUsd      Float    // 로그 시점 비정규화 비용
   latencyMs    Int?
-  method       String   // "streamText" | "generateObject"
+  method       String   // "streamText" | "generateObject" | "orchestrator.generate"
   metadata     Json?
   model        LlmModel @relation(fields: [modelId], references: [modelId])
   user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)

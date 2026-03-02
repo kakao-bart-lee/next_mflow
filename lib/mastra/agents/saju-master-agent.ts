@@ -1,23 +1,22 @@
 import { Agent } from "@mastra/core/agent"
-import { openai } from "@ai-sdk/openai"
 import type { FortuneResponse } from "@/lib/saju-core"
 import { SAJU_MASTER_PERSONA } from "@/lib/mastra/personas"
-
-const DEFAULT_MODEL = "gpt-4o-mini"
+import { getModel } from "@/lib/mastra/model"
 
 export type DebatePhase = "initial" | "rebuttal"
 
 export { SAJU_MASTER_PERSONA }
 
 /**
- * 사주 명리사 에이전트 — 토론 시스템 전용
- * 결정론적 턴 오케스트레이터(run-debate.ts)에 의해 호출됩니다.
+ * 사주 명리사 에이전트 — stateless 전문가
+ * 오케스트레이터(fortuneOrchestrator) 또는 토론 오케스트레이터(run-debate.ts)에 의해 호출.
  */
 export const sajuMasterAgent = new Agent({
   id: "saju-master",
   name: "사주 명리사",
+  description: "사주팔자 데이터를 분석하여 오행/십신/운세를 해석하는 전문가",
   instructions: SAJU_MASTER_PERSONA,
-  model: openai(process.env.MASTRA_SAJU_MODEL || DEFAULT_MODEL),
+  model: getModel("MASTRA_SAJU_MODEL"),
 })
 
 /**

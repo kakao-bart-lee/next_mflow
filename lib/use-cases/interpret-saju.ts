@@ -1,5 +1,3 @@
-import { generateObject } from "ai";
-import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 import type { FortuneResponse } from "@/lib/saju-core";
 import { getStringSystemSetting } from "@/lib/system-settings";
@@ -9,6 +7,7 @@ import {
   CREDIT_COSTS,
 } from "@/lib/credit-service";
 import { logLlmUsage } from "@/lib/llm-usage";
+import { fortuneOrchestrator } from "@/lib/mastra/agents/fortune-orchestrator";
 
 // =============================================================================
 // Schemas — LLM 응답 구조 정의
@@ -178,7 +177,7 @@ export async function interpretSaju<T extends InterpretationType>(
     decisionContext
   );
 
-  // LLM 호출
+  // Orchestrator를 통한 LLM 호출
   try {
     const schema =
       type === "daily"
@@ -186,24 +185,37 @@ export async function interpretSaju<T extends InterpretationType>(
         : type === "weekly"
           ? WeeklyFortuneSchema
           : DecisionFortuneSchema;
-    const model = openai(process.env.MASTRA_SAJU_MODEL || "gpt-4o-mini");
+
+    const resourceId = userId || "anonymous";
 
     const startTime = Date.now();
-    const result = await generateObject({
-      model,
-      schema,
-      system: systemPrompt,
-      prompt: sajuContext,
+    const result = await fortuneOrchestrator.generate(sajuContext, {
+      maxSteps: 5,
+      instructions: systemPrompt,
+      structuredOutput: { schema },
+      memory: {
+        thread: `${resourceId}:readings`,
+        resource: resourceId,
+      },
     });
 
+    // multi-step 총 토큰 합산 (supervisor 위임 포함)
+    const totalInput = result.steps?.reduce(
+      (sum, step) => sum + (step.usage?.inputTokens ?? 0), 0
+    ) ?? result.usage?.inputTokens ?? 0;
+    const totalOutput = result.steps?.reduce(
+      (sum, step) => sum + (step.usage?.outputTokens ?? 0), 0
+    ) ?? result.usage?.outputTokens ?? 0;
+
+    const modelId = process.env.MASTRA_SAJU_MODEL || "gpt-4o-mini";
     void logLlmUsage({
       endpoint: `interpret-${type}`,
-      modelId: process.env.MASTRA_SAJU_MODEL || "gpt-4o-mini",
+      modelId,
       userId,
-      inputTokens: result.usage.inputTokens ?? 0,
-      outputTokens: result.usage.outputTokens ?? 0,
+      inputTokens: totalInput,
+      outputTokens: totalOutput,
       latencyMs: Date.now() - startTime,
-      method: "generateObject",
+      method: "orchestrator.generate",
     });
 
     // LLM 성공 후 크레딧 차감

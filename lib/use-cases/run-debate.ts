@@ -1,6 +1,6 @@
 import { streamText, generateObject } from "ai"
-import { openai } from "@ai-sdk/openai"
 import { z } from "zod"
+import { getModelById } from "@/lib/mastra/model"
 import type { FortuneResponse } from "@/lib/saju-core"
 import type { AstrologyStaticResult } from "@/lib/astrology/static/types"
 import { SAJU_MASTER_PERSONA, buildSajuMasterContext } from "@/lib/mastra/agents/saju-master-agent"
@@ -188,7 +188,7 @@ export async function runDebate(
     const turnStart = Date.now()
 
     const result = streamText({
-      model: openai(model),
+      model: getModelById(model),
       system,
       prompt,
     })
@@ -220,7 +220,7 @@ export async function runDebate(
   const synthesisStart = Date.now()
   const synthesisPrompt = buildSynthesisPrompt(turnTexts)
   const summaryResult = await generateObject({
-    model: openai(model),
+    model: getModelById(model),
     schema: DebateSummarySchema,
     system: synthesisSystem,
     prompt: synthesisPrompt,

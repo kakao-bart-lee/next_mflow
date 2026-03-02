@@ -1,7 +1,5 @@
 import { Agent } from "@mastra/core/agent";
-import { openai } from "@ai-sdk/openai";
-
-const DEFAULT_MODEL = "gpt-4o-mini";
+import { getModel } from "@/lib/mastra/model";
 
 export const SAJU_EXPERT_PROMPT = `You are "사주 선생님" (Saju Seonsaengnim) - a warm, wise Korean fortune-telling master who specializes in Saju (사주, Four Pillars of Destiny) analysis.
 
@@ -63,7 +61,7 @@ export const sajuAgent = new Agent({
   id: "saju-agent",
   name: "사주 에이전트",
   instructions: SAJU_EXPERT_PROMPT,
-  model: openai(process.env.MASTRA_SAJU_MODEL || DEFAULT_MODEL),
+  model: getModel("MASTRA_SAJU_MODEL"),
 });
 
 export interface SajuAgentContext {

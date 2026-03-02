@@ -90,7 +90,7 @@ dev:
 		kill -9 $$pid 2>/dev/null; \
 		while lsof -ti :$(NEXT_PORT) >/dev/null 2>&1; do sleep 0.1; done; \
 	fi
-	SKIP_AUTH=true npm run dev -- --port $(NEXT_PORT)
+	MOCK_LLM=true SKIP_AUTH=true npm run dev -- --port $(NEXT_PORT)
 
 dev-clean:
 	@pid=$$(lsof -ti :$(NEXT_PORT)); \
@@ -100,7 +100,7 @@ dev-clean:
 		while lsof -ti :$(NEXT_PORT) >/dev/null 2>&1; do sleep 0.1; done; \
 	fi
 	rm -rf .next
-	SKIP_AUTH=true npm run dev -- --port $(NEXT_PORT)
+	MOCK_LLM=true SKIP_AUTH=true npm run dev -- --port $(NEXT_PORT)
 
 build:
 	npm run build
