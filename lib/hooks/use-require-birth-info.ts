@@ -15,7 +15,7 @@ export function useRequireBirthInfo(): boolean {
 
   useEffect(() => {
     if (isHydrated && !birthInfo) {
-      router.replace("/")
+      router.replace("/onboarding")
     }
   }, [isHydrated, birthInfo, router])
 

@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import { ThemeToggle } from "./theme-toggle"
@@ -64,24 +65,47 @@ export function LandingScreen() {
 
           {/* CTA */}
           <div
-            className="mt-12"
+            className="mt-12 flex flex-col items-center gap-3"
             style={{
               animation:
                 "fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both",
             }}
           >
             <Button
-              onClick={() => router.push("/onboarding")}
-              className="h-14 rounded-xl bg-foreground px-10 font-medium text-background transition-all hover:bg-foreground/90"
+              onClick={() => router.push("/login")}
+              className="h-14 w-full max-w-[16rem] rounded-xl bg-foreground px-10 font-medium text-background transition-all hover:bg-foreground/90"
             >
               {t.common.start}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/today?demo=true")}
+              className="h-9 rounded-xl px-6 text-sm text-muted-foreground hover:text-foreground"
+            >
+              먼저 둘러보기
+            </Button>
+          </div>
+
+          {/* 기존 사용자 로그인 링크 */}
+          <div
+            className="mt-6"
+            style={{
+              animation:
+                "fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both",
+            }}
+          >
+            <Link
+              href="/login"
+              className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline transition-colors"
+            >
+              이미 계정이 있으신가요? 로그인
+            </Link>
           </div>
 
           {/* Subtle footer note */}
           <p
-            className="mt-16 text-[11px] tracking-wide text-muted-foreground/40"
+            className="mt-10 text-[11px] tracking-wide text-muted-foreground/40"
             style={{
               animation:
                 "fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.55s both",
