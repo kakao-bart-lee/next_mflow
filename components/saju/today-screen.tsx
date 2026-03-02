@@ -223,7 +223,7 @@ function RecentHistory() {
 /* ─── 메인 컴포넌트 ─── */
 
 export function TodayScreen() {
-  const { sajuResult, birthInfo, isLoading } = useSaju()
+  const { sajuResult, birthInfo, isLoading, isDemo } = useSaju()
   const [checkedActions, setCheckedActions] = useState<Set<string>>(new Set())
   const [deepDiveOpen, setDeepDiveOpen] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
@@ -364,15 +364,17 @@ export function TodayScreen() {
                     {todayData.body}
                   </p>
 
-                  {/* AI chat trigger - inline */}
-                  <button
-                    onClick={() => setChatOpen(true)}
-                    className="mt-5 flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
-                    type="button"
-                  >
-                    <MessageCircle className="h-3.5 w-3.5" />
-                    이 내용에 대해 더 이야기하기
-                  </button>
+                  {/* AI chat trigger - inline (데모 모드에서는 숨김) */}
+                  {!isDemo && (
+                    <button
+                      onClick={() => setChatOpen(true)}
+                      className="mt-5 flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
+                      type="button"
+                    >
+                      <MessageCircle className="h-3.5 w-3.5" />
+                      이 내용에 대해 더 이야기하기
+                    </button>
+                  )}
 
                   {/* Decorative seal */}
                   <div className="mt-5 flex justify-end">
@@ -506,26 +508,28 @@ export function TodayScreen() {
               {/* Check-in */}
               <CheckInChips />
 
-              {/* AI conversation prompt */}
-              <div className="rounded-xl border border-border bg-card p-5">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-accent" />
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    AI 대화
-                  </h3>
+              {/* AI conversation prompt (데모 모드에서는 숨김) */}
+              {!isDemo && (
+                <div className="rounded-xl border border-border bg-card p-5">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-accent" />
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      AI 대화
+                    </h3>
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    오늘의 기운에 대해 궁금한 게 있나요? AI와 대화하며 나만의 실천을 찾아보세요.
+                  </p>
+                  <button
+                    onClick={() => setChatOpen(true)}
+                    className="mt-3 flex items-center gap-1.5 text-xs font-medium text-primary transition-colors hover:text-primary/80"
+                    type="button"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5" />
+                    대화 시작하기
+                  </button>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  오늘의 기운에 대해 궁금한 게 있나요? AI와 대화하며 나만의 실천을 찾아보세요.
-                </p>
-                <button
-                  onClick={() => setChatOpen(true)}
-                  className="mt-3 flex items-center gap-1.5 text-xs font-medium text-primary transition-colors hover:text-primary/80"
-                  type="button"
-                >
-                  <MessageCircle className="h-3.5 w-3.5" />
-                  대화 시작하기
-                </button>
-              </div>
+              )}
 
             {/* Recent progress — localStorage 기반 */}
             <RecentHistory />
@@ -541,12 +545,14 @@ export function TodayScreen() {
 
       {/* Panels */}
       <DeepDiveSheet open={deepDiveOpen} onOpenChange={setDeepDiveOpen} />
-      <AIChatPanel
-        open={chatOpen}
-        onOpenChange={setChatOpen}
-        context="today"
-        onActionsGenerated={setAiActions}
-      />
+      {!isDemo && (
+        <AIChatPanel
+          open={chatOpen}
+          onOpenChange={setChatOpen}
+          context="today"
+          onActionsGenerated={setAiActions}
+        />
+      )}
     </>
   )
 }

@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react"
 import type { BirthInfo } from "@/lib/schemas/birth-info"
 import type { DailyFortune, WeeklyFortune } from "@/lib/use-cases/interpret-saju"
+import { useSaju } from "@/lib/contexts/saju-context"
+import { DEMO_DAILY_FORTUNE } from "@/lib/contexts/saju-context"
 
 type InterpretationType = "daily" | "weekly"
 
@@ -22,12 +24,14 @@ interface UseSajuInterpretReturn<T extends InterpretationType> {
  *
  * birthInfo가 null이면 fetch하지 않습니다.
  * 같은 birthInfo + type 조합에 대해 중복 fetch를 방지합니다.
+ * 데모 모드에서는 API 호출 없이 정적 데이터를 반환합니다.
  */
 export function useSajuInterpret<T extends InterpretationType>(
   type: T,
   birthInfo: BirthInfo | null,
   weekStartDate?: string
 ): UseSajuInterpretReturn<T> {
+  const { isDemo } = useSaju()
   const [data, setData] = useState<InterpretResult<T> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -39,7 +43,7 @@ export function useSajuInterpret<T extends InterpretationType>(
     : null
 
   const doFetch = async () => {
-    if (!birthInfo) return
+    if (!birthInfo || isDemo) return
 
     // 이미 같은 키로 fetch 완료된 경우 스킵
     if (fetchedRef.current === fetchKey) return
@@ -77,7 +81,7 @@ export function useSajuInterpret<T extends InterpretationType>(
   }
 
   useEffect(() => {
-    if (birthInfo && fetchKey !== fetchedRef.current) {
+    if (!isDemo && birthInfo && fetchKey !== fetchedRef.current) {
       doFetch()
     }
 
@@ -85,11 +89,18 @@ export function useSajuInterpret<T extends InterpretationType>(
       abortRef.current?.abort()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchKey])
+  }, [fetchKey, isDemo])
 
   const refetch = () => {
+    if (isDemo) return
     fetchedRef.current = null
     doFetch()
+  }
+
+  // 데모 모드: LLM 호출 없이 정적 데이터 반환
+  if (isDemo) {
+    const demoData = type === "daily" ? (DEMO_DAILY_FORTUNE as InterpretResult<T>) : null
+    return { data: demoData, isLoading: false, error: null, refetch }
   }
 
   return { data, isLoading, error, refetch }
