@@ -15,6 +15,25 @@ interface DragOffset {
   dy: number
 }
 
+const STORAGE_KEY = "dev-toolbar-pos"
+
+function loadPos(): Position | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as Position) : null
+  } catch {
+    return null
+  }
+}
+
+function savePos(p: Position): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(p))
+  } catch {
+    // 저장 실패는 무시
+  }
+}
+
 const VIEW_OPTIONS = [
   { path: "/", label: "Landing" },
   { path: "/onboarding", label: "Onboarding" },
@@ -26,7 +45,7 @@ const VIEW_OPTIONS = [
 
 export function DevToolbar(): ReactNode {
   const [collapsed, setCollapsed] = useState(false)
-  const [pos, setPos] = useState<Position | null>(null)
+  const [pos, setPos] = useState<Position | null>(() => loadPos())
   const containerRef = useRef<HTMLDivElement>(null)
   const dragOffset = useRef<DragOffset | null>(null)
   const router = useRouter()
@@ -52,7 +71,14 @@ export function DevToolbar(): ReactNode {
       })
     }
 
-    function onUp(): void {
+    function onUp(ev: MouseEvent): void {
+      if (dragOffset.current) {
+        const newPos = {
+          x: ev.clientX - dragOffset.current.dx,
+          y: ev.clientY - dragOffset.current.dy,
+        }
+        savePos(newPos)
+      }
       dragOffset.current = null
       document.removeEventListener("mousemove", onMove)
       document.removeEventListener("mouseup", onUp)
