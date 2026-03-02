@@ -1,6 +1,7 @@
 "use client"
 
 import type { ReactNode } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { LogOut, Settings, User } from "lucide-react"
 import { logoutAction } from "@/lib/auth/actions"
@@ -22,6 +23,9 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps): ReactNode {
   const { clearData } = useSaju()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
 
   function handleLogout(): void {
     clearData()
@@ -31,6 +35,7 @@ export default function MainLayout({ children }: MainLayoutProps): ReactNode {
   return (
     <div className="flex h-svh flex-col overflow-hidden bg-background">
       <header className="pointer-events-none fixed inset-x-0 top-0 z-30 flex items-center justify-end px-5 py-3">
+        {mounted && (
         <div className="pointer-events-auto flex items-center gap-2">
           <ThemeToggle />
           <DropdownMenu>
@@ -61,6 +66,7 @@ export default function MainLayout({ children }: MainLayoutProps): ReactNode {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        )}
       </header>
       <main className="flex-1 overflow-y-auto pb-20 pt-14">
         {children}
