@@ -14,8 +14,10 @@ test-results/
 playwright-report/
 .playwright-mcp/
 
-# Mastra Memory
+# Mastra Memory (LibSQL → PgStore 전환 완료, 레거시 파일)
 mastra-memory.db
+mastra-memory.db-shm
+mastra-memory.db-wal
 
 # Agent / tool artifacts
 .agent/

@@ -12,9 +12,13 @@ const MOODS = [
   { id: "scattered", label: "산만해요" },
 ]
 
+function getTodayStr() {
+  return new Date().toISOString().slice(0, 10)
+}
+
 // 날짜별 키 — 매일 초기화됨
 function getTodayKey() {
-  return `saju_checkin_${new Date().toISOString().slice(0, 10)}`
+  return `saju_checkin_${getTodayStr()}`
 }
 
 interface CheckInState {
@@ -26,18 +30,42 @@ export function CheckInChips() {
   const [selected, setSelected] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
 
-  // 오늘의 체크인 상태 복원
+  // 오늘의 체크인 상태 복원: API → fallback localStorage
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(getTodayKey())
-      if (stored) {
-        const state: CheckInState = JSON.parse(stored)
-        setSelected(state.selected)
-        setSaved(state.saved)
+    let cancelled = false
+
+    async function loadCheckIn() {
+      // 1차: API에서 조회
+      try {
+        const res = await fetch(`/api/user/daily-checkin?date=${getTodayStr()}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (!cancelled && data.checkin) {
+            setSelected(data.checkin.mood)
+            setSaved(true)
+            return
+          }
+        }
+      } catch {
+        // API 실패 시 localStorage fallback
       }
-    } catch {
-      // ignore storage errors
+
+      // 2차: localStorage fallback
+      if (cancelled) return
+      try {
+        const stored = localStorage.getItem(getTodayKey())
+        if (stored) {
+          const state: CheckInState = JSON.parse(stored)
+          setSelected(state.selected)
+          setSaved(state.saved)
+        }
+      } catch {
+        // ignore
+      }
     }
+
+    loadCheckIn()
+    return () => { cancelled = true }
   }, [])
 
   const handleSelect = (id: string) => {
@@ -48,12 +76,23 @@ export function CheckInChips() {
   const handleSave = () => {
     if (!selected) return
     setSaved(true)
+
+    // localStorage write-through
     try {
       const state: CheckInState = { selected, saved: true }
       localStorage.setItem(getTodayKey(), JSON.stringify(state))
     } catch {
       // ignore storage errors
     }
+
+    // API 동기화 (background, fire-and-forget)
+    fetch("/api/user/daily-checkin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date: getTodayStr(), mood: selected }),
+    }).catch(() => {
+      // API 실패해도 localStorage에 이미 저장됨
+    })
   }
 
   return (

@@ -101,6 +101,8 @@ Architecture Decision Records → `docs/adr/`. 새로운 아키텍처 결정은 
 | [001](docs/adr/001-nextjs-proxy-convention.md) | Next.js 16: `middleware.ts` → `proxy.ts` |
 | [002](docs/adr/002-mastra-memory-storage-binding.md) | Mastra 에이전트는 `lib/mastra/index.ts`를 통해서만 import |
 | [003](docs/adr/003-mock-llm-structured-output.md) | MOCK_LLM structured output은 use-case 레이어에서 fixture로 처리 |
+| [004](docs/adr/004-terminology-washing-and-ux-layers.md) | 용어 워싱 + UX 깊이 레이어 + 결정 허브 확장 패턴 |
+| [005](docs/adr/005-user-data-persistence.md) | 사용자 데이터 지속성: Fortune 캐싱, 채팅 PgStore, 체크인 DB 동기화 |
 
 ## Gotchas
 

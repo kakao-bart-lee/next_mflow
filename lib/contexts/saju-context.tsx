@@ -55,6 +55,31 @@ export const DEMO_DAILY_FORTUNE: DailyFortune = {
 const SajuContext = createContext<SajuContextValue | null>(null)
 
 const STORAGE_KEY = "saju_birth_info"
+const SAJU_CACHE_KEY = "saju_analysis_cache"
+const ASTRO_CACHE_KEY = "astro_analysis_cache"
+
+// 사주 캐시: birthInfo fingerprint가 같으면 무한 유효 (결정적 계산)
+function getSajuCacheKey(info: BirthInfo): string {
+  return `${info.birthDate}:${info.birthTime ?? "unknown"}:${info.gender}:${info.timezone}`
+}
+
+// 점성술 캐시: 날짜별 1일 TTL
+interface AstroCacheEntry {
+  date: string
+  data: AstrologyStaticResult
+}
+
+function tryGetCached<T>(key: string): T | null {
+  try {
+    const raw = localStorage.getItem(key)
+    if (raw) return JSON.parse(raw) as T
+  } catch { /* ignore */ }
+  return null
+}
+
+function trySetCache(key: string, value: unknown): void {
+  try { localStorage.setItem(key, JSON.stringify(value)) } catch { /* ignore */ }
+}
 
 export function SajuProvider({ children }: { children: ReactNode }) {
   const [birthInfo, setBirthInfoState] = useState<BirthInfo | null>(null)
@@ -69,6 +94,29 @@ export function SajuProvider({ children }: { children: ReactNode }) {
     setIsLoading(true)
     setError(null)
     type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string; network: boolean }
+
+    // ── 클라이언트 캐시 확인 ──
+    const sajuFingerprint = getSajuCacheKey(info)
+    const todayStr = new Date().toISOString().slice(0, 10)
+
+    // 사주 캐시: 같은 birthInfo면 무한 유효
+    const cachedSajuMap = tryGetCached<Record<string, FortuneResponse>>(SAJU_CACHE_KEY)
+    const cachedSaju = cachedSajuMap?.[sajuFingerprint] ?? null
+
+    // 점성술 캐시: 당일 + 같은 birthInfo만 유효
+    const cachedAstroEntry = tryGetCached<AstroCacheEntry & { fingerprint: string }>(ASTRO_CACHE_KEY)
+    const cachedAstro =
+      cachedAstroEntry?.date === todayStr && cachedAstroEntry?.fingerprint === sajuFingerprint
+        ? cachedAstroEntry.data
+        : null
+
+    // 둘 다 캐시 hit이면 API 호출 스킵
+    if (cachedSaju && cachedAstro) {
+      setSajuResult(cachedSaju)
+      setAstrologyResult(cachedAstro)
+      setIsLoading(false)
+      return
+    }
 
     const postAnalysis = async <T,>(url: string): Promise<ApiResult<T>> => {
       try {
@@ -93,13 +141,22 @@ export function SajuProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    const [sajuApi, astrologyApi] = await Promise.all([
-      postAnalysis<FortuneResponse>("/api/saju/analyze"),
-      postAnalysis<AstrologyStaticResult>("/api/astrology/static"),
-    ])
+    // 캐시 miss인 것만 fetch (partial cache 지원)
+    const sajuPromise = cachedSaju
+      ? Promise.resolve({ ok: true as const, data: cachedSaju })
+      : postAnalysis<FortuneResponse>("/api/saju/analyze")
+    const astroPromise = cachedAstro
+      ? Promise.resolve({ ok: true as const, data: cachedAstro })
+      : postAnalysis<AstrologyStaticResult>("/api/astrology/static")
+
+    const [sajuApi, astrologyApi] = await Promise.all([sajuPromise, astroPromise])
 
     if (sajuApi.ok) {
       setSajuResult(sajuApi.data)
+      // 사주 캐시 저장 (fingerprint별)
+      const map = cachedSajuMap ?? {}
+      map[sajuFingerprint] = sajuApi.data
+      trySetCache(SAJU_CACHE_KEY, map)
     } else {
       setSajuResult(null)
       setError(sajuApi.error)
@@ -107,11 +164,19 @@ export function SajuProvider({ children }: { children: ReactNode }) {
 
     if (astrologyApi.ok) {
       setAstrologyResult(astrologyApi.data)
+      // 점성술 캐시 저장 (당일 + fingerprint)
+      trySetCache(ASTRO_CACHE_KEY, {
+        date: todayStr,
+        fingerprint: sajuFingerprint,
+        data: astrologyApi.data,
+      })
     } else {
       setAstrologyResult(null)
     }
 
-    if (!sajuApi.ok && !astrologyApi.ok && sajuApi.network && astrologyApi.network) {
+    if (!sajuApi.ok && !astrologyApi.ok && !("network" in sajuApi) && !("network" in astrologyApi)) {
+      // both failed but not network errors — keep individual errors
+    } else if (!sajuApi.ok && !astrologyApi.ok && "network" in sajuApi && sajuApi.network && "network" in astrologyApi && astrologyApi.network) {
       setError("네트워크 오류가 발생했습니다")
     }
 

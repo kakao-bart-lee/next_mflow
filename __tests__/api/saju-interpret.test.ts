@@ -23,6 +23,12 @@ vi.mock("@/lib/use-cases/interpret-saju", () => ({
   interpretSaju: mockInterpretSaju,
 }))
 
+vi.mock("@/lib/services/fortune-cache", () => ({
+  getCachedFortune: vi.fn().mockResolvedValue(null),
+  cacheFortune: vi.fn().mockResolvedValue(undefined),
+  buildContextHash: vi.fn().mockReturnValue("mock-hash"),
+}))
+
 import { POST } from "@/app/api/saju/interpret/route"
 
 const MOCK_FORTUNE_RESPONSE = {
@@ -83,7 +89,7 @@ describe("POST /api/saju/interpret", () => {
     )
 
     expect(response.status).toBe(200)
-    await expect(response.json()).resolves.toEqual({ type: "daily", data: dailyData })
+    await expect(response.json()).resolves.toEqual({ type: "daily", data: dailyData, cacheStatus: "miss" })
   })
 
   it("POST with valid weekly request returns 200 with weekly data", async () => {
@@ -117,7 +123,7 @@ describe("POST /api/saju/interpret", () => {
     )
 
     expect(response.status).toBe(200)
-    await expect(response.json()).resolves.toEqual({ type: "weekly", data: weeklyData })
+    await expect(response.json()).resolves.toEqual({ type: "weekly", data: weeklyData, cacheStatus: "miss" })
   })
 
   it("POST with invalid birthInfo returns 422", async () => {

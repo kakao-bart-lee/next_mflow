@@ -4,6 +4,12 @@ import { auth } from "@/lib/auth";
 import { FortuneTellerService } from "@/lib/saju-core/facade";
 import { BirthInfoSchema } from "@/lib/schemas/birth-info";
 import { interpretSaju } from "@/lib/use-cases/interpret-saju";
+import {
+  getCachedFortune,
+  cacheFortune,
+  buildContextHash,
+  type FortuneCacheKey,
+} from "@/lib/services/fortune-cache";
 
 const InterpretRequestSchema = z.object({
   type: z.enum(["daily", "weekly", "decision"]),
@@ -64,8 +70,47 @@ export async function POST(req: NextRequest) {
   }
 
   const { type, birthInfo, weekStartDate, decisionContext } = parsed.data;
+  const userId = session.user.id;
+  const isMock = process.env.MOCK_LLM === "true";
 
-  // 사주 계산
+  // ── 캐시 키 구성 ──
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const dateKey =
+    type === "daily"
+      ? todayStr
+      : type === "weekly"
+        ? (weekStartDate ?? todayStr)
+        : todayStr;
+  const contextHash =
+    type === "decision" && decisionContext
+      ? buildContextHash(decisionContext.optionA, decisionContext.optionB)
+      : undefined;
+
+  const cacheKey: FortuneCacheKey = {
+    userId,
+    expertId: type,
+    dateKey,
+    contextHash,
+  };
+
+  // ── 캐시 조회 (MOCK_LLM이면 건너뜀 — 비용 없으므로) ──
+  if (!isMock) {
+    try {
+      const cached = await getCachedFortune(cacheKey);
+      if (cached) {
+        return NextResponse.json({
+          type,
+          data: cached,
+          cacheStatus: "hit" as const,
+        });
+      }
+    } catch (err) {
+      // 캐시 조회 실패는 무시하고 LLM으로 진행
+      console.warn("Fortune cache lookup failed:", err);
+    }
+  }
+
+  // ── 사주 계산 ──
   let sajuData: ReturnType<FortuneTellerService["calculateSaju"]>;
   try {
     const birthTime = birthInfo.isTimeUnknown
@@ -84,12 +129,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // LLM 해석 생성
+  // ── LLM 해석 생성 ──
   const result = await interpretSaju(
     type,
     sajuData,
     weekStartDate,
-    session.user.id,
+    userId,
     type === "decision" ? decisionContext : undefined
   );
 
@@ -100,5 +145,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  return NextResponse.json({ type, data: result.data });
+  // ── 캐시 저장 (MOCK_LLM이면 건너뜀) ──
+  if (!isMock) {
+    try {
+      await cacheFortune(cacheKey, { type, birthDate: birthInfo.birthDate, weekStartDate, decisionContext }, result.data);
+    } catch (err) {
+      // 캐시 저장 실패는 무시 (결과는 이미 생성됨)
+      console.warn("Fortune cache save failed:", err);
+    }
+  }
+
+  const cacheStatus = isMock ? ("mock" as const) : ("miss" as const);
+  return NextResponse.json({ type, data: result.data, cacheStatus });
 }

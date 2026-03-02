@@ -14,22 +14,21 @@ vi.mock("@/lib/credit-service", () => ({
   CREDIT_COSTS: { SAJU_ANALYSIS: 2, CHAT_MESSAGE: 1, COMPATIBILITY: 3 },
 }))
 
-const { mockToTextStreamResponse } = vi.hoisted(() => ({
-  mockToTextStreamResponse: vi.fn(),
-}))
-vi.mock("ai", () => ({
-  streamText: vi.fn(() => ({
-    toTextStreamResponse: mockToTextStreamResponse,
-  })),
-}))
-
-vi.mock("@ai-sdk/openai", () => ({ openai: vi.fn().mockReturnValue("gpt-4o-mini-model") }))
-
 const { mockGetStringSystemSetting } = vi.hoisted(() => ({
   mockGetStringSystemSetting: vi.fn(),
 }))
 vi.mock("@/lib/system-settings", () => ({
   getStringSystemSetting: mockGetStringSystemSetting,
+}))
+
+vi.mock("@/lib/llm-usage", () => ({
+  logLlmUsage: vi.fn(),
+}))
+
+// Mastra chatAgent mock
+const { mockStream } = vi.hoisted(() => ({ mockStream: vi.fn() }))
+vi.mock("@/lib/mastra", () => ({
+  chatAgent: { stream: mockStream },
 }))
 
 import { POST } from "@/app/api/chat/route"
@@ -42,13 +41,24 @@ function makeRequest(body: unknown) {
   })
 }
 
+function mockStreamResult(text: string) {
+  const chunks = [text]
+  return {
+    textStream: (async function* () {
+      for (const chunk of chunks) yield chunk
+    })(),
+    usage: Promise.resolve({ inputTokens: 10, outputTokens: 20 }),
+    steps: Promise.resolve([]),
+  }
+}
+
 describe("POST /api/chat", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockAuth.mockResolvedValue(null)
     mockIsCreditEnabled.mockReturnValue(false)
-    mockToTextStreamResponse.mockReturnValue(new Response("안녕하세요"))
     mockGetStringSystemSetting.mockResolvedValue("기본 프롬프트")
+    mockStream.mockReturnValue(mockStreamResult("안녕하세요"))
   })
 
   it("정상 요청에 스트리밍 응답 반환", async () => {
@@ -56,7 +66,9 @@ describe("POST /api/chat", () => {
       messages: [{ role: "user", content: "오늘 운세가 궁금해요" }],
     }))
     expect(res.status).toBe(200)
-    expect(mockToTextStreamResponse).toHaveBeenCalled()
+    const body = await res.text()
+    expect(body).toBe("안녕하세요")
+    expect(mockStream).toHaveBeenCalled()
   })
 
   it("JSON 파싱 실패 시 400 반환", async () => {
@@ -98,7 +110,7 @@ describe("POST /api/chat", () => {
     expect(json.code).toBe("INSUFFICIENT_CREDITS")
   })
 
-  it("context.birthInfo가 있으면 시스템 프롬프트에 BIRTH_INFO_JSON 포함", async () => {
+  it("context.birthInfo가 있으면 instructions에 BIRTH_INFO_JSON 포함", async () => {
     await POST(makeRequest({
       messages: [{ role: "user", content: "내 사주 해석해줘" }],
       context: {
@@ -106,13 +118,11 @@ describe("POST /api/chat", () => {
       },
     }))
 
-    const aiModule = await import("ai")
-    const streamTextMock = vi.mocked(aiModule.streamText)
-    const lastCallArg = streamTextMock.mock.calls.at(-1)?.[0]
-    expect(lastCallArg?.system).toContain("BIRTH_INFO_JSON")
+    const lastCallArg = mockStream.mock.calls.at(-1)?.[1]
+    expect(lastCallArg?.instructions).toContain("BIRTH_INFO_JSON")
   })
 
-  it("context.astrologyData가 있으면 시스템 프롬프트에 ASTROLOGY_STATIC_JSON 포함", async () => {
+  it("context.astrologyData가 있으면 instructions에 ASTROLOGY_STATIC_JSON 포함", async () => {
     await POST(makeRequest({
       messages: [{ role: "user", content: "이번주 운세 알려줘" }],
       context: {
@@ -120,10 +130,8 @@ describe("POST /api/chat", () => {
       },
     }))
 
-    const aiModule = await import("ai")
-    const streamTextMock = vi.mocked(aiModule.streamText)
-    const lastCallArg = streamTextMock.mock.calls.at(-1)?.[0]
-    expect(lastCallArg?.system).toContain("ASTROLOGY_STATIC_JSON")
+    const lastCallArg = mockStream.mock.calls.at(-1)?.[1]
+    expect(lastCallArg?.instructions).toContain("ASTROLOGY_STATIC_JSON")
   })
 
   it("context가 없어도 정상 응답", async () => {
@@ -132,28 +140,28 @@ describe("POST /api/chat", () => {
     }))
 
     expect(res.status).toBe(200)
-    expect(mockToTextStreamResponse).toHaveBeenCalled()
+    expect(mockStream).toHaveBeenCalled()
   })
 
-  it("DB에서 프롬프트 로드 실패해도 기본값으로 정상 동작", async () => {
-    mockGetStringSystemSetting.mockImplementation(async (_key: string, fallback: string) => {
-      try {
-        throw new Error("DB load failed")
-      } catch {
-        return fallback
-      }
-    })
-
-    const res = await POST(makeRequest({
-      messages: [{ role: "user", content: "기본 프롬프트로 답해줘" }],
+  it("threadId를 전달하면 memory.thread에 포함", async () => {
+    await POST(makeRequest({
+      messages: [{ role: "user", content: "이어서 대화" }],
+      threadId: "thread-123",
     }))
 
-    const aiModule = await import("ai")
-    const streamTextMock = vi.mocked(aiModule.streamText)
-    const lastCallArg = streamTextMock.mock.calls.at(-1)?.[0]
+    const lastCallArg = mockStream.mock.calls.at(-1)?.[1]
+    expect(lastCallArg?.memory?.thread).toBe("thread-123")
+  })
 
-    expect(res.status).toBe(200)
-    expect(lastCallArg?.system).toContain("You are an astrology interpretation guide for a destiny decision product.")
-    expect(lastCallArg?.system).toContain("ASTROLOGY_REPORT_GUIDE: Use ASTROLOGY_STATIC_JSON for deterministic interpretation and practical weekly guidance.")
+  it("user 메시지만 agent에 전달", async () => {
+    await POST(makeRequest({
+      messages: [
+        { role: "assistant", content: "이전 답변" },
+        { role: "user", content: "새 질문" },
+      ],
+    }))
+
+    const firstArg = mockStream.mock.calls.at(-1)?.[0]
+    expect(firstArg).toBe("새 질문")
   })
 })

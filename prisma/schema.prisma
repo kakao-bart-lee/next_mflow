@@ -38,6 +38,10 @@ model User {
   // LLM 사용량 추적
   llmUsageLogs  LlmUsageLog[]
 
+  // 일일 데이터
+  dailyCheckIns DailyCheckIn[]
+  dailyActions  DailyAction[]
+
   // 관리자
   isAdmin       Boolean   @default(false)
   isSuspended   Boolean   @default(false)
@@ -292,4 +296,34 @@ model LlmUsageLog {
   @@index([modelId])
   @@index([userId])
   @@index([createdAt])
+}
+
+// ──────────────────────────────────────────
+// 일일 체크인 & 액션
+// ──────────────────────────────────────────
+
+model DailyCheckIn {
+  id        String   @id @default(cuid())
+  userId    String
+  date      String   // "YYYY-MM-DD"
+  mood      String   // "calm" | "anxious" | "happy" | "tired" | "focused" | "scattered"
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
+}
+
+model DailyAction {
+  id         String   @id @default(cuid())
+  userId     String
+  date       String   // "YYYY-MM-DD"
+  actionId   String
+  actionText String   // 감사 로그용
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, date, actionId])
+  @@index([userId, date])
 }
