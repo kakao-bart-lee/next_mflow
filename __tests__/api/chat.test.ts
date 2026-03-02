@@ -97,4 +97,63 @@ describe("POST /api/chat", () => {
     const json = await res.json()
     expect(json.code).toBe("INSUFFICIENT_CREDITS")
   })
+
+  it("context.birthInfo가 있으면 시스템 프롬프트에 BIRTH_INFO_JSON 포함", async () => {
+    await POST(makeRequest({
+      messages: [{ role: "user", content: "내 사주 해석해줘" }],
+      context: {
+        birthInfo: { birthDate: "1990-01-01", birthTime: "13:30", gender: "male" },
+      },
+    }))
+
+    const aiModule = await import("ai")
+    const streamTextMock = vi.mocked(aiModule.streamText)
+    const lastCallArg = streamTextMock.mock.calls.at(-1)?.[0]
+    expect(lastCallArg?.system).toContain("BIRTH_INFO_JSON")
+  })
+
+  it("context.astrologyData가 있으면 시스템 프롬프트에 ASTROLOGY_STATIC_JSON 포함", async () => {
+    await POST(makeRequest({
+      messages: [{ role: "user", content: "이번주 운세 알려줘" }],
+      context: {
+        astrologyData: { dayPillar: "갑자", monthPillar: "을축", yearPillar: "병인" },
+      },
+    }))
+
+    const aiModule = await import("ai")
+    const streamTextMock = vi.mocked(aiModule.streamText)
+    const lastCallArg = streamTextMock.mock.calls.at(-1)?.[0]
+    expect(lastCallArg?.system).toContain("ASTROLOGY_STATIC_JSON")
+  })
+
+  it("context가 없어도 정상 응답", async () => {
+    const res = await POST(makeRequest({
+      messages: [{ role: "user", content: "질문" }],
+    }))
+
+    expect(res.status).toBe(200)
+    expect(mockToTextStreamResponse).toHaveBeenCalled()
+  })
+
+  it("DB에서 프롬프트 로드 실패해도 기본값으로 정상 동작", async () => {
+    mockGetStringSystemSetting.mockImplementation(async (_key: string, fallback: string) => {
+      try {
+        throw new Error("DB load failed")
+      } catch {
+        return fallback
+      }
+    })
+
+    const res = await POST(makeRequest({
+      messages: [{ role: "user", content: "기본 프롬프트로 답해줘" }],
+    }))
+
+    const aiModule = await import("ai")
+    const streamTextMock = vi.mocked(aiModule.streamText)
+    const lastCallArg = streamTextMock.mock.calls.at(-1)?.[0]
+
+    expect(res.status).toBe(200)
+    expect(lastCallArg?.system).toContain("You are an astrology interpretation guide for a destiny decision product.")
+    expect(lastCallArg?.system).toContain("ASTROLOGY_REPORT_GUIDE: Use ASTROLOGY_STATIC_JSON for deterministic interpretation and practical weekly guidance.")
+  })
 })
