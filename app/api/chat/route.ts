@@ -10,6 +10,7 @@ interface ChatRequestBody {
   context?: {
     birthInfo?: Record<string, unknown>
     astrologyData?: Record<string, unknown>
+    sajuData?: Record<string, unknown>
   }
 }
 
@@ -37,10 +38,13 @@ function buildAstrologySystemPrompt(
     lines.push(`ASTROLOGY_REPORT_GUIDE: ${reportGuide}`)
   }
 
-  if (context?.birthInfo || context?.astrologyData) {
+  if (context?.birthInfo || context?.astrologyData || context?.sajuData) {
     lines.push("\n## Current User Context")
     if (context.birthInfo) {
       lines.push(`BIRTH_INFO_JSON: ${JSON.stringify(context.birthInfo)}`)
+    }
+    if (context.sajuData) {
+      lines.push(`SAJU_ANALYSIS_JSON: ${JSON.stringify(context.sajuData)}`)
     }
     if (context.astrologyData) {
       lines.push(`ASTROLOGY_STATIC_JSON: ${JSON.stringify(context.astrologyData)}`)

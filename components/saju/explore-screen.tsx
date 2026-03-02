@@ -22,6 +22,7 @@ import {
 import { useSaju } from "@/lib/contexts/saju-context"
 import type { FortuneResponse } from "@/lib/saju-core"
 import { PLANET_ORDER } from "@/lib/astrology/static/constants"
+import { computeTransits, type TransitAspect } from "@/lib/astrology/static/transits"
 import type { PlanetId } from "@/lib/astrology/static/types"
 
 /* ─── 실제 사주 데이터 파생 ─── */
@@ -182,7 +183,7 @@ const PLANET_POSITIONS: PlanetDisplay[] = [
 ]
 
 
-const TRANSITS = [
+const TRANSITS: TransitAspect[] = [
   { id: "t1", type: "daily" as const, headline: "감정의 조화로운 흐름", planets: "☽ trine ♀", sajuResonance: "식신과 정재의 만남 — 표현이 결실로 이어지는 날", body: "달과 금성의 트라인이 형성됩니다. 사주 관점에서 식신과 정재의 조화는 내면의 재능이 현실 성과로 연결되는 에너지예요.", significance: "high" as const },
   { id: "t2", type: "daily" as const, headline: "소통과 확장의 기회", planets: "☿ sextile ♃", sajuResonance: "편관과 정인의 교류 — 학습과 도전이 만나는 때", body: "수성과 목성의 섹스타일이 아이디어의 확장을 도와줍니다. 새로운 도전과 지적 성장이 함께하는 시간입니다.", significance: "medium" as const },
   { id: "t3", type: "weekly" as const, headline: "인내가 필요한 한 주", planets: "♂ square ♄", sajuResonance: "상관과 비견의 긴장 — 독단보다 협력이 유리한 시기", body: "화성과 토성의 스퀘어는 행동에 제약을 줄 수 있어요. 혼자 밀어붙이면 마찰이 커지지만, 함께하면 단단해지는 에너지입니다.", significance: "high" as const },
@@ -265,13 +266,18 @@ export function ExploreScreen() {
     })
   }, [astrologyResult])
 
+  const transits = useMemo(() => {
+    if (!astrologyResult) return TRANSITS
+    return computeTransits(astrologyResult.positions)
+  }, [astrologyResult])
+
   const headlineTitle = astrologyResult?.today.headline ?? "감성의 물결 속에서 직관을 따라가는 시기"
   const headlineBody =
     astrologyResult?.today.summary ??
     "사주의 식신 기운과 태양의 물고기자리 에너지가 함께 흐르고 있습니다. 이성적 판단보다 직관을 신뢰하되, 오행의 토(Earth) 에너지로 현실 감각을 유지하세요."
 
   const activePlanet = activePlanetIdx !== null ? planetPositions[activePlanetIdx] : null
-  const filteredTransits = transitFilter === "all" ? TRANSITS : TRANSITS.filter((t) => t.type === transitFilter)
+  const filteredTransits = transitFilter === "all" ? transits : transits.filter((t) => t.type === transitFilter)
 
   return (
     <>

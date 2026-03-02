@@ -3,19 +3,34 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { FortuneTellerService } from "@/lib/saju-core/facade";
 import { BirthInfoSchema } from "@/lib/schemas/birth-info";
-import { interpretSaju, type InterpretationType } from "@/lib/use-cases/interpret-saju";
+import { interpretSaju } from "@/lib/use-cases/interpret-saju";
 
 const InterpretRequestSchema = z.object({
-  type: z.enum(["daily", "weekly"]),
+  type: z.enum(["daily", "weekly", "decision"]),
   birthInfo: BirthInfoSchema,
   /** 주간 운세일 때 시작 날짜 (YYYY-MM-DD) */
   weekStartDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  decisionContext: z
+    .object({
+      optionA: z.string(),
+      optionB: z.string(),
+      answers: z.record(z.string(), z.string()),
+    })
+    .optional(),
 }).superRefine((data, ctx) => {
   if (data.type === "weekly" && !data.weekStartDate) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: "주간 운세 요청 시 weekStartDate는 필수입니다",
       path: ["weekStartDate"],
+    });
+  }
+
+  if (data.type === "decision" && !data.decisionContext) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "결정 운세 요청 시 decisionContext는 필수입니다",
+      path: ["decisionContext"],
     });
   }
 });
@@ -48,7 +63,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { type, birthInfo, weekStartDate } = parsed.data;
+  const { type, birthInfo, weekStartDate, decisionContext } = parsed.data;
 
   // 사주 계산
   let sajuData: ReturnType<FortuneTellerService["calculateSaju"]>;
@@ -74,7 +89,8 @@ export async function POST(req: NextRequest) {
     type,
     sajuData,
     weekStartDate,
-    session.user.id
+    session.user.id,
+    type === "decision" ? decisionContext : undefined
   );
 
   if (!result.success) {
