@@ -29,7 +29,7 @@ export default function MainLayout({ children }: MainLayoutProps): ReactNode {
   }
 
   return (
-    <div className="flex min-h-svh flex-col bg-background">
+    <div className="flex h-svh flex-col overflow-hidden bg-background">
       <header className="pointer-events-none fixed inset-x-0 top-0 z-30 flex items-center justify-end px-5 py-3">
         <div className="pointer-events-auto flex items-center gap-2">
           <ThemeToggle />
@@ -62,7 +62,7 @@ export default function MainLayout({ children }: MainLayoutProps): ReactNode {
           </DropdownMenu>
         </div>
       </header>
-      <main className="flex-1 pb-20 pt-14">
+      <main className="flex-1 overflow-y-auto pb-20 pt-14">
         {children}
       </main>
       <BottomNav />
