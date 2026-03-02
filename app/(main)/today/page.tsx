@@ -1,18 +1,19 @@
 "use client"
 
 import { Suspense, useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
+import type { ReactNode } from "react"
 import Link from "next/link"
-import { TodayScreen } from "@/components/saju/today-screen"
-import { useRequireBirthInfo } from "@/lib/hooks/use-require-birth-info"
-import { useSaju } from "@/lib/contexts/saju-context"
-import { Button } from "@/components/ui/button"
+import { useSearchParams } from "next/navigation"
 import { Sparkles } from "lucide-react"
+import { useSaju } from "@/lib/contexts/saju-context"
+import { useRequireBirthInfo } from "@/lib/hooks/use-require-birth-info"
+import { TodayScreen } from "@/components/saju/today-screen"
+import { Button } from "@/components/ui/button"
 
 /** 데모 배너: 가입 유도 CTA */
-function DemoBanner() {
+function DemoBanner(): ReactNode {
   return (
-    <div className="sticky top-14 z-20 flex items-center justify-between gap-3 border-b border-border bg-card/95 px-4 py-2.5 backdrop-blur-sm text-sm">
+    <div className="fixed inset-x-0 top-0 z-40 flex items-center justify-between gap-3 border-b border-border bg-card/95 px-4 py-2.5 text-sm backdrop-blur-sm">
       <div className="flex items-center gap-2 text-muted-foreground">
         <Sparkles className="h-3.5 w-3.5 shrink-0 text-amber-500" />
         <span>샘플 사주로 체험 중입니다</span>
@@ -25,13 +26,18 @@ function DemoBanner() {
 }
 
 /** 데모 모드: SajuContext에 샘플 데이터 로드 후 화면 표시 */
-function DemoTodayPage() {
+function DemoTodayPage(): ReactNode {
   const { initDemoMode, isHydrated } = useSaju()
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
     if (!isHydrated) return
-    initDemoMode().then(() => setReady(true))
+
+    let cancelled = false
+    initDemoMode().then(() => {
+      if (!cancelled) setReady(true)
+    })
+    return () => { cancelled = true }
   }, [isHydrated, initDemoMode])
 
   if (!ready) return null
@@ -44,23 +50,23 @@ function DemoTodayPage() {
   )
 }
 
-/** 실제 사용자 모드: birthInfo 없으면 홈으로 redirect */
-function RealTodayPage() {
+/** 실제 사용자 모드: birthInfo 없으면 온보딩으로 redirect */
+function RealTodayPage(): ReactNode {
   const isGuarding = useRequireBirthInfo()
   if (isGuarding) return null
   return <TodayScreen />
 }
 
-function TodayPageInner() {
+function TodayPageInner(): ReactNode {
   const searchParams = useSearchParams()
   const isDemo = searchParams.get("demo") === "true"
 
   return isDemo ? <DemoTodayPage /> : <RealTodayPage />
 }
 
-export default function TodayPage() {
+export default function TodayPage(): ReactNode {
   return (
-    <Suspense>
+    <Suspense fallback={null}>
       <TodayPageInner />
     </Suspense>
   )

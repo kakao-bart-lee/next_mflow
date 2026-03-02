@@ -1,8 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import type { ReactNode } from "react"
+import { useState, useRef } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { ChevronDown, ChevronUp, Monitor } from "lucide-react"
+import { ChevronDown, ChevronUp, GripVertical, Monitor } from "lucide-react"
+
+interface Position {
+  x: number
+  y: number
+}
+
+interface DragOffset {
+  dx: number
+  dy: number
+}
 
 const VIEW_OPTIONS = [
   { path: "/", label: "Landing" },
@@ -13,35 +24,85 @@ const VIEW_OPTIONS = [
   { path: "/explore", label: "Explore" },
 ] as const
 
-export function DevToolbar() {
+export function DevToolbar(): ReactNode {
   const [collapsed, setCollapsed] = useState(false)
+  const [pos, setPos] = useState<Position | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const dragOffset = useRef<DragOffset | null>(null)
   const router = useRouter()
   const pathname = usePathname()
 
   if (process.env.NODE_ENV !== "development") return null
 
-  return (
-    <div className="fixed bottom-4 left-4 z-[9999] select-none">
-      <div className="overflow-hidden rounded-lg border border-border/80 bg-card/95 shadow-lg shadow-black/10 backdrop-blur-sm">
-        {/* Header — always visible */}
-        <button
-          onClick={() => setCollapsed((p) => !p)}
-          className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[11px] font-semibold tracking-wide text-muted-foreground transition-colors hover:text-foreground"
-          type="button"
-        >
-          <Monitor className="h-3 w-3" />
-          <span>DEV</span>
-          <span className="ml-auto text-[10px] font-normal text-muted-foreground/50">
-            {pathname}
-          </span>
-          {collapsed ? (
-            <ChevronUp className="h-3 w-3" />
-          ) : (
-            <ChevronDown className="h-3 w-3" />
-          )}
-        </button>
+  function handleDragStart(e: React.MouseEvent): void {
+    e.preventDefault()
+    const container = containerRef.current
+    if (!container) return
 
-        {/* Body */}
+    const rect = container.getBoundingClientRect()
+    const originX = pos?.x ?? rect.left
+    const originY = pos?.y ?? rect.top
+    dragOffset.current = { dx: e.clientX - originX, dy: e.clientY - originY }
+
+    function onMove(ev: MouseEvent): void {
+      if (!dragOffset.current) return
+      setPos({
+        x: ev.clientX - dragOffset.current.dx,
+        y: ev.clientY - dragOffset.current.dy,
+      })
+    }
+
+    function onUp(): void {
+      dragOffset.current = null
+      document.removeEventListener("mousemove", onMove)
+      document.removeEventListener("mouseup", onUp)
+    }
+
+    document.addEventListener("mousemove", onMove)
+    document.addEventListener("mouseup", onUp)
+  }
+
+  function toggleCollapsed(): void {
+    setCollapsed((prev) => !prev)
+  }
+
+  const posStyle = pos
+    ? { left: pos.x, top: pos.y, bottom: "auto" as const }
+    : {}
+
+  return (
+    <div
+      ref={containerRef}
+      className={`fixed z-[9999] select-none ${pos ? "" : "bottom-4 left-4"}`}
+      style={posStyle}
+    >
+      <div className="overflow-hidden rounded-lg border border-border/80 bg-card/95 shadow-lg shadow-black/10 backdrop-blur-sm">
+        <div className="flex w-full items-center text-[11px] font-semibold tracking-wide text-muted-foreground">
+          {/* 드래그 핸들 */}
+          <div
+            onMouseDown={handleDragStart}
+            className="cursor-grab px-1.5 py-1.5 text-muted-foreground/40 transition-colors hover:text-muted-foreground active:cursor-grabbing"
+          >
+            <GripVertical className="h-3 w-3" />
+          </div>
+
+          <button
+            onClick={toggleCollapsed}
+            className="flex flex-1 items-center gap-2 py-1.5 pr-3 text-left transition-colors hover:text-foreground"
+            type="button"
+          >
+            <Monitor className="h-3 w-3" />
+            <span>DEV</span>
+            <span className="ml-auto text-[10px] font-normal text-muted-foreground/50">
+              {pathname}
+            </span>
+            {collapsed
+              ? <ChevronUp className="h-3 w-3" />
+              : <ChevronDown className="h-3 w-3" />
+            }
+          </button>
+        </div>
+
         {!collapsed && (
           <div className="border-t border-border/50 px-2 py-2">
             <div className="flex flex-wrap gap-1">

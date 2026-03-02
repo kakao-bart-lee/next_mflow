@@ -2,7 +2,9 @@
 
 import type { ReactNode } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { LogOut, Settings, User } from "lucide-react"
+import { logoutAction } from "@/lib/auth/actions"
+import { useSaju } from "@/lib/contexts/saju-context"
 import { BottomNav } from "@/components/saju/bottom-nav"
 import { DevToolbar } from "@/components/dev/dev-toolbar"
 import { ThemeToggle } from "@/components/saju/theme-toggle"
@@ -13,17 +15,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, LogOut, Settings } from "lucide-react"
-import { useSaju } from "@/lib/contexts/saju-context"
 
-export default function MainLayout({ children }: { children: ReactNode }) {
+interface MainLayoutProps {
+  children: ReactNode
+}
+
+export default function MainLayout({ children }: MainLayoutProps): ReactNode {
   const { clearData } = useSaju()
-  const router = useRouter()
+
+  function handleLogout(): void {
+    clearData()
+    logoutAction()
+  }
 
   return (
     <div className="flex min-h-svh flex-col bg-background">
-      <header className="fixed inset-x-0 top-0 z-30 flex items-center justify-end px-5 py-3 pointer-events-none">
-        <div className="flex items-center gap-2 pointer-events-auto">
+      <header className="pointer-events-none fixed inset-x-0 top-0 z-30 flex items-center justify-end px-5 py-3">
+        <div className="pointer-events-auto flex items-center gap-2">
           <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -44,10 +52,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onClick={() => {
-                  clearData()
-                  router.replace("/")
-                }}
+                onClick={handleLogout}
                 className="text-destructive focus:text-destructive"
               >
                 <LogOut className="mr-2 h-4 w-4" />
