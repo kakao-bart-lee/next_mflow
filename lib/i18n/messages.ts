@@ -15,6 +15,12 @@ const messages = {
       start: "시작하기",
       analyzing: "분석 중...",
     },
+    nav: {
+      today: "오늘",
+      week: "이번 주",
+      decision: "결정",
+      explore: "탐색",
+    },
     onboarding: {
       brand: "사주 플레이북",
       tagline: "오늘을 잘 쓰는 방법을 알려드릴게요",
@@ -50,6 +56,12 @@ const messages = {
       back: "Back",
       start: "Get started",
       analyzing: "Analyzing...",
+    },
+    nav: {
+      today: "Today",
+      week: "This Week",
+      decision: "Decision",
+      explore: "Explore",
     },
     onboarding: {
       brand: "Saju Playbook",

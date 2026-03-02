@@ -62,6 +62,7 @@ export function OnboardingScreen() {
     watch,
     trigger,
     getValues,
+    setError,
     formState: { errors },
   } = useForm<Step0Values>({
     resolver: zodResolver(step0Schema),
@@ -72,7 +73,14 @@ export function OnboardingScreen() {
 
   const handleStep0Next = async () => {
     const valid = await trigger("birthDate")
-    if (valid) setStep(1)
+    if (!valid) return
+    if (!isTimeUnknown && !getValues("birthTime")) {
+      setError("birthTime", {
+        message: "출생시간을 입력하거나 '모르겠어요'를 선택해주세요",
+      })
+      return
+    }
+    setStep(1)
   }
 
   const canProceedStep1 = location !== null && gender !== ""
@@ -107,7 +115,7 @@ export function OnboardingScreen() {
       />
 
       {/* Top-right controls */}
-      <div className="fixed right-5 top-5 z-50 flex items-center gap-2">
+      <div className="fixed right-5 top-5 z-40 flex items-center gap-2">
         <LocaleToggle />
         <ThemeToggle />
       </div>
@@ -245,6 +253,12 @@ export function OnboardingScreen() {
                     </p>
                   </div>
                 )}
+                {errors.birthTime && (
+                  <div className="flex items-center gap-1.5 text-xs text-destructive">
+                    <AlertCircle className="h-3 w-3" />
+                    {errors.birthTime.message}
+                  </div>
+                )}
               </div>
 
               {/* CTA */}
@@ -329,6 +343,7 @@ export function OnboardingScreen() {
                 <Button
                   variant="ghost"
                   onClick={() => setStep(0)}
+                  disabled={isSubmitting}
                   className="h-14 flex-1 rounded-xl text-muted-foreground hover:text-foreground"
                 >
                   <ArrowLeft className="mr-1.5 h-4 w-4" />

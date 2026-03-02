@@ -16,6 +16,7 @@ import {
   Sparkles,
   BookOpen,
 } from "lucide-react"
+import { toast } from "sonner"
 import { AIChatPanel } from "./ai-chat-panel"
 import { useSaju } from "@/lib/contexts/saju-context"
 import { useSajuInterpret } from "@/lib/hooks/use-saju-interpret"
@@ -184,7 +185,10 @@ export function WeekScreen() {
         setJournalText(entry.text)
         setJournalSaved(true)
       })
-      .catch(() => { /* 네트워크 오류 — 무시 */ })
+      .catch((err) => {
+        console.error("저널 불러오기 실패:", err)
+        toast.error("저널을 불러오지 못했습니다")
+      })
       .finally(() => { if (!cancelled) setJournalLoading(false) })
     return () => { cancelled = true }
   }, [weekStartDate])
@@ -205,9 +209,9 @@ export function WeekScreen() {
       if (res.ok) {
         setJournalSaved(true)
       }
-    } catch {
-      // 네트워크 오류 — 로컬에만 저장
-      setJournalSaved(true)
+    } catch (err) {
+      console.error("저널 저장 실패:", err)
+      toast.error("저장에 실패했습니다. 다시 시도해주세요")
     } finally {
       setJournalLoading(false)
     }

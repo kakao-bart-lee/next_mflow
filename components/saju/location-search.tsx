@@ -77,13 +77,31 @@ export function LocationSearch({ value, onChange }: LocationSearchProps) {
   )
 
   const handleDetectLocation = () => {
-    setIsDetecting(true)
-    // Simulate geolocation detection
-    setTimeout(() => {
-      const seoul = POPULAR_CITIES[0]
-      handleSelect(seoul)
+    if (!navigator.geolocation) {
+      // geolocation 미지원 시 조용히 실패 (탭 UI는 유지)
       setIsDetecting(false)
-    }, 1500)
+      return
+    }
+    setIsDetecting(true)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords
+        // 좌표 기반으로 ALL_CITIES 중 가장 가까운 도시 선택
+        let closest = ALL_CITIES[0]
+        let minDist = Infinity
+        for (const city of ALL_CITIES) {
+          const dist = Math.hypot(city.lat - latitude, city.lng - longitude)
+          if (dist < minDist) { minDist = dist; closest = city }
+        }
+        handleSelect(closest)
+        setIsDetecting(false)
+      },
+      () => {
+        // 권한 거부 또는 실패 시 조용히 탭만 닫기
+        setIsDetecting(false)
+      },
+      { timeout: 8000 }
+    )
   }
 
   // Close on outside click
@@ -135,7 +153,7 @@ export function LocationSearch({ value, onChange }: LocationSearchProps) {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute inset-x-0 top-full z-50 mt-1 max-h-72 overflow-hidden rounded-xl border border-border bg-card shadow-lg animate-in fade-in slide-in-from-top-1 duration-200">
+        <div className="absolute inset-x-0 top-full z-[60] mt-1 max-h-72 overflow-hidden rounded-xl border border-border bg-card shadow-lg animate-in fade-in slide-in-from-top-1 duration-200">
           {/* Tab bar */}
           {!query && (
             <div className="flex border-b border-border">
@@ -175,7 +193,12 @@ export function LocationSearch({ value, onChange }: LocationSearchProps) {
           <div className="max-h-56 overflow-y-auto p-1">
             {filteredCities.length === 0 ? (
               <div className="px-3 py-6 text-center text-sm text-muted-foreground">
-                검색 결과가 없습니다
+                <p>검색 결과가 없습니다</p>
+                <p className="mt-1 text-xs text-muted-foreground/60">
+                  한글 또는 영문으로 도시 이름을 입력해보세요
+                  <br />
+                  예: 서울 / Seoul, 뉴욕 / New York
+                </p>
               </div>
             ) : (
               filteredCities.map((city) => (

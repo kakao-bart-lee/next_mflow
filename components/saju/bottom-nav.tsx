@@ -3,16 +3,18 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { CalendarDays, Compass, Home, Telescope } from "lucide-react"
+import { useLocale } from "@/lib/contexts/locale-context"
 
-const TABS = [
-  { href: "/today", label: "오늘", icon: Home },
-  { href: "/week", label: "이번 주", icon: CalendarDays },
-  { href: "/decision", label: "결정", icon: Compass },
-  { href: "/explore", label: "탐색", icon: Telescope },
-] as const
+const TAB_DEFS = [
+  { href: "/today", key: "today" as const, icon: Home },
+  { href: "/week", key: "week" as const, icon: CalendarDays },
+  { href: "/decision", key: "decision" as const, icon: Compass },
+  { href: "/explore", key: "explore" as const, icon: Telescope },
+]
 
 export function BottomNav() {
   const pathname = usePathname()
+  const { t } = useLocale()
 
   return (
     <nav
@@ -21,7 +23,7 @@ export function BottomNav() {
       aria-label="메인 탐색"
     >
       <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
-        {TABS.map(({ href, label, icon: Icon }) => {
+        {TAB_DEFS.map(({ href, key, icon: Icon }) => {
           const isActive = pathname === href
           return (
             <Link
@@ -39,7 +41,7 @@ export function BottomNav() {
                 strokeWidth={isActive ? 2.2 : 1.8}
               />
               <span className="text-[10px] font-medium leading-none">
-                {label}
+                {t.nav[key]}
               </span>
             </Link>
           )

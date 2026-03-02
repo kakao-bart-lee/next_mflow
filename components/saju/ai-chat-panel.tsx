@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react"
 import { useChat } from "@ai-sdk/react"
 import { TextStreamChatTransport, isTextUIPart, type UIMessage } from "ai"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -56,10 +57,11 @@ function getMessageText(msg: UIMessage): string {
 }
 
 function ChatContent({
+  open,
   context = "default",
   initialPrompt,
   onActionsGenerated,
-}: Omit<AIChatPanelProps, "open" | "onOpenChange">) {
+}: Omit<AIChatPanelProps, "onOpenChange">) {
   const { birthInfo, astrologyResult, sajuResult } = useSaju()
   const ctxKey = ["today", "week", "decision"].includes(context ?? "")
     ? (context as string)
@@ -67,6 +69,7 @@ function ChatContent({
 
   const [input, setInput] = useState(initialPrompt ?? "")
   const scrollRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const transport = useMemo(
@@ -87,6 +90,10 @@ function ChatContent({
   const { messages, sendMessage, stop, setMessages, status } = useChat({
     transport,
     messages: [makeInitialMessage(ctxKey)],
+    onError: (error) => {
+      console.error("채팅 API 오류:", error)
+      toast.error("메시지 전송에 실패했습니다. 잠시 후 다시 시도해주세요")
+    },
   })
 
   const isActive = status === "submitted" || status === "streaming"
@@ -102,6 +109,16 @@ function ChatContent({
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [messages, isActive])
+
+  // 패널이 열릴 때 메시지 목록 최하단으로 스크롤 (재오픈 시 이전 대화 위치 복원)
+  useEffect(() => {
+    if (open && messagesEndRef.current) {
+      const timer = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "instant" })
+      }, 50)
+      return () => clearTimeout(timer)
+    }
+  }, [open])
 
   // AI 응답에서 실천 항목 추출 → onActionsGenerated 콜백
   useEffect(() => {
@@ -182,6 +199,9 @@ function ChatContent({
               </div>
             </div>
           ))}
+
+          {/* 스크롤 앵커 — 메시지 목록 최하단 */}
+          <div ref={messagesEndRef} />
 
           {/* Loading dots — shown while waiting for the AI to start responding */}
           {status === "submitted" && (
@@ -283,6 +303,7 @@ export function AIChatPanel({
             </div>
           </DrawerHeader>
           <ChatContent
+            open={open}
             context={context}
             initialPrompt={initialPrompt}
             onActionsGenerated={onActionsGenerated}
@@ -304,6 +325,7 @@ export function AIChatPanel({
           </div>
         </SheetHeader>
         <ChatContent
+          open={open}
           context={context}
           initialPrompt={initialPrompt}
           onActionsGenerated={onActionsGenerated}

@@ -402,6 +402,8 @@ export function ExploreScreen() {
                       onClick={() => setActivePlanetIdx(activePlanetIdx === i ? null : i)}
                       className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs transition-colors ${activePlanetIdx === i ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
                       type="button"
+                      aria-label={`${p.symbol} ${p.name}`}
+                      title={p.name.split(" (")[0]}
                     >
                       <span className="text-sm">{p.symbol}</span>
                       <span className="hidden sm:inline">{p.name.split(" (")[0]}</span>

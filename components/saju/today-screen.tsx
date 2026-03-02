@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
-  User,
   ChevronDown,
   AlertTriangle,
   Leaf,
@@ -16,19 +15,10 @@ import {
   Wind,
   MessageCircle,
   Sparkles,
-  LogOut,
 } from "lucide-react"
 import { CheckInChips } from "./check-in-chips"
 import { DeepDiveSheet } from "./deep-dive-sheet"
 import { AIChatPanel } from "./ai-chat-panel"
-import { ThemeToggle } from "./theme-toggle"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useRouter } from "next/navigation"
 import { useSaju } from "@/lib/contexts/saju-context"
 import { useSajuInterpret } from "@/lib/hooks/use-saju-interpret"
 import type { FortuneResponse } from "@/lib/saju-core"
@@ -230,8 +220,7 @@ function RecentHistory() {
 /* ─── 메인 컴포넌트 ─── */
 
 export function TodayScreen() {
-  const { sajuResult, birthInfo, isLoading, clearData } = useSaju()
-  const router = useRouter()
+  const { sajuResult, birthInfo, isLoading } = useSaju()
   const [checkedActions, setCheckedActions] = useState<Set<string>>(new Set())
   const [deepDiveOpen, setDeepDiveOpen] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
@@ -253,7 +242,7 @@ export function TodayScreen() {
     }
   }, [])
   // LLM 동적 콘텐츠 fetch
-  const { data: llmDaily, isLoading: llmLoading } = useSajuInterpret("daily", birthInfo)
+  const { data: llmDaily, isLoading: llmLoading, error: llmError } = useSajuInterpret("daily", birthInfo)
 
   const todayData = useMemo(() => {
     if (!sajuResult) return null
@@ -319,40 +308,22 @@ export function TodayScreen() {
           {/* Main column */}
           <div className="lg:max-w-2xl lg:flex-1">
             {/* Top app bar */}
-            <header className="relative z-10 flex items-center justify-between py-2">
+            <header className="py-2">
               <time className="text-sm font-medium text-muted-foreground">
                 {dateLabel}
               </time>
-              <div className="flex items-center gap-2">
-                <ThemeToggle />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:bg-secondary"
-                      aria-label="프로필 및 설정"
-                    >
-                      <User className="h-4 w-4" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40">
-                    <DropdownMenuItem
-                      onClick={() => {
-                        clearData()
-                        router.replace("/")
-                      }}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      로그아웃
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
             </header>
 
+            {/* LLM 폴백 알림 — 정적 데이터로 표시 중일 때 */}
+            {llmError && !llmLoading && sajuResult && (
+              <div className="mt-4 flex items-center gap-2 rounded-lg border border-border bg-secondary/30 px-3 py-2 text-xs text-muted-foreground">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                <span>네트워크 상태로 인해 간소화된 결과를 보여드립니다</span>
+              </div>
+            )}
+
             {/* Letter Card (Hero) */}
-            <section className="mt-6" aria-label="오늘의 편지">
+            <section className="mt-4" aria-label="오늘의 편지">
               {isLoading ? (
                 <TodaySkeleton />
               ) : todayData ? (
@@ -500,7 +471,7 @@ export function TodayScreen() {
 
           {/* Right sidebar (desktop only) */}
           <aside className="hidden lg:block lg:w-72 lg:shrink-0 lg:pt-14">
-            <div className="sticky top-6 space-y-6">
+            <div className="sticky top-6 max-h-[calc(100vh-5rem)] overflow-y-auto space-y-6">
               {/* Check-in */}
               <CheckInChips />
 

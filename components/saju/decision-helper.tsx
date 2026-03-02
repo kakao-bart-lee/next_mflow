@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ArrowRight, RotateCcw, Sparkles, ChevronDown, MessageCircle } from "lucide-react"
+import { AlertCircle, ArrowRight, RotateCcw, Sparkles, ChevronDown, MessageCircle } from "lucide-react"
 import { DeepDiveSheet } from "./deep-dive-sheet"
 import { AIChatPanel } from "./ai-chat-panel"
 import { useSaju } from "@/lib/contexts/saju-context"
@@ -369,9 +369,13 @@ export function DecisionHelper() {
               )}
 
               {aiError && !aiLoading && (
-                <p className="mt-4 text-xs text-muted-foreground">
-                  AI 결과를 불러오지 못해 기본 결정 프레임을 보여드려요. ({aiError})
-                </p>
+                <div className="mt-4 flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                  <div>
+                    <p className="text-sm font-medium text-destructive">분석에 실패했습니다</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">잠시 후 다시 시도해주세요</p>
+                  </div>
+                </div>
               )}
 
               {/* AI chat trigger */}
@@ -408,6 +412,7 @@ export function DecisionHelper() {
               <Button
                 variant="outline"
                 onClick={resetAll}
+                disabled={aiLoading}
                 className="h-10 rounded-lg border-border text-foreground"
               >
                 <RotateCcw className="mr-2 h-4 w-4" />
