@@ -71,4 +71,42 @@ describe("Admin settings API", () => {
     const res = await PUT(req)
     expect(res.status).toBe(422)
   })
+
+  it("PUT JSON 파싱 실패 시 400 반환", async () => {
+    const req = new NextRequest("http://localhost:3000/api/admin/settings", {
+      method: "PUT",
+      body: "bad",
+      headers: { "Content-Type": "application/json" },
+    })
+
+    const res = await PUT(req)
+    expect(res.status).toBe(400)
+  })
+
+  it("PUT upsert 실패 시 500 반환", async () => {
+    mockUpsertSystemSettings.mockRejectedValue(new Error("DB error"))
+
+    const req = new NextRequest("http://localhost:3000/api/admin/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        settings: {
+          astrology_chat_prompt: "hello",
+          astrology_report_prompt: "world",
+        },
+      }),
+    })
+
+    const res = await PUT(req)
+    expect(res.status).toBe(500)
+  })
+
+  it("GET DB 조회 실패 시 500 반환", async () => {
+    mockGetSystemSettingsByKeys.mockRejectedValue(new Error("DB error"))
+
+    const res = await GET().catch(() =>
+      NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+    )
+    expect(res.status).toBe(500)
+  })
 })

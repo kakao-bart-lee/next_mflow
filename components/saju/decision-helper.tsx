@@ -4,9 +4,11 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Skeleton } from "@/components/ui/skeleton"
 import { ArrowRight, RotateCcw, Sparkles, ChevronDown, MessageCircle } from "lucide-react"
 import { DeepDiveSheet } from "./deep-dive-sheet"
 import { AIChatPanel } from "./ai-chat-panel"
+import { useSaju } from "@/lib/contexts/saju-context"
 
 const QUESTIONS = [
   {
@@ -38,6 +40,7 @@ const QUESTIONS = [
 type Step = "input" | "questions" | "result"
 
 export function DecisionHelper() {
+  const { birthInfo } = useSaju()
   const [step, setStep] = useState<Step>("input")
   const [optionA, setOptionA] = useState("")
   const [optionB, setOptionB] = useState("")
@@ -45,6 +48,58 @@ export function DecisionHelper() {
   const [currentQ, setCurrentQ] = useState(0)
   const [deepDiveOpen, setDeepDiveOpen] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
+  const [aiResult, setAiResult] = useState<{
+    recommendation: "A" | "B"
+    headline: string
+    body: string
+    reasoning: string
+    caution: string
+    keywords: string[]
+  } | null>(null)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
+
+  const fetchDecisionResult = async (allAnswers: Record<string, string>) => {
+    setStep("result")
+
+    if (!birthInfo) {
+      setAiLoading(false)
+      setAiError(null)
+      setAiResult(null)
+      return
+    }
+
+    setAiLoading(true)
+    setAiError(null)
+    setAiResult(null)
+
+    try {
+      const res = await fetch("/api/saju/interpret", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "decision",
+          birthInfo,
+          decisionContext: {
+            optionA,
+            optionB,
+            answers: allAnswers,
+          },
+        }),
+      })
+
+      if (!res.ok) throw new Error("결정 도움 생성에 실패했습니다")
+
+      const json = await res.json()
+      if (!json?.data) throw new Error("결정 도움 생성에 실패했습니다")
+      setAiResult(json.data)
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : "오류가 발생했습니다")
+      setAiResult(null)
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   const handleAnswer = (questionId: string, value: string) => {
     const next = { ...answers, [questionId]: value }
@@ -53,7 +108,7 @@ export function DecisionHelper() {
     if (currentQ < QUESTIONS.length - 1) {
       setTimeout(() => setCurrentQ((prev) => prev + 1), 300)
     } else {
-      setTimeout(() => setStep("result"), 500)
+      fetchDecisionResult(next)
     }
   }
 
@@ -63,6 +118,9 @@ export function DecisionHelper() {
     setOptionB("")
     setAnswers({})
     setCurrentQ(0)
+    setAiResult(null)
+    setAiLoading(false)
+    setAiError(null)
   }
 
   const getResult = () => {
@@ -203,42 +261,118 @@ export function DecisionHelper() {
           <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Result card */}
             <div className="rounded-2xl border border-primary/20 bg-card p-6 lg:p-8">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-accent" />
-                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  오늘의 결정 프레임
-                </span>
-              </div>
+              {aiLoading ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-accent" />
+                    <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      AI가 맞춤 결정을 분석 중입니다
+                    </span>
+                  </div>
+                  <Skeleton className="h-8 w-3/4 rounded-lg" />
+                  <Skeleton className="h-4 w-full rounded" />
+                  <Skeleton className="h-4 w-full rounded" />
+                  <Skeleton className="h-4 w-5/6 rounded" />
+                  <Skeleton className="h-16 w-full rounded-xl" />
+                </div>
+              ) : aiResult ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-accent" />
+                    <span className="rounded-full border px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                      AI
+                    </span>
+                    <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      오늘의 결정 프레임
+                    </span>
+                  </div>
 
-              <h2 className="mt-4 font-serif text-xl font-semibold text-foreground lg:text-2xl">
-                {getResult() === "A" ? (
-                  <>
-                    <span className="text-primary">{optionA}</span>
-                    {"(이)가 지금 기운과 맞닿아 있어요"}
-                  </>
-                ) : (
-                  <>
-                    <span className="text-primary">{optionB}</span>
-                    {"(이)가 지금 기운과 맞닿아 있어요"}
-                  </>
-                )}
-              </h2>
+                  <h2 className="mt-4 font-serif text-xl font-semibold text-foreground lg:text-2xl">
+                    {aiResult.recommendation === "A" ? (
+                      <>
+                        <span className="text-primary">{optionA}</span>
+                        {"(이)가 지금 기운과 맞닿아 있어요"}
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-primary">{optionB}</span>
+                        {"(이)가 지금 기운과 맞닿아 있어요"}
+                      </>
+                    )}
+                  </h2>
 
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                {getResult() === "A"
-                  ? "지금 당신의 기운은 변화와 도전을 향해 열려 있습니다. 새로운 시도가 장기적으로 더 큰 배움과 성장을 안겨줄 수 있어요. 다만 충분한 준비는 놓치지 마세요."
-                  : "지금 당신의 기운은 안정과 깊이를 향해 모이고 있습니다. 현재의 자리에서 더 깊이 뿌리내리는 것이 장기적으로 단단한 기반이 됩니다. 변화는 그 위에서 자연스럽게 올 거예요."}
-              </p>
+                  <h3 className="mt-3 text-base font-semibold text-foreground">{aiResult.headline}</h3>
 
-              {/* Keywords */}
-              <div className="mt-5 flex gap-2">
-                <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
-                  {getResult() === "A" ? "도전" : "안정"}
-                </span>
-                <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
-                  {getResult() === "A" ? "성장" : "깊이"}
-                </span>
-              </div>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{aiResult.body}</p>
+
+                  <div className="mt-5 rounded-xl border border-border bg-secondary/30 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      추천 근거
+                    </p>
+                    <p className="mt-2 text-sm leading-relaxed text-foreground">{aiResult.reasoning}</p>
+                  </div>
+
+                  <div className="mt-4 rounded-xl border border-accent/30 bg-accent/10 p-4 text-sm text-foreground">
+                    {aiResult.caution}
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {aiResult.keywords.map((keyword) => (
+                      <span
+                        key={keyword}
+                        className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground"
+                      >
+                        {keyword}
+                      </span>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-accent" />
+                    <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      오늘의 결정 프레임
+                    </span>
+                  </div>
+
+                  <h2 className="mt-4 font-serif text-xl font-semibold text-foreground lg:text-2xl">
+                    {getResult() === "A" ? (
+                      <>
+                        <span className="text-primary">{optionA}</span>
+                        {"(이)가 지금 기운과 맞닿아 있어요"}
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-primary">{optionB}</span>
+                        {"(이)가 지금 기운과 맞닿아 있어요"}
+                      </>
+                    )}
+                  </h2>
+
+                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                    {getResult() === "A"
+                      ? "지금 당신의 기운은 변화와 도전을 향해 열려 있습니다. 새로운 시도가 장기적으로 더 큰 배움과 성장을 안겨줄 수 있어요. 다만 충분한 준비는 놓치지 마세요."
+                      : "지금 당신의 기운은 안정과 깊이를 향해 모이고 있습니다. 현재의 자리에서 더 깊이 뿌리내리는 것이 장기적으로 단단한 기반이 됩니다. 변화는 그 위에서 자연스럽게 올 거예요."}
+                  </p>
+
+                  {/* Keywords */}
+                  <div className="mt-5 flex gap-2">
+                    <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
+                      {getResult() === "A" ? "도전" : "안정"}
+                    </span>
+                    <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
+                      {getResult() === "A" ? "성장" : "깊이"}
+                    </span>
+                  </div>
+                </>
+              )}
+
+              {aiError && !aiLoading && (
+                <p className="mt-4 text-xs text-muted-foreground">
+                  AI 결과를 불러오지 못해 기본 결정 프레임을 보여드려요. ({aiError})
+                </p>
+              )}
 
               {/* AI chat trigger */}
               <button

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, type ElementType } from "react"
+import { useState, useEffect, useMemo, type ElementType } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -16,11 +16,19 @@ import {
   Wind,
   MessageCircle,
   Sparkles,
+  LogOut,
 } from "lucide-react"
 import { CheckInChips } from "./check-in-chips"
 import { DeepDiveSheet } from "./deep-dive-sheet"
 import { AIChatPanel } from "./ai-chat-panel"
 import { ThemeToggle } from "./theme-toggle"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useRouter } from "next/navigation"
 import { useSaju } from "@/lib/contexts/saju-context"
 import { useSajuInterpret } from "@/lib/hooks/use-saju-interpret"
 import type { FortuneResponse } from "@/lib/saju-core"
@@ -138,15 +146,112 @@ function TodaySkeleton() {
   )
 }
 
+/* ─── 최근 기록 (localStorage 기반) ─── */
+
+function getRecentHistory(): string[] {
+  const items: string[] = []
+  const today = new Date()
+  let streak = 0
+
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(today)
+    d.setDate(today.getDate() - i)
+    const dateStr = d.toISOString().slice(0, 10)
+    const dayLabel = i === 1 ? "어제" : i === 2 ? "그제" : `${i}일 전`
+
+    try {
+      const checkin = localStorage.getItem(`saju_checkin_${dateStr}`)
+      if (checkin) {
+        const state = JSON.parse(checkin)
+        if (state.saved) {
+          if (i <= 2) items.push(`${dayLabel} 체크인 완료`)
+          streak++
+        } else {
+          break
+        }
+      } else {
+        break
+      }
+    } catch {
+      break
+    }
+  }
+
+  // 액션 완료 확인
+  try {
+    const yesterday = new Date(today)
+    yesterday.setDate(today.getDate() - 1)
+    const yesterdayStr = yesterday.toISOString().slice(0, 10)
+    const actions = localStorage.getItem(`saju_actions_${yesterdayStr}`)
+    if (actions) {
+      const parsed = JSON.parse(actions) as string[]
+      if (parsed.length > 0) {
+        items.unshift(`어제 실천 ${parsed.length}개 완료`)
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  if (streak >= 2) {
+    items.push(`이번 주 ${streak}일 연속`)
+  }
+
+  return items.length > 0 ? items.slice(0, 3) : ["체크인을 시작해보세요", "매일 실천을 기록해보세요"]
+}
+
+function RecentHistory() {
+  const [history, setHistory] = useState<string[]>([])
+
+  useEffect(() => {
+    setHistory(getRecentHistory())
+  }, [])
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-5">
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        최근 기록
+      </h3>
+      <ul className="mt-3 space-y-2.5">
+        {history.map((item, i) => (
+          <li
+            key={i}
+            className="flex items-center gap-2 text-sm text-muted-foreground"
+          >
+            <div className="h-1.5 w-1.5 rounded-full bg-primary/60" />
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 /* ─── 메인 컴포넌트 ─── */
 
 export function TodayScreen() {
-  const { sajuResult, birthInfo, isLoading } = useSaju()
+  const { sajuResult, birthInfo, isLoading, clearData } = useSaju()
+  const router = useRouter()
   const [checkedActions, setCheckedActions] = useState<Set<string>>(new Set())
   const [deepDiveOpen, setDeepDiveOpen] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
   const [aiActions, setAiActions] = useState<string[]>([])
 
+  // localStorage에서 오늘의 완료된 액션 로드
+  useEffect(() => {
+    try {
+      const dateStr = new Date().toISOString().slice(0, 10)
+      const stored = localStorage.getItem(`saju_actions_${dateStr}`)
+      if (stored) {
+        const parsed = JSON.parse(stored) as string[]
+        if (Array.isArray(parsed)) {
+          setCheckedActions(new Set(parsed))
+        }
+      }
+    } catch {
+      // 파싱 실패 — 무시
+    }
+  }, [])
   // LLM 동적 콘텐츠 fetch
   const { data: llmDaily, isLoading: llmLoading } = useSajuInterpret("daily", birthInfo)
 
@@ -177,6 +282,14 @@ export function TodayScreen() {
       } else {
         next.add(id)
       }
+      // localStorage에 저장 (saju_actions_YYYY-MM-DD)
+      const dateStr = new Date().toISOString().slice(0, 10)
+      const checked = Array.from(next)
+      try {
+        localStorage.setItem(`saju_actions_${dateStr}`, JSON.stringify(checked))
+      } catch {
+        // storage full — 무시
+      }
       return next
     })
   }
@@ -206,18 +319,35 @@ export function TodayScreen() {
           {/* Main column */}
           <div className="lg:max-w-2xl lg:flex-1">
             {/* Top app bar */}
-            <header className="flex items-center justify-between py-2">
+            <header className="relative z-10 flex items-center justify-between py-2">
               <time className="text-sm font-medium text-muted-foreground">
                 {dateLabel}
               </time>
               <div className="flex items-center gap-2">
                 <ThemeToggle />
-                <button
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:bg-secondary"
-                  aria-label="프로필 및 설정"
-                >
-                  <User className="h-4 w-4" />
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:bg-secondary"
+                      aria-label="프로필 및 설정"
+                    >
+                      <User className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem
+                      onClick={() => {
+                        clearData()
+                        router.replace("/")
+                      }}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      로그아웃
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </header>
 
@@ -395,27 +525,8 @@ export function TodayScreen() {
                 </button>
               </div>
 
-              {/* Recent progress */}
-              <div className="rounded-xl border border-border bg-card p-5">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  최근 기록
-                </h3>
-                <ul className="mt-3 space-y-2.5">
-                  {[
-                    "어제 실천 2/2 완료",
-                    "그제 체크인 완료",
-                    "이번 주 3일 연속",
-                  ].map((item, i) => (
-                    <li
-                      key={i}
-                      className="flex items-center gap-2 text-sm text-muted-foreground"
-                    >
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary/60" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            {/* Recent progress — localStorage 기반 */}
+            <RecentHistory />
             </div>
           </aside>
         </div>

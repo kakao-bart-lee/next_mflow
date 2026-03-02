@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, type ElementType } from "react"
+import { useCallback, useEffect, useMemo, useState, type ElementType } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { AIChatPanel } from "./ai-chat-panel"
 import { useSaju } from "@/lib/contexts/saju-context"
+import { useSajuInterpret } from "@/lib/hooks/use-saju-interpret"
 import type { PlanetId } from "@/lib/astrology/static/types"
 
 interface WeekDay {
@@ -97,43 +98,120 @@ function getShortDateLabel(dateIso: string): string {
 }
 
 export function WeekScreen() {
-  const { astrologyResult } = useSaju()
+  const { astrologyResult, birthInfo } = useSaju()
   const [journalText, setJournalText] = useState("")
   const [journalSaved, setJournalSaved] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
+  const [journalLoading, setJournalLoading] = useState(false)
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
 
+  // 이번 주 시작일 계산 (월요일)
+  const weekStartDate = useMemo(() => {
+    const now = new Date()
+    const day = now.getDay()
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1)
+    const monday = new Date(now.setDate(diff))
+    return monday.toISOString().slice(0, 10)
+  }, [])
+
+  // LLM 주간 운세 fetch
+  const { data: llmWeekly } = useSajuInterpret("weekly", birthInfo, weekStartDate)
   const weekData = useMemo<WeekData>(() => {
-    if (!astrologyResult) return WEEK_DATA
-
-    const dominantPlanet = astrologyResult.ranking[0] ?? "SUN"
-    const days = astrologyResult.future.days.map((day) => ({
-      day: getWeekdayLabel(day.date),
-      date: getShortDateLabel(day.date),
-      icon: PLANET_ICON[day.dominantPlanet],
-      keyword: PLANET_KEYWORD[day.dominantPlanet],
-      note: day.focus,
-      highlight: day.intensity === "high",
-    }))
-
-    return {
-      theme: astrologyResult.today.headline,
-      range: astrologyResult.future.rangeLabel,
-      days,
-      aiRecap: {
-        summary: "점성 정적 분석 기반 주간 리캡",
-        keywords: astrologyResult.ranking.slice(0, 3).map((planet) => PLANET_KEYWORD[planet]),
-        emotionPattern: astrologyResult.today.summary,
-        suggestion: astrologyResult.today.actions[0] ?? "이번 주 핵심 과제 하나를 명확히 정해보세요.",
-      },
-      prompt: `${PLANET_KEYWORD[dominantPlanet]} 흐름을 살리기 위해 이번 주 어떤 선택을 하시겠어요?`,
+    // LLM 데이터가 있으면 최우선
+    if (llmWeekly) {
+      const ICON_MAP: Record<string, ElementType<{ className?: string }>> = {
+        정리: Wind, 표현: Flame, 휴식: Droplets, 성장: TreePine,
+        만남: Star, 이동: Wind, 마무리: Moon, 시작: Sun,
+        소통: Wind, 관계: Star, 실행: Flame, 확장: TreePine, 구조: Droplets,
+        정렬: Sun, 돌봄: Moon,
+      }
+      return {
+        theme: llmWeekly.theme,
+        range: weekStartDate ? `${getShortDateLabel(weekStartDate)} 주간` : WEEK_DATA.range,
+        days: llmWeekly.days.map((day) => ({
+          day: day.day,
+          date: day.date,
+          icon: ICON_MAP[day.keyword] ?? Sun,
+          keyword: day.keyword,
+          note: day.note,
+          highlight: day.highlight,
+        })),
+        aiRecap: llmWeekly.aiRecap,
+        prompt: llmWeekly.prompt,
+      }
     }
-  }, [astrologyResult])
 
-  const handleJournalSave = () => {
-    if (!journalText.trim()) return
-    setJournalSaved(true)
-  }
+    // astrology 데이터 폴백
+    if (astrologyResult) {
+      const dominantPlanet = astrologyResult.ranking[0] ?? "SUN"
+      const days = astrologyResult.future.days.map((day) => ({
+        day: getWeekdayLabel(day.date),
+        date: getShortDateLabel(day.date),
+        icon: PLANET_ICON[day.dominantPlanet],
+        keyword: PLANET_KEYWORD[day.dominantPlanet],
+        note: day.focus,
+        highlight: day.intensity === "high",
+      }))
+
+      return {
+        theme: astrologyResult.today.headline,
+        range: astrologyResult.future.rangeLabel,
+        days,
+        aiRecap: {
+          summary: "점성 정적 분석 기반 주간 리캡",
+          keywords: astrologyResult.ranking.slice(0, 3).map((planet) => PLANET_KEYWORD[planet]),
+          emotionPattern: astrologyResult.today.summary,
+          suggestion: astrologyResult.today.actions[0] ?? "이번 주 핵심 과제 하나를 명확히 정해보세요.",
+        },
+        prompt: `${PLANET_KEYWORD[dominantPlanet]} 흐름을 살리기 위해 이번 주 어떤 선택을 하시겠어요?`,
+      }
+    }
+
+    // 최종 폴백: 하드코딩 데이터
+    return WEEK_DATA
+  }, [llmWeekly, astrologyResult, weekStartDate])
+
+  // 저널 로드 (마운트 시 이번 주 저널 불러오기)
+  useEffect(() => {
+    if (!weekStartDate) return
+    let cancelled = false
+    setJournalLoading(true)
+    fetch(`/api/user/journal?weekStart=${weekStartDate}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.entries?.length) return
+        const entry = data.entries[0] as { text: string; prompt: string }
+        setJournalText(entry.text)
+        setJournalSaved(true)
+      })
+      .catch(() => { /* 네트워크 오류 — 무시 */ })
+      .finally(() => { if (!cancelled) setJournalLoading(false) })
+    return () => { cancelled = true }
+  }, [weekStartDate])
+
+  const handleJournalSave = useCallback(async () => {
+    if (!journalText.trim() || !weekStartDate) return
+    setJournalLoading(true)
+    try {
+      const res = await fetch("/api/user/journal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: weekData.prompt,
+          text: journalText.trim(),
+          weekStart: weekStartDate,
+        }),
+      })
+      if (res.ok) {
+        setJournalSaved(true)
+      }
+    } catch {
+      // 네트워크 오류 — 로컬에만 저장
+      setJournalSaved(true)
+    } finally {
+      setJournalLoading(false)
+    }
+  }, [journalText, weekStartDate, weekData.prompt])
 
   const handleDayTap = (date: string) => {
     setSelectedDay(selectedDay === date ? null : date)
@@ -273,6 +351,7 @@ export function WeekScreen() {
                 text={journalText}
                 onTextChange={setJournalText}
                 saved={journalSaved}
+                loading={journalLoading}
                 onSave={handleJournalSave}
               />
             </div>
@@ -287,6 +366,7 @@ export function WeekScreen() {
             text={journalText}
             onTextChange={setJournalText}
             saved={journalSaved}
+            loading={journalLoading}
             onSave={handleJournalSave}
           />
         </div>
@@ -346,12 +426,14 @@ function JournalPrompt({
   text,
   onTextChange,
   saved,
+  loading,
   onSave,
 }: {
   prompt: string
   text: string
   onTextChange: (v: string) => void
   saved: boolean
+  loading: boolean
   onSave: () => void
 }) {
   return (
@@ -385,7 +467,7 @@ function JournalPrompt({
           <Button
             size="sm"
             onClick={onSave}
-            disabled={!text.trim()}
+            disabled={!text.trim() || loading}
             className="h-8 rounded-lg bg-primary px-4 text-xs font-medium text-primary-foreground"
           >
             <Send className="mr-1.5 h-3 w-3" />

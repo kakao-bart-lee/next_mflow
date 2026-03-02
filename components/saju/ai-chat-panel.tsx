@@ -58,8 +58,9 @@ function getMessageText(msg: UIMessage): string {
 function ChatContent({
   context = "default",
   initialPrompt,
+  onActionsGenerated,
 }: Omit<AIChatPanelProps, "open" | "onOpenChange">) {
-  const { birthInfo, astrologyResult } = useSaju()
+  const { birthInfo, astrologyResult, sajuResult } = useSaju()
   const ctxKey = ["today", "week", "decision"].includes(context ?? "")
     ? (context as string)
     : "default"
@@ -75,11 +76,12 @@ function ChatContent({
         body: {
           context: {
             birthInfo: birthInfo ?? undefined,
+            sajuData: sajuResult ?? undefined,
             astrologyData: astrologyResult ?? undefined,
           },
         },
       }),
-    [birthInfo, astrologyResult],
+    [birthInfo, astrologyResult, sajuResult],
   )
 
   const { messages, sendMessage, stop, setMessages, status } = useChat({
@@ -100,6 +102,32 @@ function ChatContent({
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [messages, isActive])
+
+  // AI 응답에서 실천 항목 추출 → onActionsGenerated 콜백
+  useEffect(() => {
+    if (!onActionsGenerated || messages.length < 2) return
+    // 마지막 AI 응답에서 실천항목 패턴 추출
+    const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant" && m.id !== "init-1")
+    if (!lastAssistant) return
+    const text = getMessageText(lastAssistant)
+    // "실천:", "추천:", "해보세요", "시도해보세요" 패턴 또는 번호 리스트(1. 2. 3.) 추출
+    const actionLines = text
+      .split("\n")
+      .filter((line) => {
+        const trimmed = line.trim()
+        return (
+          /^\d+[.)\s]/.test(trimmed) ||
+          /^[-•]\s/.test(trimmed) ||
+          /(실천|추천|해보세요|시도|시작)/.test(trimmed)
+        )
+      })
+      .map((line) => line.replace(/^[\d.)\-•\s]+/, "").trim())
+      .filter((line) => line.length > 5 && line.length < 100)
+      .slice(0, 3)
+    if (actionLines.length > 0) {
+      onActionsGenerated(actionLines)
+    }
+  }, [messages, onActionsGenerated])
 
   const handleSend = async () => {
     const text = input.trim()
