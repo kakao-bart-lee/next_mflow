@@ -122,25 +122,28 @@ async function seedUsers() {
   const basicPlan = await prisma.subscriptionPlan.findUnique({ where: { name: "basic" } })
 
   // ── 3-1. 관리자 개발 계정 (SKIP_AUTH=true 자동 로그인 계정) ──
+  const devBirthInfo = {
+    birthDate: "1990-05-20",
+    birthTime: "09:00",
+    isTimeUnknown: false,
+    timezone: "Asia/Seoul",
+    gender: "M",
+  }
+
   const devUser = await prisma.user.upsert({
     where: { id: "dev-user-local" },
     update: {
       email: "dev@localhost",
       name: "개발자 (Admin)",
       isAdmin: true,
+      birthInfo: devBirthInfo,
     },
     create: {
       id: "dev-user-local",
       email: "dev@localhost",
       name: "개발자 (Admin)",
       isAdmin: true,
-      birthInfo: {
-        birthDate: "1990-05-20",
-        birthTime: "09:00",
-        isTimeUnknown: false,
-        timezone: "Asia/Seoul",
-        gender: "M",
-      },
+      birthInfo: devBirthInfo,
     },
   })
   await prisma.credit.upsert({

@@ -88,20 +88,34 @@ export function SajuProvider({ children }: { children: ReactNode }) {
     setIsLoading(false)
   }, [])
 
-  // SSR-safe hydration: only read localStorage on the client after mount
+  // SSR-safe hydration: localStorage 우선, 없으면 DB에서 birthInfo 로드
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored) as BirthInfo
-        setBirthInfoState(parsed)
-        fetchAnalysis(parsed)
+    async function hydrate() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY)
+        if (stored) {
+          const parsed = JSON.parse(stored) as BirthInfo
+          setBirthInfoState(parsed)
+          fetchAnalysis(parsed)
+          return
+        }
+        // localStorage에 없으면 DB fallback (로그인 유저 대상)
+        const res = await fetch("/api/user/birth-info")
+        if (res.ok) {
+          const { birthInfo: dbInfo } = await res.json() as { birthInfo: BirthInfo | null }
+          if (dbInfo) {
+            setBirthInfoState(dbInfo)
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(dbInfo)) } catch { /* ignore */ }
+            fetchAnalysis(dbInfo)
+          }
+        }
+      } catch {
+        // ignore parse or network errors
+      } finally {
+        setIsHydrated(true)
       }
-    } catch {
-      // ignore parse or storage errors
-    } finally {
-      setIsHydrated(true)
     }
+    void hydrate()
   }, [fetchAnalysis])
 
   // Auto-reanalyze: if birthInfo exists but sajuResult is missing (e.g. after refresh),
