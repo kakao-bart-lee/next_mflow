@@ -35,7 +35,7 @@ export function SolarSystemView({
   sizeMode,
 }: SolarSystemViewProps) {
   return (
-    <div className="relative mx-auto aspect-[4/3] w-full max-w-[480px] sm:max-w-[520px]">
+    <div className="relative mx-auto aspect-[4/3] w-full max-w-[480px] sm:max-w-[520px] rounded-xl overflow-hidden bg-[#07070f]">
       <SolarSystemScene
         activePlanetIdx={activePlanetIdx}
         onPlanetClick={onPlanetClick}

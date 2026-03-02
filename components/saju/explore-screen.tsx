@@ -282,20 +282,20 @@ export function ExploreScreen() {
   return (
     <>
       <div className="mx-auto w-full max-w-2xl px-5 pb-8 pt-6 lg:max-w-5xl lg:px-8">
+        {/* Full-width header — spans both columns on desktop */}
+        <header className="py-2">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">탐색</p>
+          <h1 className="mt-2 text-balance font-serif text-xl font-semibold leading-snug text-foreground lg:text-2xl">
+            나의 하늘과 사주
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            동양의 사주와 서양의 점성술을 하나의 시선으로 읽습니다
+          </p>
+        </header>
+
         <div className="lg:flex lg:gap-10">
           {/* Main column */}
           <div className="lg:max-w-2xl lg:flex-1">
-            {/* Header */}
-            <header className="py-2">
-              <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">탐색</p>
-              <h1 className="mt-2 text-balance font-serif text-xl font-semibold leading-snug text-foreground lg:text-2xl">
-                나의 하늘과 사주
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                동양의 사주와 서양의 점성술을 하나의 시선으로 읽습니다
-              </p>
-            </header>
-
             {/* ─── 1. Headline: Fused reading ─── */}
             <section className="mt-6" aria-label="오늘의 융합 해석">
               <div className="rounded-2xl border border-border bg-card p-6">
@@ -530,7 +530,7 @@ export function ExploreScreen() {
           </div>
 
           {/* ─── Desktop Sidebar ─── */}
-          <aside className="hidden lg:block lg:w-80 lg:shrink-0 lg:pt-14">
+          <aside className="hidden lg:block lg:w-80 lg:shrink-0">
             <div className="sticky top-6 space-y-6">
               {/* Saju pillar card */}
               <div className="rounded-xl border border-border bg-card p-5">

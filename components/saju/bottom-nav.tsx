@@ -30,17 +30,14 @@ export function BottomNav() {
               key={href}
               href={href}
               aria-current={isActive ? "page" : undefined}
-              className={`flex min-w-[56px] flex-col items-center gap-1 rounded-lg px-3 py-1.5 transition-colors ${
+              className={`flex h-14 w-16 flex-col items-center justify-center gap-1 rounded-lg transition-colors ${
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Icon
-                className="h-5 w-5"
-                strokeWidth={isActive ? 2.2 : 1.8}
-              />
-              <span className="text-[10px] font-medium leading-none">
+              <Icon className="h-5 w-5 shrink-0" strokeWidth={isActive ? 2.2 : 1.8} />
+              <span className="whitespace-nowrap text-[10px] font-medium leading-none">
                 {t.nav[key]}
               </span>
             </Link>
