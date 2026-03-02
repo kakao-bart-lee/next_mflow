@@ -15,7 +15,10 @@ import {
   Wind,
   MessageCircle,
   Sparkles,
+  ScrollText,
+  Star,
 } from "lucide-react"
+import Link from "next/link"
 import { CheckInChips } from "./check-in-chips"
 import { DeepDiveSheet } from "./deep-dive-sheet"
 import { AIChatPanel } from "./ai-chat-panel"
@@ -456,6 +459,34 @@ export function TodayScreen() {
                 )}
               </div>
             </section>
+
+            {/* 토론 진입 CTA */}
+            {sajuResult && !isLoading && (
+              <section className="mt-6">
+                <Link
+                  href="/debate"
+                  className="group flex w-full items-center gap-3 rounded-xl border border-primary/20 bg-gradient-to-r from-amber-50/60 to-violet-50/60 p-4 transition-colors hover:from-amber-50 hover:to-violet-50 dark:from-amber-950/20 dark:to-violet-950/20 dark:hover:from-amber-950/30 dark:hover:to-violet-950/30"
+                >
+                  <div className="flex -space-x-1.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40">
+                      <ScrollText className="h-4 w-4 text-amber-700 dark:text-amber-400" />
+                    </div>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-900/40">
+                      <Star className="h-4 w-4 text-violet-700 dark:text-violet-400" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground">
+                      동서양 전문가 토론
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      사주 명리사와 점성술사가 당신의 운세를 토론합니다
+                    </p>
+                  </div>
+                  <ChevronDown className="h-4 w-4 -rotate-90 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              </section>
+            )}
 
             {/* Evidence trigger */}
             <section className="mb-8 mt-6">
