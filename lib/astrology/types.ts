@@ -113,6 +113,38 @@ export interface AccidentalScoreResponse {
   observation_time_utc: string
 }
 
+/* ─── hellenistic core ─── */
+
+export interface HellenisticSectScore {
+  in_sect: boolean
+  is_above_horizon: boolean | null
+  score: number
+  rationale: string
+}
+
+export interface HellenisticCoreResponse {
+  sect: string | null
+  sect_score_total: number | null
+  sect_scores: Record<string, HellenisticSectScore> | null
+  asc_deg: number | null
+  mc_deg: number | null
+  lot_of_fortune_deg: number | null
+  lot_of_spirit_deg: number | null
+  lot_of_fortune_sign: string | null
+  lot_of_spirit_sign: string | null
+  observation_time_utc: string
+}
+
+export interface HellenisticProfectionResponse {
+  mode: string
+  age_years: number
+  profected_house: number
+  profected_sign: string
+  time_lord: string
+  monthly_offset: number | null
+  observation_time_utc: string
+}
+
 /* ─── vedic vimshottari dasha ─── */
 
 export interface DashaPeriod {

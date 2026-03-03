@@ -8,6 +8,8 @@ import type {
   EssentialScoreResponse,
   AccidentalScoreResponse,
   VimshottariResponse,
+  HellenisticCoreResponse,
+  HellenisticProfectionResponse,
 } from "@/lib/astrology/types"
 import {
   hasLocation,
@@ -310,4 +312,55 @@ export async function fetchAccidentalScore(input: BirthInfo): Promise<Accidental
 /** 10-5. 비묘타리 다샤 */
 export async function fetchVimshottari(input: BirthInfo): Promise<VimshottariResponse> {
   return fetchDerived<VimshottariResponse>("/v1/vedic/vimshottari", input)
+}
+
+/** 10-6. 헬레니스틱 핵심 (세크트, 로트, ASC/MC) */
+export async function fetchHellenisticCore(input: BirthInfo): Promise<HellenisticCoreResponse> {
+  return fetchDerived<HellenisticCoreResponse>("/v1/hellenistic/core", input)
+}
+
+/** 10-7. 헬레니스틱 프로펙션 (연간/월간) */
+export async function fetchHellenisticProfection(
+  input: BirthInfo,
+  targetLocalDatetime: string,
+  mode: "ANNUAL" | "MONTHLY" = "ANNUAL",
+): Promise<HellenisticProfectionResponse> {
+  const baseUrl = getBaseUrl()
+  const body = {
+    ...buildDerivedRequestBody(input),
+    target_local_datetime: targetLocalDatetime,
+    mode,
+  }
+  const headers: Record<string, string> = { "Content-Type": "application/json" }
+  const apiKey = process.env.HARUNA_HORIZONS_API_KEY?.trim()
+  if (apiKey) headers.Authorization = `Bearer ${apiKey}`
+
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), getTimeoutMs())
+  let response: Response
+  try {
+    response = await fetch(`${baseUrl}/v1/hellenistic/profection`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+      cache: "no-store",
+      signal: controller.signal,
+    })
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new HorizonsClientError("Haruna Horizons 요청이 시간 초과되었습니다", 504, "HORIZONS_TIMEOUT")
+    }
+    throw new HorizonsClientError("Haruna Horizons 네트워크 요청에 실패했습니다", 503, "HORIZONS_NETWORK_ERROR")
+  } finally {
+    clearTimeout(timeout)
+  }
+
+  let payload: unknown = null
+  try { payload = await response.json() } catch {
+    if (!response.ok) {
+      throw new HorizonsClientError("Haruna Horizons 에러 응답을 해석할 수 없습니다", response.status, "HORIZONS_BAD_RESPONSE")
+    }
+  }
+  if (!response.ok) throw mapServiceError(response.status, payload)
+  return payload as HellenisticProfectionResponse
 }
