@@ -16,6 +16,7 @@ import {
   Radar,
 } from "lucide-react"
 import { SolarSystemView } from "./celestial/solar-system-view"
+import { NatalChartWheel } from "./natal-chart-wheel"
 import type { PlanetSizeMode } from "./celestial/scene"
 import {
   Tooltip,
@@ -446,6 +447,23 @@ export function ExploreScreen() {
                 )}
               </div>
             </section>
+
+            {/* ─── 2.5 Natal Chart Wheel (Horizons 데이터) ─── */}
+            {chartCore && (
+              <section className="mt-6" aria-label="네이탈 차트 휠">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">네이탈 차트</h2>
+                  <span className="text-[10px] text-muted-foreground/60">Horizons Engine</span>
+                </div>
+                <div className="mt-3 rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
+                  <NatalChartWheel chartCore={chartCore} aspects={aspects} />
+                  <div className="mt-3 flex flex-wrap justify-center gap-3 text-[10px] text-muted-foreground">
+                    <span>ASC: {chartCore.ascendant?.signLabel} {chartCore.ascendant?.degreeInSign?.toFixed(1)}°</span>
+                    <span>MC: {chartCore.midheaven?.signLabel} {chartCore.midheaven?.degreeInSign?.toFixed(1)}°</span>
+                  </div>
+                </div>
+              </section>
+            )}
 
             {/* ─── 3. Five Elements (실제 데이터) ─── */}
             <section className="mt-6" aria-label="오행 에너지">
