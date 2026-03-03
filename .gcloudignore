@@ -1,0 +1,13 @@
+.git
+.github
+.next
+node_modules
+.env.local
+.env.*.local
+*.md
+tests/
+__tests__/
+coverage/
+.vscode/
+.idea/
+docker-compose.yml

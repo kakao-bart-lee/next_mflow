@@ -1,0 +1,54 @@
+# Cloud Build — moonlit next_mflow (Sandbox)
+# Triggers on push to develop branch
+
+steps:
+  # Step 0: Determine image tag
+  - name: 'bash'
+    script: |
+      TAG="${COMMIT_SHA:-$(date +%Y%m%d-%H%M%S)}"
+      echo "$TAG" > /workspace/image-tag.txt
+      echo "Image tag: $TAG"
+
+  # Step 1: Build & push Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        TAG=$(cat /workspace/image-tag.txt)
+        docker buildx build --platform=linux/amd64 \
+          -t asia-northeast3-docker.pkg.dev/$PROJECT_ID/moonlit/next-mflow-sandbox:$$TAG \
+          -t asia-northeast3-docker.pkg.dev/$PROJECT_ID/moonlit/next-mflow-sandbox:latest \
+          --push .
+    timeout: 600s
+
+  # Step 2: Deploy to Cloud Run (Sandbox)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        TAG=$(cat /workspace/image-tag.txt)
+        gcloud run deploy moonlit-web-sandbox \
+          --image=asia-northeast3-docker.pkg.dev/$PROJECT_ID/moonlit/next-mflow-sandbox:$$TAG \
+          --platform=managed \
+          --region=asia-northeast3 \
+          --allow-unauthenticated \
+          --port=3000 \
+          --memory=512Mi \
+          --cpu=1 \
+          --min-instances=0 \
+          --max-instances=3 \
+          --timeout=60 \
+          --set-env-vars=NODE_ENV=production,SKIP_AUTH=true,MOCK_LLM=false,HARUNA_HORIZONS_BASE_URL=${_HARUNA_HORIZONS_BASE_URL},ASTROLOGY_USE_HORIZONS=true \
+          --set-secrets=DATABASE_URL=moonlit-database-url-sandbox:latest,AUTH_SECRET=moonlit-auth-secret-sandbox:latest,OPENAI_API_KEY=moonlit-openai-api-key-sandbox:latest
+    timeout: 300s
+
+substitutions:
+  _HARUNA_HORIZONS_BASE_URL: ''
+
+options:
+  machineType: 'E2_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: 1200s
