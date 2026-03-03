@@ -17,6 +17,8 @@ interface DragOffset {
 
 const STORAGE_KEY = "dev-toolbar-pos"
 const PALETTE_KEY = "saju-theme-preset"
+const FONT_KEY = "saju-font-preset"
+const SERVICE_KEY = "saju-service-name"
 
 function loadPos(): Position | null {
   try {
@@ -100,6 +102,48 @@ function applyPreset(preset: Preset): void {
   }
 }
 
+/* ─── Font presets ─── */
+
+interface FontPreset {
+  id: string
+  label: string
+}
+
+const FONT_PRESETS: FontPreset[] = [
+  { id: "pretendard", label: "Pretendard" },
+  { id: "noto", label: "Noto" },
+  { id: "system", label: "System" },
+]
+
+function applyFont(preset: FontPreset): void {
+  const root = document.documentElement
+  if (preset.id === "pretendard") {
+    root.removeAttribute("data-font")
+  } else {
+    root.setAttribute("data-font", preset.id)
+  }
+  try { localStorage.setItem(FONT_KEY, preset.id) } catch { /* ignore */ }
+}
+
+/* ─── Service name presets ─── */
+
+interface ServicePreset {
+  id: string
+  label: string
+}
+
+const SERVICE_PRESETS: ServicePreset[] = [
+  { id: "saju-playbook", label: "Saju Playbook" },
+  { id: "moonlit", label: "Moonlit" },
+  { id: "astro-rain-cat", label: "Astro Rain Cat" },
+]
+
+function applyServiceName(preset: ServicePreset): void {
+  try { localStorage.setItem(SERVICE_KEY, preset.id) } catch { /* ignore */ }
+  // Dispatch custom event so header can react
+  window.dispatchEvent(new CustomEvent("service-name-change", { detail: preset.id }))
+}
+
 /* ─── View options ─── */
 
 const VIEW_OPTIONS = [
@@ -115,6 +159,8 @@ export function DevToolbar(): ReactNode {
   const [collapsed, setCollapsed] = useState(false)
   const [pos, setPos] = useState<Position | null>(null)
   const [activePaletteId, setActivePaletteId] = useState<string>("cosmic-dark")
+  const [activeFontId, setActiveFontId] = useState<string>("pretendard")
+  const [activeServiceId, setActiveServiceId] = useState<string>("saju-playbook")
 
   useEffect(() => {
     const saved = loadPos()
@@ -125,13 +171,21 @@ export function DevToolbar(): ReactNode {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Load and apply saved palette on mount
+  // Load and apply saved palette, font, service on mount
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(PALETTE_KEY) ?? "cosmic-dark"
-      setActivePaletteId(saved)
-      const preset = PRESETS.find((p) => p.id === saved)
+      const savedPalette = localStorage.getItem(PALETTE_KEY) ?? "cosmic-dark"
+      setActivePaletteId(savedPalette)
+      const preset = PRESETS.find((p) => p.id === savedPalette)
       if (preset) applyPreset(preset)
+
+      const savedFont = localStorage.getItem(FONT_KEY) ?? "pretendard"
+      setActiveFontId(savedFont)
+      const fontPreset = FONT_PRESETS.find((f) => f.id === savedFont)
+      if (fontPreset) applyFont(fontPreset)
+
+      const savedService = localStorage.getItem(SERVICE_KEY) ?? "saju-playbook"
+      setActiveServiceId(savedService)
     } catch {
       // ignore
     }
@@ -177,6 +231,16 @@ export function DevToolbar(): ReactNode {
   function handlePresetSelect(preset: Preset): void {
     setActivePaletteId(preset.id)
     applyPreset(preset)
+  }
+
+  function handleFontSelect(preset: FontPreset): void {
+    setActiveFontId(preset.id)
+    applyFont(preset)
+  }
+
+  function handleServiceSelect(preset: ServicePreset): void {
+    setActiveServiceId(preset.id)
+    applyServiceName(preset)
   }
 
   function toggleCollapsed(): void {
@@ -274,6 +338,52 @@ export function DevToolbar(): ReactNode {
                       </button>
                     )
                   })}
+                </div>
+              </div>
+            </div>
+
+            {/* Font switcher */}
+            <div className="border-t border-border/50 px-2 py-1.5">
+              <div className="flex items-center gap-1.5">
+                <span className="shrink-0 text-[10px] text-muted-foreground/50">폰트</span>
+                <div className="flex gap-1">
+                  {FONT_PRESETS.map((fp) => (
+                    <button
+                      key={fp.id}
+                      onClick={() => handleFontSelect(fp)}
+                      className={`rounded-md px-2 py-1 text-[10px] font-medium transition-colors ${
+                        fp.id === activeFontId
+                          ? "bg-foreground text-background"
+                          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                      }`}
+                      type="button"
+                    >
+                      {fp.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Service name switcher */}
+            <div className="border-t border-border/50 px-2 py-1.5">
+              <div className="flex items-center gap-1.5">
+                <span className="shrink-0 text-[10px] text-muted-foreground/50">서비스</span>
+                <div className="flex gap-1">
+                  {SERVICE_PRESETS.map((sp) => (
+                    <button
+                      key={sp.id}
+                      onClick={() => handleServiceSelect(sp)}
+                      className={`rounded-md px-2 py-1 text-[10px] font-medium transition-colors ${
+                        sp.id === activeServiceId
+                          ? "bg-foreground text-background"
+                          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                      }`}
+                      type="button"
+                    >
+                      {sp.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>

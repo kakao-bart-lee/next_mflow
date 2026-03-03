@@ -136,7 +136,7 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-noto-sans-kr), 'Geist', sans-serif;
+  --font-sans: 'Pretendard Variable', var(--font-noto-sans-kr), 'Geist', sans-serif;
   --font-serif: var(--font-noto-serif-kr), 'Georgia', serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);
@@ -359,4 +359,12 @@
   --star-gold-r: 167; --star-gold-g: 139; --star-gold-b: 250;
   --star-lavender-r: 124; --star-lavender-g: 92; --star-lavender-b: 191;
   --rain-r: 103; --rain-g: 232; --rain-b: 249;
+}
+
+/* ─── Font switcher (DevToolbar) ─── */
+[data-font="noto"] body {
+  font-family: var(--font-noto-sans-kr), 'Geist', sans-serif;
+}
+[data-font="system"] body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }

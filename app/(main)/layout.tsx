@@ -1,7 +1,7 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { LogOut, Settings, User } from "lucide-react"
 import { logoutAction } from "@/lib/auth/actions"
@@ -10,6 +10,7 @@ import { BottomNav } from "@/components/saju/bottom-nav"
 import { DevToolbar } from "@/components/dev/dev-toolbar"
 import { ThemeToggle } from "@/components/saju/theme-toggle"
 import { StarfieldBg } from "@/components/starfield-bg"
+import { MoonIcon } from "@/components/moon-icon"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +19,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+const SERVICE_LABELS: Record<string, string> = {
+  "saju-playbook": "Saju Playbook",
+  "moonlit": "Moonlit",
+  "astro-rain-cat": "Astro Rain Cat",
+}
+
 interface MainLayoutProps {
   children: ReactNode
 }
@@ -25,8 +32,25 @@ interface MainLayoutProps {
 export default function MainLayout({ children }: MainLayoutProps): ReactNode {
   const { clearData } = useSaju()
   const [mounted, setMounted] = useState(false)
+  const [serviceName, setServiceName] = useState("saju-playbook")
 
-  useEffect(() => setMounted(true), [])
+  useEffect(() => {
+    setMounted(true)
+    try {
+      const saved = localStorage.getItem("saju-service-name")
+      if (saved) setServiceName(saved)
+    } catch { /* ignore */ }
+  }, [])
+
+  const handleServiceChange = useCallback((e: Event) => {
+    const detail = (e as CustomEvent<string>).detail
+    setServiceName(detail)
+  }, [])
+
+  useEffect(() => {
+    window.addEventListener("service-name-change", handleServiceChange)
+    return () => window.removeEventListener("service-name-change", handleServiceChange)
+  }, [handleServiceChange])
 
   function handleLogout(): void {
     clearData()
@@ -53,9 +77,10 @@ export default function MainLayout({ children }: MainLayoutProps): ReactNode {
           {/* Logo */}
           <Link
             href="/today"
-            className="font-serif text-base font-semibold text-foreground/90 transition-opacity hover:opacity-70"
+            className="flex items-center gap-2 font-serif text-base font-semibold text-foreground/90 transition-opacity hover:opacity-70"
           >
-            Saju Playbook
+            {serviceName === "moonlit" && <MoonIcon size={20} className="text-primary" />}
+            {SERVICE_LABELS[serviceName] ?? "Saju Playbook"}
           </Link>
 
           {/* Controls */}

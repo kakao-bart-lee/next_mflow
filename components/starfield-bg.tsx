@@ -38,6 +38,22 @@ function getThemeColors(canvas: HTMLCanvasElement): {
   }
 }
 
+/** 4-pointed star via quadraticCurveTo — crisp spike shape */
+function drawSharpStar(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
+  const outerR = size * 1.5
+  const innerR = size * 0.3
+  ctx.beginPath()
+  // top spike
+  ctx.moveTo(x, y - outerR)
+  ctx.quadraticCurveTo(x + innerR, y - innerR, x + outerR, y)
+  ctx.quadraticCurveTo(x + innerR, y + innerR, x, y + outerR)
+  ctx.quadraticCurveTo(x - innerR, y + innerR, x - outerR, y)
+  ctx.quadraticCurveTo(x - innerR, y - innerR, x, y - outerR)
+  ctx.closePath()
+  ctx.fill()
+}
+
+/** Small 4-spike star for medium-sized stars */
 function drawStar(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
   const spikes = 4
   const outerR = size * 1.2
@@ -107,34 +123,39 @@ export function StarfieldBg() {
       time += 0.01
 
       // Draw stars
-      for (const star of stars) {
+      for (let idx = 0; idx < stars.length; idx++) {
+        const star = stars[idx]
         const twinkle = Math.sin(time * star.speed + star.twinkleOffset)
-        const opacity = star.opacity * (0.6 + twinkle * 0.4)
+        const opacity = star.opacity * (0.4 + twinkle * 0.6)
 
-        // Alternate between gold and lavender
-        const idx = stars.indexOf(star)
-        let r, g, b
-        if (idx % 3 === 0) {
+        // Color assignment: gold / lavender / white
+        let r: number, g: number, b: number
+        const isGolden = star.size > 1.5
+        if (isGolden) {
           r = colors.goldR; g = colors.goldG; b = colors.goldB
         } else if (idx % 3 === 1) {
           r = colors.lavR; g = colors.lavG; b = colors.lavB
-        } else {
+        } else if (idx % 3 === 2) {
           r = 255; g = 255; b = 255
+        } else {
+          r = colors.goldR; g = colors.goldG; b = colors.goldB
         }
 
-        ctx.fillStyle = `rgba(${r},${g},${b},${opacity})`
         if (star.size > 1.8) {
-          // Glow effect for large stars
-          const grd = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, star.size * 3)
-          grd.addColorStop(0, `rgba(${r},${g},${b},${opacity})`)
-          grd.addColorStop(1, `rgba(${r},${g},${b},0)`)
-          ctx.fillStyle = grd
-          ctx.beginPath()
-          ctx.arc(star.x, star.y, star.size * 3, 0, Math.PI * 2)
-          ctx.fill()
+          // Large stars: sharp 4-pointed star + shadowBlur glow
+          ctx.save()
+          ctx.shadowBlur = 8
+          ctx.shadowColor = `rgba(${r},${g},${b},${opacity * 0.6})`
+          ctx.fillStyle = `rgba(${r},${g},${b},${opacity})`
+          drawSharpStar(ctx, star.x, star.y, star.size)
+          ctx.restore()
+        } else if (star.size > 1.2) {
+          // Medium stars: small spike shape
           ctx.fillStyle = `rgba(${r},${g},${b},${opacity})`
           drawStar(ctx, star.x, star.y, star.size)
         } else {
+          // Small stars: simple circle
+          ctx.fillStyle = `rgba(${r},${g},${b},${opacity})`
           ctx.beginPath()
           ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2)
           ctx.fill()
@@ -167,7 +188,7 @@ export function StarfieldBg() {
     })
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ["class"],
+      attributeFilter: ["class", "data-palette"],
     })
 
     window.addEventListener("resize", resize)

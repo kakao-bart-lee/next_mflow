@@ -6,21 +6,7 @@ import { TextStreamChatTransport, isTextUIPart, type UIMessage } from "ai"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerClose,
-} from "@/components/ui/drawer"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { ArrowUp, X, Sparkles, RotateCcw, User } from "lucide-react"
+import { ArrowUp, X, Sparkles, RotateCcw, User, ArrowLeft } from "lucide-react"
 import { useSaju } from "@/lib/contexts/saju-context"
 
 interface AIChatPanelProps {
@@ -172,7 +158,7 @@ function ChatContent({
     <div className="flex h-full flex-col">
       {/* Messages area */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3">
-        <div className="space-y-4">
+        <div className="mx-auto max-w-2xl space-y-4">
           {messages.map((msg) => (
             <div
               key={msg.id}
@@ -225,7 +211,7 @@ function ChatContent({
 
       {/* Suggested prompts — shown only before any user message */}
       {messages.length <= 1 && (
-        <div className="flex flex-wrap gap-2 px-4 pb-3">
+        <div className="mx-auto flex max-w-2xl flex-wrap gap-2 px-4 pb-3">
           {suggestedPrompts.map((prompt) => (
             <button
               key={prompt}
@@ -243,8 +229,8 @@ function ChatContent({
       )}
 
       {/* Input area */}
-      <div className="border-t border-border/20 bg-background/40 p-3 backdrop-blur-sm">
-        <div className="flex items-end gap-2">
+      <div className="border-t border-border/20 bg-background/40 p-3 pb-safe backdrop-blur-sm">
+        <div className="mx-auto flex max-w-2xl items-end gap-2">
           <button
             onClick={handleReset}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
@@ -284,65 +270,48 @@ export function AIChatPanel({
   initialPrompt,
   onActionsGenerated,
 }: AIChatPanelProps) {
-  const isMobile = useIsMobile()
-
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-[85vh] border-border/20 bg-card/95 backdrop-blur-xl">
-          <DrawerHeader className="border-b border-border/20 pb-3 text-left">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <DrawerTitle className="font-serif text-sm font-medium text-foreground">
-                    AI 통합 해석
-                  </DrawerTitle>
-                  <p className="text-[10px] text-muted-foreground">사주 + 점성술 통합 분석</p>
-                </div>
-              </div>
-              <DrawerClose className="rounded-full p-1 text-muted-foreground hover:text-foreground">
-                <X className="h-5 w-5" />
-                <span className="sr-only">닫기</span>
-              </DrawerClose>
-            </div>
-          </DrawerHeader>
-          <ChatContent
-            open={open}
-            context={context}
-            initialPrompt={initialPrompt}
-            onActionsGenerated={onActionsGenerated}
-          />
-        </DrawerContent>
-      </Drawer>
-    )
-  }
+  if (!open) return null
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="flex w-full max-w-md flex-col border-border/20 bg-card/95 p-0 backdrop-blur-xl sm:max-w-lg">
-        <SheetHeader className="border-b border-border/20 px-4 py-3">
+    <div className="fixed inset-0 z-50 flex flex-col bg-background animate-fade-in-up">
+      {/* Header */}
+      <header className="flex items-center justify-between border-b border-border/20 bg-background/60 px-4 py-3 backdrop-blur-xl">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => onOpenChange(false)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            type="button"
+            aria-label="뒤로가기"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15">
               <Sparkles className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <SheetTitle className="font-serif text-sm font-medium text-foreground">
-                AI 통합 해석
-              </SheetTitle>
+              <h2 className="font-serif text-sm font-medium text-foreground">AI 통합 해석</h2>
               <p className="text-[10px] text-muted-foreground">사주 + 점성술 통합 분석</p>
             </div>
           </div>
-        </SheetHeader>
-        <ChatContent
-          open={open}
-          context={context}
-          initialPrompt={initialPrompt}
-          onActionsGenerated={onActionsGenerated}
-        />
-      </SheetContent>
-    </Sheet>
+        </div>
+        <button
+          onClick={() => onOpenChange(false)}
+          className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          type="button"
+          aria-label="닫기"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </header>
+
+      {/* Chat content fills remaining space */}
+      <ChatContent
+        open={open}
+        context={context}
+        initialPrompt={initialPrompt}
+        onActionsGenerated={onActionsGenerated}
+      />
+    </div>
   )
 }

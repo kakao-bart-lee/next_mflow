@@ -26,8 +26,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f5f0e8' },
-    { media: '(prefers-color-scheme: dark)', color: '#2a2520' },
+    { media: '(prefers-color-scheme: light)', color: '#FFF9E5' },
+    { media: '(prefers-color-scheme: dark)', color: '#0B0D17' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -42,6 +42,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={`${notoSansKR.variable} ${notoSerifKR.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Pretendard Variable — CDN preconnect + stylesheet */}
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
+      </head>
       <body className="font-sans antialiased">
         <ThemeProvider
           attribute="class"
