@@ -2,7 +2,9 @@
 
 import { useState, useMemo } from "react"
 import { AIChatPanel } from "./ai-chat-panel"
+import { FiveElementsRadar } from "./five-elements-radar"
 import { Skeleton } from "@/components/ui/skeleton"
+import { MoonIcon } from "@/components/moon-icon"
 import {
   MessageCircle,
   Sparkles,
@@ -10,6 +12,8 @@ import {
   ChevronUp,
   BookOpen,
   HelpCircle,
+  BarChart3,
+  Radar,
 } from "lucide-react"
 import { SolarSystemView } from "./celestial/solar-system-view"
 import type { PlanetSizeMode } from "./celestial/scene"
@@ -229,12 +233,13 @@ function getTypeLabel(type: "daily" | "weekly" | "special") {
 /* ─── 메인 컴포넌트 ─── */
 
 export function ExploreScreen() {
-  const { sajuResult, astrologyResult, isLoading } = useSaju()
+  const { sajuResult, astrologyResult, chartCore, vedicCore, isLoading } = useSaju()
   const [chatOpen, setChatOpen] = useState(false)
   const [activePlanetIdx, setActivePlanetIdx] = useState<number | null>(null)
   const [expandedTransit, setExpandedTransit] = useState<string | null>(null)
   const [transitFilter, setTransitFilter] = useState<"all" | "daily" | "weekly" | "special">("all")
   const [planetSizeMode, setPlanetSizeMode] = useState<PlanetSizeMode>("influence")
+  const [elementChartMode, setElementChartMode] = useState<"bar" | "radar">("bar")
 
   const sajuPillar = useMemo(
     () => (sajuResult ? buildSajuPillar(sajuResult) : null),
@@ -254,17 +259,19 @@ export function ExploreScreen() {
       const base = PLANET_META[planet]
       const position = astrologyResult.positions[planet]
       const influence = astrologyResult.influences[planet]
+      // chartCore 하우스 데이터가 있으면 우선 사용
+      const chartCoreHouse = chartCore?.planets[planet]?.house ?? null
       return {
         id: planet,
         symbol: base.symbol,
         name: base.name,
         sign: `${position.signLabel} ${position.degreeInSign}°`,
-        house: position.house,
+        house: chartCoreHouse ?? position.house,
         sajuMap: base.sajuMap,
         description: influence.interpretation,
       }
     })
-  }, [astrologyResult])
+  }, [astrologyResult, chartCore])
 
   const transits = useMemo(() => {
     if (!astrologyResult) return TRANSITS
@@ -282,15 +289,39 @@ export function ExploreScreen() {
   return (
     <>
       <div className="mx-auto w-full max-w-2xl px-5 pb-8 pt-6 lg:max-w-5xl lg:px-8">
-        {/* Full-width header — spans both columns on desktop */}
-        <header className="py-2">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">탐색</p>
-          <h1 className="mt-2 text-balance font-serif text-xl font-semibold leading-snug text-foreground lg:text-2xl">
-            나의 하늘과 사주
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            동양의 사주와 서양의 점성술을 하나의 시선으로 읽습니다
-          </p>
+        {/* Hero banner */}
+        <header className="relative overflow-hidden rounded-2xl border border-border/40 bg-card/40 px-5 py-5 backdrop-blur-sm lg:px-7 lg:py-6"
+          style={{
+            background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, var(--card)), color-mix(in srgb, var(--accent) 6%, var(--card)))",
+          }}
+        >
+          {/* Ambient moon decoration */}
+          <MoonIcon size={48} className="absolute right-4 top-4 text-primary opacity-20 animate-float" />
+
+          <div className="relative z-10">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground/70">탐색</p>
+            <h1 className="mt-1.5 text-balance font-serif text-2xl font-semibold leading-snug text-foreground lg:text-3xl">
+              나의 하늘과 사주
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              오늘의 별자리와 사주가 말하는 것
+            </p>
+
+            {/* Planet symbol row */}
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {["☉", "☽", "☿", "♀", "♂", "♃", "♄"].map((sym) => (
+                <span
+                  key={sym}
+                  className="flex h-6 w-6 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-xs text-muted-foreground"
+                >
+                  {sym}
+                </span>
+              ))}
+              <span className="ml-1 flex items-center rounded-full border border-primary/20 bg-primary/10 px-2.5 text-[11px] font-medium text-primary">
+                사주 + 점성술
+              </span>
+            </div>
+          </div>
         </header>
 
         <div className="lg:flex lg:gap-10">
@@ -298,7 +329,7 @@ export function ExploreScreen() {
           <div className="lg:max-w-2xl lg:flex-1">
             {/* ─── 1. Headline: Fused reading ─── */}
             <section className="mt-6" aria-label="오늘의 융합 해석">
-              <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-6">
                 {/* Saju pillar + planet pills */}
                 {isLoading ? (
                   <div className="flex gap-2">
@@ -355,7 +386,7 @@ export function ExploreScreen() {
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">차트와 사주 매핑</h2>
                 <Sparkles className="h-4 w-4 text-accent/60" />
               </div>
-              <div className="mt-3 rounded-2xl border border-border bg-card p-5">
+              <div className="mt-3 rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
                 {/* Size mode toggle */}
                 <div className="mb-3 flex justify-end">
                   <div className="inline-flex rounded-full border border-border p-0.5 text-xs">
@@ -418,8 +449,30 @@ export function ExploreScreen() {
 
             {/* ─── 3. Five Elements (실제 데이터) ─── */}
             <section className="mt-6" aria-label="오행 에너지">
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">오행 에너지 분포</h2>
-              <div className="mt-3 rounded-2xl border border-border bg-card p-5">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">오행 에너지 분포</h2>
+                {fiveElements && (
+                  <div className="inline-flex rounded-full border border-border p-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setElementChartMode("bar")}
+                      className={`rounded-full p-1.5 transition-colors ${elementChartMode === "bar" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                      aria-label="바 차트"
+                    >
+                      <BarChart3 className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setElementChartMode("radar")}
+                      className={`rounded-full p-1.5 transition-colors ${elementChartMode === "radar" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                      aria-label="레이더 차트"
+                    >
+                      <Radar className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div className="mt-3 rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
                 {isLoading ? (
                   <div className="space-y-3">
                     {[...Array(5)].map((_, i) => (
@@ -434,28 +487,32 @@ export function ExploreScreen() {
                   </div>
                 ) : fiveElements ? (
                   <>
-                    <div className="space-y-3">
-                      {fiveElements.map((el) => {
-                        const maxVal = Math.max(...fiveElements.map((e) => e.value), 1)
-                        const pct = (el.value / maxVal) * 100
-                        return (
-                          <div key={el.element} className="flex items-center gap-3">
-                            <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${el.color}`}>
-                              <span className={`font-serif text-xs font-bold ${el.textColor}`}>{el.element}</span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="font-medium text-foreground">{el.label}</span>
-                                <span className="text-muted-foreground">{el.value}</span>
+                    {elementChartMode === "bar" ? (
+                      <div className="space-y-3">
+                        {fiveElements.map((el) => {
+                          const maxVal = Math.max(...fiveElements.map((e) => e.value), 1)
+                          const pct = (el.value / maxVal) * 100
+                          return (
+                            <div key={el.element} className="flex items-center gap-3">
+                              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${el.color}`}>
+                                <span className={`font-serif text-xs font-bold ${el.textColor}`}>{el.element}</span>
                               </div>
-                              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
-                                <div className={`h-full rounded-full ${el.color} transition-all duration-500`} style={{ width: `${pct}%` }} />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-medium text-foreground">{el.label}</span>
+                                  <span className="text-muted-foreground">{el.value}</span>
+                                </div>
+                                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                                  <div className={`h-full rounded-full ${el.color} transition-all duration-500`} style={{ width: `${pct}%` }} />
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        )
-                      })}
-                    </div>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <FiveElementsRadar data={fiveElements} />
+                    )}
                     <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
                       {(() => {
                         const dominant = fiveElements.reduce((a, b) => a.value > b.value ? a : b)
@@ -532,27 +589,35 @@ export function ExploreScreen() {
           {/* ─── Desktop Sidebar ─── */}
           <aside className="hidden lg:block lg:w-80 lg:shrink-0">
             <div className="sticky top-6 space-y-6">
-              {/* Saju pillar card */}
-              <div className="rounded-xl border border-border bg-card p-5">
+              {/* Saju pillar card — 원형 배지 디자인 */}
+              <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">나의 사주 일주</h3>
                 {isLoading ? (
                   <div className="mt-3 flex items-center gap-3">
-                    <Skeleton className="h-14 w-14 rounded-xl" />
+                    <Skeleton className="h-16 w-16 rounded-full" />
                     <div className="space-y-2">
                       <Skeleton className="h-4 w-24" />
                       <Skeleton className="h-3 w-32" />
                     </div>
                   </div>
                 ) : sajuPillar ? (
-                  <div className="mt-3 flex items-center gap-3">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary">
-                      <span className="font-serif text-xl font-bold text-primary-foreground">
-                        {sajuPillar.heavenlyStem}{sajuPillar.earthlyBranch}
+                  <div className="mt-3 flex items-center gap-4">
+                    <div className="relative flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-full animate-glow-pulse"
+                      style={{ background: "color-mix(in srgb, var(--primary) 15%, transparent)" }}
+                    >
+                      <span className="font-serif text-base font-bold text-primary leading-none">
+                        {sajuPillar.heavenlyStem}
+                      </span>
+                      <span className="font-serif text-sm text-primary/80 leading-none mt-0.5">
+                        {sajuPillar.earthlyBranch}
                       </span>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{sajuPillar.element}</p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">{sajuPillar.meaning}</p>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-2 w-2 rounded-full bg-primary" />
+                        <p className="text-sm font-medium text-foreground">{sajuPillar.element}</p>
+                      </div>
+                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground line-clamp-2">{sajuPillar.meaning}</p>
                     </div>
                   </div>
                 ) : (
@@ -562,7 +627,7 @@ export function ExploreScreen() {
 
               {/* Current Daewoon */}
               {sajuResult && (
-                <div className="rounded-xl border border-border bg-card p-5">
+                <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">대운 / 세운</h3>
                   <div className="mt-3 space-y-2">
                     {greatFortune?.current_period && (
@@ -584,8 +649,26 @@ export function ExploreScreen() {
                 </div>
               )}
 
+              {/* Moon Nakshatra (베딕) */}
+              {vedicCore?.moonNakshatra && (
+                <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">달의 낙샤트라</h3>
+                  <div className="mt-3 flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/15">
+                      <span className="text-lg">☽</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{vedicCore.moonNakshatra.name}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        파다 {vedicCore.moonNakshatra.pada} · 주관 {vedicCore.moonNakshatra.lord}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* AI prompt */}
-              <div className="rounded-xl border border-border bg-card p-5">
+              <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-accent" />
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI 통합 해석</h3>

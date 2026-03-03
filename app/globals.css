@@ -3,115 +3,140 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ─── Cosmic Cream (Light) — Cat's Eye Gold + Rain Blue + Lavender ─── */
 :root {
-  /* Warm parchment/cream background */
-  --background: oklch(0.97 0.008 75);
-  --foreground: oklch(0.22 0.02 50);
+  --background: #FFF9E5;
+  --foreground: #2C3E50;
 
-  /* Card: slightly warmer than bg */
-  --card: oklch(0.99 0.005 75);
-  --card-foreground: oklch(0.22 0.02 50);
+  --card: #FFFFFF;
+  --card-foreground: #2C3E50;
 
-  --popover: oklch(0.99 0.005 75);
-  --popover-foreground: oklch(0.22 0.02 50);
+  --popover: #FFFFFF;
+  --popover-foreground: #2C3E50;
 
-  /* Primary: deep forest green */
-  --primary: oklch(0.35 0.08 155);
-  --primary-foreground: oklch(0.97 0.005 75);
+  /* Primary: Cat's Eye Gold */
+  --primary: #E9B44C;
+  --primary-foreground: #2C3E50;
 
   /* Secondary: warm sand */
-  --secondary: oklch(0.93 0.015 75);
-  --secondary-foreground: oklch(0.30 0.03 50);
+  --secondary: #F0EDE4;
+  --secondary-foreground: #2C3E50;
 
-  /* Muted: soft warm gray */
-  --muted: oklch(0.93 0.01 75);
-  --muted-foreground: oklch(0.50 0.02 50);
+  /* Muted: astro grey */
+  --muted: #F0EDE4;
+  --muted-foreground: #708090;
 
-  /* Accent: earthy terracotta */
-  --accent: oklch(0.62 0.14 45);
-  --accent-foreground: oklch(0.99 0.005 75);
+  /* Accent: Rain Blue */
+  --accent: #A7C7E7;
+  --accent-foreground: #2C3E50;
 
-  --destructive: oklch(0.55 0.2 27);
-  --destructive-foreground: oklch(0.97 0.005 75);
+  --destructive: #C45B3E;
+  --destructive-foreground: #FFF9E5;
 
-  --border: oklch(0.88 0.015 75);
-  --input: oklch(0.90 0.012 75);
-  --ring: oklch(0.35 0.08 155);
+  --border: #DDD6C6;
+  --input: #DDD6C6;
+  --ring: #B2A4D4;
 
-  --chart-1: oklch(0.35 0.08 155);
-  --chart-2: oklch(0.62 0.14 45);
-  --chart-3: oklch(0.50 0.06 75);
-  --chart-4: oklch(0.70 0.10 90);
-  --chart-5: oklch(0.45 0.05 200);
+  --chart-1: #E9B44C;
+  --chart-2: #A7C7E7;
+  --chart-3: #B2A4D4;
+  --chart-4: #88B04B;
+  --chart-5: #C45B3E;
 
   --radius: 0.75rem;
 
-  /* Ambient gradient for layered backgrounds */
-  --gradient-warm: oklch(0.94 0.025 75 / 0.6);
+  /* Semantic color names for canvas/animations */
+  --gold: #E9B44C;
+  --lavender: #B2A4D4;
+  --rain-blue: #A7C7E7;
 
-  --sidebar: oklch(0.95 0.01 75);
-  --sidebar-foreground: oklch(0.22 0.02 50);
-  --sidebar-primary: oklch(0.35 0.08 155);
-  --sidebar-primary-foreground: oklch(0.97 0.005 75);
-  --sidebar-accent: oklch(0.93 0.015 75);
-  --sidebar-accent-foreground: oklch(0.30 0.03 50);
-  --sidebar-border: oklch(0.88 0.015 75);
-  --sidebar-ring: oklch(0.35 0.08 155);
+  /* RGB components for canvas (comma-separated for rgba()) */
+  --star-gold-r: 233;
+  --star-gold-g: 180;
+  --star-gold-b: 76;
+  --star-lavender-r: 178;
+  --star-lavender-g: 164;
+  --star-lavender-b: 212;
+  --rain-r: 167;
+  --rain-g: 199;
+  --rain-b: 231;
+
+  --sidebar: #F4F0EB;
+  --sidebar-foreground: #2C3E50;
+  --sidebar-primary: #E9B44C;
+  --sidebar-primary-foreground: #2C3E50;
+  --sidebar-accent: #F0EDE4;
+  --sidebar-accent-foreground: #2C3E50;
+  --sidebar-border: #DDD6C6;
+  --sidebar-ring: #B2A4D4;
 }
 
+/* ─── Night Sky (Dark) — Gold + Cyan + Purple ─── */
 .dark {
-  /* Deep charcoal with warm undertone */
-  --background: oklch(0.16 0.01 60);
-  --foreground: oklch(0.90 0.01 75);
+  --background: #0B0D17;
+  --foreground: #FFFFFF;
 
-  --card: oklch(0.20 0.012 60);
-  --card-foreground: oklch(0.90 0.01 75);
+  --card: #12152A;
+  --card-foreground: #FFFFFF;
 
-  --popover: oklch(0.20 0.012 60);
-  --popover-foreground: oklch(0.90 0.01 75);
+  --popover: #12152A;
+  --popover-foreground: #FFFFFF;
 
-  /* Primary: muted sage green (softer for dark) */
-  --primary: oklch(0.60 0.08 155);
-  --primary-foreground: oklch(0.16 0.01 60);
+  /* Primary: Cat's Eye Yellow */
+  --primary: #FFD700;
+  --primary-foreground: #0B0D17;
 
-  /* Secondary: dark warm surface */
-  --secondary: oklch(0.24 0.012 60);
-  --secondary-foreground: oklch(0.82 0.01 75);
+  /* Secondary: dark navy surface */
+  --secondary: #1A1F38;
+  --secondary-foreground: #CBD5E0;
 
-  --muted: oklch(0.24 0.01 60);
-  --muted-foreground: oklch(0.60 0.015 75);
+  /* Muted: moonlight silver */
+  --muted: #1A1F38;
+  --muted-foreground: #CBD5E0;
 
-  /* Accent: warm terracotta (slightly brighter for dark) */
-  --accent: oklch(0.68 0.14 45);
-  --accent-foreground: oklch(0.16 0.01 60);
+  /* Accent: Neon Cyan */
+  --accent: #00F5FF;
+  --accent-foreground: #0B0D17;
 
-  --destructive: oklch(0.55 0.2 27);
-  --destructive-foreground: oklch(0.90 0.01 75);
+  --destructive: #FF4D4D;
+  --destructive-foreground: #FFFFFF;
 
-  --border: oklch(0.28 0.012 60);
-  --input: oklch(0.26 0.01 60);
-  --ring: oklch(0.60 0.08 155);
+  --border: #252A42;
+  --input: #252A42;
+  --ring: #6347D1;
 
-  --chart-1: oklch(0.60 0.08 155);
-  --chart-2: oklch(0.68 0.14 45);
-  --chart-3: oklch(0.55 0.06 75);
-  --chart-4: oklch(0.72 0.10 90);
-  --chart-5: oklch(0.50 0.05 200);
+  --chart-1: #FFD700;
+  --chart-2: #00F5FF;
+  --chart-3: #6347D1;
+  --chart-4: #88B04B;
+  --chart-5: #FF4D4D;
 
-  --gradient-warm: oklch(0.20 0.018 55 / 0.5);
+  --gold: #FFD700;
+  --lavender: #6347D1;
+  --rain-blue: #00F5FF;
 
-  --sidebar: oklch(0.18 0.01 60);
-  --sidebar-foreground: oklch(0.90 0.01 75);
-  --sidebar-primary: oklch(0.60 0.08 155);
-  --sidebar-primary-foreground: oklch(0.16 0.01 60);
-  --sidebar-accent: oklch(0.24 0.012 60);
-  --sidebar-accent-foreground: oklch(0.82 0.01 75);
-  --sidebar-border: oklch(0.28 0.012 60);
-  --sidebar-ring: oklch(0.60 0.08 155);
+  --star-gold-r: 255;
+  --star-gold-g: 215;
+  --star-gold-b: 0;
+  --star-lavender-r: 99;
+  --star-lavender-g: 71;
+  --star-lavender-b: 209;
+  --rain-r: 0;
+  --rain-g: 245;
+  --rain-b: 255;
+
+  --sidebar: #0F1020;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-primary: #FFD700;
+  --sidebar-primary-foreground: #0B0D17;
+  --sidebar-accent: #1A1F38;
+  --sidebar-accent-foreground: #CBD5E0;
+  --sidebar-border: #252A42;
+  --sidebar-ring: #6347D1;
 }
 
 @theme inline {
-  --font-sans: var(--font-noto-sans-kr), 'Geist', sans-serif;
+  --font-sans: 'Pretendard Variable', var(--font-noto-sans-kr), 'Geist', sans-serif;
   --font-serif: var(--font-noto-serif-kr), 'Georgia', serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);
@@ -160,15 +185,10 @@
     @apply bg-background text-foreground break-keep;
   }
 
-  /* Text selection — matches theme palette */
   ::selection {
-    background-color: oklch(0.35 0.08 155 / 0.12);
-  }
-  .dark ::selection {
-    background-color: oklch(0.60 0.08 155 / 0.2);
+    background-color: color-mix(in srgb, var(--primary) 20%, transparent);
   }
 
-  /* Refined scrollbar */
   @supports selector(::-webkit-scrollbar) {
     ::-webkit-scrollbar {
       width: 6px;
@@ -178,44 +198,173 @@
       background: transparent;
     }
     ::-webkit-scrollbar-thumb {
-      background: oklch(0.5 0.01 75 / 0.18);
+      background: color-mix(in srgb, var(--foreground) 15%, transparent);
       border-radius: 3px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: oklch(0.5 0.01 75 / 0.35);
+      background: color-mix(in srgb, var(--foreground) 28%, transparent);
     }
   }
 }
 
 /* ─── Custom keyframes ─── */
 
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes raindrop {
+  0% { transform: translateY(-20px); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px color-mix(in srgb, var(--primary) 10%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 40px color-mix(in srgb, var(--primary) 25%, transparent);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fade-in-scale {
-  from {
-    opacity: 0;
-    transform: scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes line-grow {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* ─── Custom utilities ─── */
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+.animate-shimmer {
+  animation: shimmer 3s linear infinite;
+  background-size: 200% auto;
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out both;
+}
+
+/* ─── Moonlit Mist (Light) — Lavender + Steel Blue ─── */
+[data-palette="moonlit"]:not(.dark) {
+  --background: #F0EBF4;
+  --foreground: #1E1840;
+
+  --card: #FFFFFF;
+  --card-foreground: #1E1840;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #1E1840;
+
+  --primary: #7C5CBF;
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #EDE8F5;
+  --secondary-foreground: #1E1840;
+
+  --muted: #EDE8F5;
+  --muted-foreground: #6B738A;
+
+  --accent: #9BB5CC;
+  --accent-foreground: #1E1840;
+
+  --destructive: #C45B3E;
+  --destructive-foreground: #F0EBF4;
+
+  --border: #D4CCE8;
+  --input: #D4CCE8;
+  --ring: #A492D4;
+
+  --gold: #7C5CBF;
+  --lavender: #A492D4;
+  --rain-blue: #9BB5CC;
+
+  --star-gold-r: 124; --star-gold-g: 92; --star-gold-b: 191;
+  --star-lavender-r: 164; --star-lavender-g: 146; --star-lavender-b: 212;
+  --rain-r: 155; --rain-g: 181; --rain-b: 204;
+}
+
+/* ─── Moonlit Night (Dark) — Soft Violet + Cyan ─── */
+[data-palette="moonlit"].dark {
+  --background: #0D0B1A;
+  --foreground: #E8E4F5;
+
+  --card: #141228;
+  --card-foreground: #E8E4F5;
+
+  --popover: #141228;
+  --popover-foreground: #E8E4F5;
+
+  --primary: #A78BFA;
+  --primary-foreground: #0D0B1A;
+
+  --secondary: #1E1840;
+  --secondary-foreground: #A0AABB;
+
+  --muted: #1E1840;
+  --muted-foreground: #A0AABB;
+
+  --accent: #67E8F9;
+  --accent-foreground: #0D0B1A;
+
+  --destructive: #FF4D4D;
+  --destructive-foreground: #E8E4F5;
+
+  --border: #2A2550;
+  --input: #2A2550;
+  --ring: #7C5CBF;
+
+  --gold: #A78BFA;
+  --lavender: #7C5CBF;
+  --rain-blue: #67E8F9;
+
+  --star-gold-r: 167; --star-gold-g: 139; --star-gold-b: 250;
+  --star-lavender-r: 124; --star-lavender-g: 92; --star-lavender-b: 191;
+  --rain-r: 103; --rain-g: 232; --rain-b: 249;
+}
+
+/* ─── Font switcher (DevToolbar) ─── */
+[data-font="noto"] body {
+  font-family: var(--font-noto-sans-kr), 'Geist', sans-serif;
+}
+[data-font="system"] body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }

@@ -11,12 +11,16 @@ import {
 import type { BirthInfo } from "@/lib/schemas/birth-info"
 import type { FortuneResponse } from "@/lib/saju-core"
 import type { AstrologyStaticResult } from "@/lib/astrology/static/types"
+import type { ChartCoreResponse, AspectsResponse, VedicCoreResponse } from "@/lib/astrology/types"
 import type { DailyFortune } from "@/lib/use-cases/interpret-saju"
 
 interface SajuContextValue {
   birthInfo: BirthInfo | null
   sajuResult: FortuneResponse | null
   astrologyResult: AstrologyStaticResult | null
+  chartCore: ChartCoreResponse | null
+  aspects: AspectsResponse | null
+  vedicCore: VedicCoreResponse | null
   isLoading: boolean
   isHydrated: boolean
   isDemo: boolean
@@ -85,6 +89,9 @@ export function SajuProvider({ children }: { children: ReactNode }) {
   const [birthInfo, setBirthInfoState] = useState<BirthInfo | null>(null)
   const [sajuResult, setSajuResult] = useState<FortuneResponse | null>(null)
   const [astrologyResult, setAstrologyResult] = useState<AstrologyStaticResult | null>(null)
+  const [chartCore, setChartCore] = useState<ChartCoreResponse | null>(null)
+  const [aspects, setAspects] = useState<AspectsResponse | null>(null)
+  const [vedicCore, setVedicCore] = useState<VedicCoreResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isHydrated, setIsHydrated] = useState(false)
@@ -181,6 +188,30 @@ export function SajuProvider({ children }: { children: ReactNode }) {
     }
 
     setIsLoading(false)
+
+    // Horizons 확장 API: chart-core, aspects, vedic-core (best-effort, 실패 시 무시)
+    const extendedFetch = async <T,>(url: string): Promise<T | null> => {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(info),
+        })
+        if (!res.ok) return null
+        return (await res.json()) as T
+      } catch { return null }
+    }
+
+    // 비동기 병렬 — UI 블로킹 없이 데이터 보강
+    void Promise.all([
+      extendedFetch<ChartCoreResponse>("/api/astrology/chart-core"),
+      extendedFetch<AspectsResponse>("/api/astrology/aspects"),
+      extendedFetch<VedicCoreResponse>("/api/astrology/vedic-core"),
+    ]).then(([chartCoreData, aspectsData, vedicCoreData]) => {
+      if (chartCoreData) setChartCore(chartCoreData)
+      if (aspectsData) setAspects(aspectsData)
+      if (vedicCoreData) setVedicCore(vedicCoreData)
+    })
   }, [])
 
   // SSR-safe hydration: localStorage 우선, 없으면 DB에서 birthInfo 로드
@@ -246,6 +277,9 @@ export function SajuProvider({ children }: { children: ReactNode }) {
     setBirthInfoState(null)
     setSajuResult(null)
     setAstrologyResult(null)
+    setChartCore(null)
+    setAspects(null)
+    setVedicCore(null)
     setIsDemo(false)
     setError(null)
     try {
@@ -261,6 +295,9 @@ export function SajuProvider({ children }: { children: ReactNode }) {
         birthInfo,
         sajuResult,
         astrologyResult,
+        chartCore,
+        aspects,
+        vedicCore,
         isLoading,
         isHydrated,
         isDemo,

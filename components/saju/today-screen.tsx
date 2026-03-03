@@ -123,7 +123,7 @@ const TAG_ICONS: Record<string, ElementType<{ className?: string }>> = {
 
 function TodaySkeleton() {
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+    <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-6 space-y-4">
       <div className="flex gap-2">
         <Skeleton className="h-6 w-16 rounded-full" />
         <Skeleton className="h-6 w-16 rounded-full" />
@@ -244,7 +244,7 @@ function RecentHistory() {
   }, [])
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
+    <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
       <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         최근 기록
       </h3>
@@ -381,7 +381,7 @@ export function TodayScreen() {
 
             {/* LLM 폴백 알림 — 정적 데이터로 표시 중일 때 */}
             {llmError && !llmLoading && sajuResult && (
-              <div className="mt-4 flex items-center gap-2 rounded-lg border border-border bg-secondary/30 px-3 py-2 text-xs text-muted-foreground">
+              <div className="mt-4 flex items-center gap-2 rounded-lg border border-border/30 bg-card/40 backdrop-blur-sm px-3 py-2 text-xs text-muted-foreground">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                 <span>네트워크 상태로 인해 간소화된 결과를 보여드립니다</span>
               </div>
@@ -392,7 +392,7 @@ export function TodayScreen() {
               {isLoading ? (
                 <TodaySkeleton />
               ) : todayData ? (
-                <div className="rounded-2xl border border-border bg-card p-6 lg:p-8">
+                <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-6 lg:p-8 animate-glow-pulse">
                   {/* Theme chips */}
                   <div className="flex gap-2">
                     {todayData.tags.map((tag) => {
@@ -401,7 +401,7 @@ export function TodayScreen() {
                         <Badge
                           key={tag}
                           variant="secondary"
-                          className="rounded-full border-0 bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground"
+                          className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
                         >
                           {Icon && <Icon className="mr-1 h-3 w-3" />}
                           {tag}
@@ -434,7 +434,7 @@ export function TodayScreen() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-2xl border border-dashed border-border bg-secondary/20 p-8 text-center">
+                <div className="rounded-2xl border border-dashed border-border/40 bg-card/30 backdrop-blur-sm p-8 text-center">
                   <Sparkles className="mx-auto h-8 w-8 text-muted-foreground/50" />
                   <p className="mt-3 text-sm text-muted-foreground">
                     오늘의 결과를 불러오는 중입니다
@@ -463,12 +463,12 @@ export function TodayScreen() {
                   return (
                     <label
                       key={action.id}
-                      className={`flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors hover:bg-secondary/50 ${
+                      className={`flex cursor-pointer items-start gap-4 rounded-xl border p-4 backdrop-blur-sm transition-colors ${
                         checkedActions.has(action.id)
-                          ? "border-primary/30 bg-primary/5"
+                          ? "border-primary/30 bg-primary/10"
                           : isAi
-                            ? "border-accent/20 bg-accent/5"
-                            : "border-border bg-card"
+                            ? "border-ring/20 bg-ring/5"
+                            : "border-border/40 bg-card/60 hover:bg-card/80"
                       }`}
                     >
                       <Checkbox
@@ -500,7 +500,7 @@ export function TodayScreen() {
 
                 {/* Avoid row */}
                 {(todayData || !isLoading) && (
-                  <div className="flex items-start gap-3 rounded-xl border border-accent/20 bg-accent/5 p-4">
+                  <div className="flex items-start gap-3 rounded-xl border border-destructive/20 bg-destructive/5 backdrop-blur-sm p-4">
                     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                     <span className="text-sm leading-relaxed text-foreground">
                       {todayData?.avoid ?? "차분하게 하루를 보내보세요"}
@@ -515,14 +515,14 @@ export function TodayScreen() {
               <section className="mt-6">
                 <Link
                   href="/debate"
-                  className="group flex w-full items-center gap-3 rounded-xl border border-primary/20 bg-gradient-to-r from-amber-50/60 to-violet-50/60 p-4 transition-colors hover:from-amber-50 hover:to-violet-50 dark:from-amber-950/20 dark:to-violet-950/20 dark:hover:from-amber-950/30 dark:hover:to-violet-950/30"
+                  className="group flex w-full items-center gap-3 rounded-xl border border-primary/20 bg-card/60 p-4 backdrop-blur-sm transition-all hover:border-primary/40 hover:bg-card/80"
                 >
                   <div className="flex -space-x-1.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40">
-                      <ScrollText className="h-4 w-4 text-amber-700 dark:text-amber-400" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full border border-primary/30 bg-primary/10">
+                      <ScrollText className="h-4 w-4 text-primary" />
                     </div>
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-900/40">
-                      <Star className="h-4 w-4 text-violet-700 dark:text-violet-400" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full border border-ring/30 bg-ring/10">
+                      <Star className="h-4 w-4 text-ring" />
                     </div>
                   </div>
                   <div className="flex-1">
