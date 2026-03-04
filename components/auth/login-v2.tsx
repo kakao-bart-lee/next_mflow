@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { MeteorShower } from "./meteor-shower"
+import { StarfieldBg } from "@/components/starfield-bg"
 import { MoonIcon } from "@/components/moon-icon"
 import { ThemeToggle } from "@/components/saju/theme-toggle"
 import { LocaleToggle } from "@/components/saju/locale-toggle"
@@ -31,6 +32,7 @@ export function LoginV2({ skipAuth, callbackUrl, enabledProviders }: LoginV2Prop
             "linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, var(--background)), color-mix(in srgb, var(--accent) 6%, var(--background)))",
         }}
       >
+        <StarfieldBg />
         <MeteorShower />
         <div className="relative z-10 flex flex-col items-center px-12 text-center">
           <MoonIcon size={80} className="mb-6 text-primary animate-float" />
