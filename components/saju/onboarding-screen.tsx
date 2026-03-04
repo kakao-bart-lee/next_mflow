@@ -252,7 +252,7 @@ export function OnboardingScreen() {
             </div>
             <div className="h-[1.5px] w-full overflow-hidden rounded-full bg-border/50">
               <div
-                className="h-full rounded-full bg-foreground/40 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                className="h-full rounded-full bg-primary/60 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 style={{ width: step === 0 ? "50%" : "100%" }}
               />
             </div>
@@ -361,7 +361,7 @@ export function OnboardingScreen() {
                 <Button
                   onClick={handleStep0Next}
                   disabled={!watch("birthDate") || (!isTimeUnknown && !watch("birthTime"))}
-                  className="h-14 w-full rounded-xl bg-foreground font-medium text-background transition-all hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground"
+                  className="h-14 w-full rounded-xl bg-primary font-medium text-primary-foreground transition-all hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
                 >
                   {common.next}
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -400,7 +400,7 @@ export function OnboardingScreen() {
                       onClick={() => setGender(option.value)}
                       className={`flex-1 rounded-xl border-[1.5px] px-4 py-4 text-sm font-medium transition-all duration-200 ${
                         gender === option.value
-                          ? "border-foreground/80 bg-foreground text-background shadow-sm"
+                          ? "border-primary/80 bg-primary text-primary-foreground shadow-sm"
                           : "border-border/60 bg-card text-foreground/70 shadow-sm shadow-black/[0.02] hover:border-border hover:text-foreground"
                       }`}
                       type="button"
@@ -447,7 +447,7 @@ export function OnboardingScreen() {
                 <Button
                   onClick={handleComplete}
                   disabled={!canProceedStep1 || isSubmitting}
-                  className="h-14 flex-[2.5] rounded-xl bg-foreground font-medium text-background transition-all hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground"
+                  className="h-14 flex-[2.5] rounded-xl bg-primary font-medium text-primary-foreground transition-all hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
                 >
                   {isSubmitting ? (
                     <>
