@@ -8,17 +8,17 @@ import { signIn, signOut, unstableUpdate } from "@/lib/auth"
  */
 export async function googleSignInAction(formData: FormData) {
   const callbackUrl = formData.get("callbackUrl") as string | null
-  await signIn("google", { redirectTo: callbackUrl || "/" })
+  await signIn("google", { redirectTo: callbackUrl || "/today" })
 }
 
 export async function twitterSignInAction(formData: FormData) {
   const callbackUrl = formData.get("callbackUrl") as string | null
-  await signIn("twitter", { redirectTo: callbackUrl || "/" })
+  await signIn("twitter", { redirectTo: callbackUrl || "/today" })
 }
 
 export async function kakaoSignInAction(formData: FormData) {
   const callbackUrl = formData.get("callbackUrl") as string | null
-  await signIn("kakao", { redirectTo: callbackUrl || "/" })
+  await signIn("kakao", { redirectTo: callbackUrl || "/today" })
 }
 
 /**
