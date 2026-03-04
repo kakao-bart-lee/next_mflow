@@ -25,6 +25,7 @@ function UserSearchField({
   const [selected, setSelected] = useState<UserResult | null>(null);
   const [fetchError, setFetchError] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,18 +38,31 @@ function UserSearchField({
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
+      // 이전 요청 취소 (경합 방지)
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
       setFetchError(false);
-      const res = await fetch(
-        `/api/admin/users?q=${encodeURIComponent(query)}&limit=5`
-      );
-      if (!res.ok) {
-        setFetchError(true);
+      try {
+        const res = await fetch(
+          `/api/admin/users?q=${encodeURIComponent(query)}&limit=5`,
+          { signal: controller.signal }
+        );
+        if (!res.ok) {
+          setFetchError(true);
+          setOpen(true);
+          return;
+        }
+        const data = await res.json();
+        setResults(data.users ?? []);
         setOpen(true);
-        return;
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          setFetchError(true);
+          setOpen(true);
+        }
       }
-      const data = await res.json();
-      setResults(data.users ?? []);
-      setOpen(true);
     }, 300);
 
     return () => {
@@ -75,6 +89,7 @@ function UserSearchField({
   };
 
   const handleClear = () => {
+    abortRef.current?.abort();
     setSelected(null);
     setQuery("");
     setResults([]);
@@ -100,6 +115,7 @@ function UserSearchField({
           <button
             type="button"
             onClick={handleClear}
+            aria-label="검색어 지우기"
             className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
           >
             <X className="h-4 w-4" />

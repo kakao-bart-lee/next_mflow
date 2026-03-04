@@ -77,6 +77,7 @@ export default function AdminLlmModelsPage() {
   // Confirm deactivation / activation
   const [deactivatingId, setDeactivatingId] = useState<string | null>(null)
   const [activatingId, setActivatingId] = useState<string | null>(null)
+  const [actionLoading, setActionLoading] = useState(false)
 
   // -------------------------------------------------------------------------
   // Fetch models
@@ -217,6 +218,7 @@ export default function AdminLlmModelsPage() {
   const handleActivate = async (id: string) => {
     setActivatingId(null)
     setError(null)
+    setActionLoading(true)
     try {
       const res = await fetch("/api/admin/llm-models", {
         method: "PUT",
@@ -230,6 +232,8 @@ export default function AdminLlmModelsPage() {
       await fetchModels()
     } catch (err) {
       setError(err instanceof Error ? err.message : "활성화에 실패했습니다")
+    } finally {
+      setActionLoading(false)
     }
   }
 
@@ -503,15 +507,16 @@ export default function AdminLlmModelsPage() {
             이 모델을 다시 활성화하시겠습니까? 활성화된 모델은 서비스에서 다시 사용할 수 있습니다.
           </p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setActivatingId(null)}>
+            <Button variant="outline" onClick={() => setActivatingId(null)} disabled={actionLoading}>
               취소
             </Button>
             <Button
+              disabled={actionLoading}
               onClick={() => {
                 if (activatingId) handleActivate(activatingId)
               }}
             >
-              활성화
+              {actionLoading ? "처리 중..." : "활성화"}
             </Button>
           </DialogFooter>
         </DialogContent>

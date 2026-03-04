@@ -7,29 +7,31 @@ import { Button } from "@/components/ui/button"
 const PAGE_SIZE = 20
 
 interface Props {
-  searchParams: Promise<{ page?: string }>
+  searchParams?: { page?: string }
 }
 
 export default async function DebateSessionsPage({ searchParams }: Props) {
-  const { page: pageParam } = await searchParams
-  const page = Math.max(1, Number(pageParam ?? 1))
-  const skip = (page - 1) * PAGE_SIZE
+  const { page: pageParam } = searchParams ?? {}
+  const parsedPage = parseInt(pageParam ?? "", 10)
+  const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1
 
-  const [sessions, total] = await Promise.all([
-    prisma.chatSession.findMany({
-      where: { expertId: "debate" },
-      include: {
-        user: { select: { name: true, email: true } },
-        _count: { select: { messages: true } },
-      },
-      orderBy: { createdAt: "desc" },
-      take: PAGE_SIZE,
-      skip,
-    }),
-    prisma.chatSession.count({ where: { expertId: "debate" } }),
-  ])
-
+  const total = await prisma.chatSession.count({ where: { expertId: "debate" } })
   const totalPages = Math.ceil(total / PAGE_SIZE)
+
+  // 범위 초과 페이지는 마지막 페이지로 clamp
+  const safePage = totalPages > 0 ? Math.min(page, totalPages) : 1
+  const skip = (safePage - 1) * PAGE_SIZE
+
+  const sessions = await prisma.chatSession.findMany({
+    where: { expertId: "debate" },
+    include: {
+      user: { select: { name: true, email: true } },
+      _count: { select: { messages: true } },
+    },
+    orderBy: { createdAt: "desc" },
+    take: PAGE_SIZE,
+    skip,
+  })
 
   return (
     <div className="space-y-6">
@@ -42,10 +44,19 @@ export default async function DebateSessionsPage({ searchParams }: Props) {
         </div>
       </div>
 
-      {sessions.length === 0 ? (
+      {sessions.length === 0 && total === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
             아직 토론 세션이 없습니다.
+          </CardContent>
+        </Card>
+      ) : sessions.length === 0 ? (
+        <Card>
+          <CardContent className="py-10 text-center text-sm text-muted-foreground">
+            해당 페이지에 세션이 없습니다.{" "}
+            <Link href="/admin/debate/sessions" className="text-primary hover:underline">
+              첫 페이지로
+            </Link>
           </CardContent>
         </Card>
       ) : (
@@ -105,12 +116,12 @@ export default async function DebateSessionsPage({ searchParams }: Props) {
           {totalPages > 1 && (
             <div className="flex items-center justify-between text-sm">
               <p className="text-muted-foreground">
-                {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} / {total.toLocaleString()}건
+                {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, total)} / {total.toLocaleString()}건
               </p>
               <div className="flex items-center gap-2">
-                {page > 1 ? (
+                {safePage > 1 ? (
                   <Button variant="outline" size="sm" asChild>
-                    <Link href={`/admin/debate/sessions?page=${page - 1}`}>
+                    <Link href={`/admin/debate/sessions?page=${safePage - 1}`}>
                       <ChevronLeft className="h-4 w-4" />
                       이전
                     </Link>
@@ -122,11 +133,11 @@ export default async function DebateSessionsPage({ searchParams }: Props) {
                   </Button>
                 )}
                 <span className="text-muted-foreground">
-                  {page} / {totalPages}
+                  {safePage} / {totalPages}
                 </span>
-                {page < totalPages ? (
+                {safePage < totalPages ? (
                   <Button variant="outline" size="sm" asChild>
-                    <Link href={`/admin/debate/sessions?page=${page + 1}`}>
+                    <Link href={`/admin/debate/sessions?page=${safePage + 1}`}>
                       다음
                       <ChevronRight className="h-4 w-4" />
                     </Link>
