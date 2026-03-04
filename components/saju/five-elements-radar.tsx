@@ -19,7 +19,7 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
   const cx = size / 2
   const cy = size / 2
   const maxR = 80
-  const angleOffset = -Math.PI / 2 // start from top
+  const angleOffset = -Math.PI / 2
 
   const maxValue = Math.max(...data.map((d) => d.value), 1)
 
@@ -43,19 +43,6 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
 
   return (
     <svg viewBox={`0 0 ${size} ${size}`} className="mx-auto w-full max-w-[220px]">
-      <defs>
-        {/* 각 오행별 radial gradient — 배경 섹터 glow */}
-        {data.map((d) => {
-          const color = ELEMENT_HEX[d.element] ?? "#888"
-          return (
-            <radialGradient key={`grad-${d.element}`} id={`grad-${d.element}`} cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor={color} stopOpacity="0.25" />
-              <stop offset="100%" stopColor={color} stopOpacity="0.04" />
-            </radialGradient>
-          )
-        })}
-      </defs>
-
       {/* Background grid */}
       {[0.33, 0.66, 1].map((scale) => (
         <polygon
@@ -68,53 +55,53 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
         />
       ))}
 
-      {/* Axis lines — 각 오행 색상 */}
-      {data.map((d, i) => {
+      {/* 배경 축선 — 가이드용 (연하게) */}
+      {data.map((_, i) => {
         const [px, py] = getPoint(i, maxR)
-        const color = ELEMENT_HEX[d.element] ?? "var(--border)"
         return (
           <line
-            key={i}
-            x1={cx}
-            y1={cy}
-            x2={px}
-            y2={py}
-            stroke={color}
-            strokeWidth="1"
-            opacity="0.5"
+            key={`axis-bg-${i}`}
+            x1={cx} y1={cy} x2={px} y2={py}
+            stroke="var(--border)"
+            strokeWidth="0.5"
+            opacity="0.3"
           />
         )
       })}
 
-      {/* 데이터 영역 — 5개 삼각형 섹터, 각 오행 색상 */}
-      {data.map((d, i) => {
-        const r = (d.value / maxValue) * maxR
-        const nextIdx = (i + 1) % 5
-        const nextR = (data[nextIdx].value / maxValue) * maxR
-        const [px, py] = getPoint(i, r)
-        const [nx, ny] = getPoint(nextIdx, nextR)
-        const color = ELEMENT_HEX[d.element] ?? "#888"
-        return (
-          <polygon
-            key={`sector-${i}`}
-            points={`${cx},${cy} ${px},${py} ${nx},${ny}`}
-            fill={color}
-            opacity="0.22"
-          />
-        )
-      })}
-
-      {/* 데이터 폴리곤 외곽선 */}
+      {/* 데이터 폴리곤 — 중립 색상으로 전체 형태 표시 */}
       <polygon
         points={dataPolygonPoints()}
-        fill="none"
+        fill="var(--foreground)"
+        fillOpacity="0.05"
         stroke="var(--foreground)"
-        strokeWidth="1"
-        opacity="0.3"
+        strokeWidth="0.8"
+        strokeOpacity="0.2"
         strokeLinejoin="round"
       />
 
-      {/* 데이터 꼭짓점 — 오행 색상 원 */}
+      {/*
+        핵심: 각 원소의 스포크(spoke) — 축 위에 해당 원소 색의 굵은 선으로 값만큼만 표시.
+        이 방식은 인접 원소의 영향 없이, 각 원소의 값을 독립적으로 색상 표현함.
+      */}
+      {data.map((d, i) => {
+        const r = (d.value / maxValue) * maxR
+        const [px, py] = getPoint(i, r)
+        const color = ELEMENT_HEX[d.element] ?? "var(--primary)"
+        return (
+          <line
+            key={`spoke-${d.element}`}
+            x1={cx} y1={cy}
+            x2={px} y2={py}
+            stroke={color}
+            strokeWidth="4"
+            strokeLinecap="round"
+            opacity="0.65"
+          />
+        )
+      })}
+
+      {/* 데이터 꼭짓점 dot — 오행 색상 */}
       {data.map((d, i) => {
         const r = (d.value / maxValue) * maxR
         const [px, py] = getPoint(i, r)
@@ -122,42 +109,25 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
         return (
           <circle
             key={`dot-${d.element}`}
-            cx={px}
-            cy={py}
-            r="3.5"
+            cx={px} cy={py}
+            r="4"
             fill={color}
-            fillOpacity="0.85"
             stroke="var(--background)"
             strokeWidth="1.5"
           />
         )
       })}
 
-      {/* Vertex labels */}
+      {/* Vertex 레이블 */}
       {data.map((d, i) => {
         const [px, py] = getPoint(i, maxR + 18)
         const color = ELEMENT_HEX[d.element] ?? "var(--muted)"
         return (
           <g key={`label-${d.element}`}>
-            <circle
-              cx={px}
-              cy={py}
-              r="13"
-              fill={color}
-              opacity="0.18"
-            />
-            <circle
-              cx={px}
-              cy={py}
-              r="13"
-              fill="none"
-              stroke={color}
-              strokeWidth="1"
-              opacity="0.4"
-            />
+            <circle cx={px} cy={py} r="13" fill={color} opacity="0.15" />
+            <circle cx={px} cy={py} r="13" fill="none" stroke={color} strokeWidth="1" opacity="0.35" />
             <text
-              x={px}
-              y={py}
+              x={px} y={py}
               textAnchor="middle"
               dominantBaseline="central"
               fontSize="11"
