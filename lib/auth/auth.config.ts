@@ -3,10 +3,40 @@
  * Prisma/DB import 없음 → middleware에서 안전하게 사용 가능.
  */
 import Google from "next-auth/providers/google"
+import Twitter from "next-auth/providers/twitter"
 import Credentials from "next-auth/providers/credentials"
 import type { NextAuthConfig } from "next-auth"
 import type { JWT } from "next-auth/jwt"
 import type { Session } from "next-auth"
+
+const KakaoProvider = {
+  id: "kakao",
+  name: "Kakao",
+  type: "oauth" as const,
+  authorization: {
+    url: "https://kauth.kakao.com/oauth/authorize",
+    params: { scope: "profile_nickname profile_image account_email" },
+  },
+  token: "https://kauth.kakao.com/oauth/token",
+  userinfo: "https://kapi.kakao.com/v2/user/me",
+  clientId: process.env.KAKAO_CLIENT_ID,
+  clientSecret: process.env.KAKAO_CLIENT_SECRET,
+  allowDangerousEmailAccountLinking: true,
+  profile(profile: {
+    id: number
+    kakao_account?: {
+      email?: string
+      profile?: { nickname?: string; profile_image_url?: string }
+    }
+  }) {
+    return {
+      id: String(profile.id),
+      name: profile.kakao_account?.profile?.nickname ?? null,
+      image: profile.kakao_account?.profile?.profile_image_url ?? null,
+      email: profile.kakao_account?.email ?? null,
+    }
+  },
+}
 
 export const SKIP_AUTH =
   process.env.SKIP_AUTH === "true" ||
@@ -33,7 +63,14 @@ const providers = SKIP_AUTH
       Google({
         clientId: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        allowDangerousEmailAccountLinking: true,
       }),
+      Twitter({
+        clientId: process.env.TWITTER_CLIENT_ID,
+        clientSecret: process.env.TWITTER_CLIENT_SECRET,
+        allowDangerousEmailAccountLinking: true,
+      }),
+      KakaoProvider,
     ]
 
 /**

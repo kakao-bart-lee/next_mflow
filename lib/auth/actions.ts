@@ -11,6 +11,16 @@ export async function googleSignInAction(formData: FormData) {
   await signIn("google", { redirectTo: callbackUrl || "/" })
 }
 
+export async function twitterSignInAction(formData: FormData) {
+  const callbackUrl = formData.get("callbackUrl") as string | null
+  await signIn("twitter", { redirectTo: callbackUrl || "/" })
+}
+
+export async function kakaoSignInAction(formData: FormData) {
+  const callbackUrl = formData.get("callbackUrl") as string | null
+  await signIn("kakao", { redirectTo: callbackUrl || "/" })
+}
+
 /**
  * 개발 모드 자동 로그인.
  * SKIP_AUTH 모드에서는 middleware가 비활성화되므로 /today로 직접 이동.
