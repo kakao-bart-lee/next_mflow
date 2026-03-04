@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { AIChatPanel } from "./ai-chat-panel"
+import { ChatInterface } from "./chat-interface"
 import { FiveElementsRadar } from "./five-elements-radar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { MoonIcon } from "@/components/moon-icon"
@@ -456,7 +456,7 @@ export function ExploreScreen() {
                   <span className="text-[10px] text-muted-foreground/60">Horizons Engine</span>
                 </div>
                 <div className="mt-3 rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
-                  <NatalChartWheel chartCore={chartCore} aspects={aspects} />
+                  <NatalChartWheel chartCore={chartCore} />
                   <div className="mt-3 flex flex-wrap justify-center gap-3 text-[10px] text-muted-foreground">
                     <span>ASC: {chartCore.ascendant?.signLabel} {chartCore.ascendant?.degreeInSign?.toFixed(1)}°</span>
                     <span>MC: {chartCore.midheaven?.signLabel} {chartCore.midheaven?.degreeInSign?.toFixed(1)}°</span>
@@ -704,7 +704,7 @@ export function ExploreScreen() {
         </div>
       </div>
 
-      <AIChatPanel open={chatOpen} onOpenChange={setChatOpen} context="default" />
+      <ChatInterface mode="modal" agents="single" open={chatOpen} onOpenChange={setChatOpen} context="default" />
     </>
   )
 }

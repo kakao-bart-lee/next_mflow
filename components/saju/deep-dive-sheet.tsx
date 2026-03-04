@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import {
   Drawer,
   DrawerContent,
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/sheet"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { X, BookOpen, HelpCircle, Star, MessageCircle, AlertTriangle } from "lucide-react"
+import { ChatInterface } from "./chat-interface"
 import {
   Tooltip,
   TooltipContent,
@@ -45,7 +47,7 @@ interface DeepDiveSheetProps {
     dayDate?: string
     decisionResult?: DecisionFortune
   }
-  onOpenChat?: () => void
+  onActionsGenerated?: (actions: string[]) => void
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -825,13 +827,18 @@ function DecisionDeepDive({
 function DeepDiveContent({
   context = "today",
   contextData,
-  onOpenChat,
+  onActionsGenerated,
 }: {
   context?: DeepDiveContext
   contextData?: DeepDiveSheetProps["contextData"]
-  onOpenChat?: () => void
+  onActionsGenerated?: (actions: string[]) => void
 }) {
   const { sajuResult, astrologyResult } = useSaju()
+  const [chatOpen, setChatOpen] = useState(false)
+
+  // Map DeepDiveContext → ChatInterface context
+  const chatContext =
+    context === "weekly" ? "week" : context === "decision" ? "decision" : "today"
 
   const shared: SharedDeepDiveProps = {
     sajuResult,
@@ -843,28 +850,44 @@ function DeepDiveContent({
     planetSummaries: buildPlanetSummaries(astrologyResult),
     todayInsight: extractTodayInsight(astrologyResult),
     hyungchungItems: extractHyungchungItems(sajuResult),
-    onOpenChat,
+    onOpenChat: () => setChatOpen(true),
   }
 
-  switch (context) {
-    case "weekly":
-      return (
-        <WeeklyDeepDive
-          {...shared}
-          dayDate={contextData?.dayDate}
-          futureDays={extractFutureDays(astrologyResult)}
-        />
-      )
-    case "decision":
-      return (
-        <DecisionDeepDive
-          {...shared}
-          decisionResult={contextData?.decisionResult}
-        />
-      )
-    default:
-      return <TodayDeepDive {...shared} />
-  }
+  const deepDiveView = (() => {
+    switch (context) {
+      case "weekly":
+        return (
+          <WeeklyDeepDive
+            {...shared}
+            dayDate={contextData?.dayDate}
+            futureDays={extractFutureDays(astrologyResult)}
+          />
+        )
+      case "decision":
+        return (
+          <DecisionDeepDive
+            {...shared}
+            decisionResult={contextData?.decisionResult}
+          />
+        )
+      default:
+        return <TodayDeepDive {...shared} />
+    }
+  })()
+
+  return (
+    <>
+      {deepDiveView}
+      <ChatInterface
+        mode="sheet"
+        agents="single"
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        context={chatContext}
+        onActionsGenerated={onActionsGenerated}
+      />
+    </>
+  )
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -877,7 +900,7 @@ const CONTEXT_DESCRIPTION: Record<DeepDiveContext, string> = {
   decision: "사주 에너지와 행성 영향력이 추천에 어떻게 반영되었는지 확인하세요",
 }
 
-export function DeepDiveSheet({ open, onOpenChange, context = "today", contextData, onOpenChat }: DeepDiveSheetProps) {
+export function DeepDiveSheet({ open, onOpenChange, context = "today", contextData, onActionsGenerated }: DeepDiveSheetProps) {
   const isMobile = useIsMobile()
   const description = CONTEXT_DESCRIPTION[context]
 
@@ -900,7 +923,7 @@ export function DeepDiveSheet({ open, onOpenChange, context = "today", contextDa
             </DrawerDescription>
           </DrawerHeader>
           <div className="overflow-y-auto px-4 pb-8">
-            <DeepDiveContent context={context} contextData={contextData} onOpenChat={onOpenChat} />
+            <DeepDiveContent context={context} contextData={contextData} onActionsGenerated={onActionsGenerated} />
           </div>
         </DrawerContent>
       </Drawer>
@@ -922,7 +945,7 @@ export function DeepDiveSheet({ open, onOpenChange, context = "today", contextDa
           </SheetDescription>
         </SheetHeader>
         <div className="mt-4 px-1 pb-8">
-          <DeepDiveContent context={context} contextData={contextData} onOpenChat={onOpenChat} />
+          <DeepDiveContent context={context} contextData={contextData} onActionsGenerated={onActionsGenerated} />
         </div>
       </SheetContent>
     </Sheet>
