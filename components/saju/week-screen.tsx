@@ -19,7 +19,6 @@ import {
   Lock,
 } from "lucide-react"
 import { toast } from "sonner"
-import { AIChatPanel } from "./ai-chat-panel"
 import { DeepDiveSheet } from "./deep-dive-sheet"
 import { WhyThisResult } from "./why-this-result"
 import { useSaju } from "@/lib/contexts/saju-context"
@@ -169,7 +168,6 @@ export function WeekScreen() {
   const { astrologyResult, birthInfo } = useSaju()
   const [journalText, setJournalText] = useState("")
   const [journalSaved, setJournalSaved] = useState(false)
-  const [chatOpen, setChatOpen] = useState(false)
   const [journalLoading, setJournalLoading] = useState(false)
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [weekOffset, setWeekOffset] = useState(0)
@@ -490,12 +488,7 @@ export function WeekScreen() {
         onOpenChange={setDeepDiveOpen}
         context="weekly"
         contextData={{ dayDate: deepDiveDay ?? undefined }}
-        onOpenChat={() => {
-          setDeepDiveOpen(false)
-          setChatOpen(true)
-        }}
       />
-      <AIChatPanel open={chatOpen} onOpenChange={setChatOpen} context="week" />
     </>
   )
 }

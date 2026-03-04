@@ -8,7 +8,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { AlertCircle, ArrowRight, Heart, Sparkles } from "lucide-react"
 import { useSaju } from "@/lib/contexts/saju-context"
 import { DeepDiveSheet } from "./deep-dive-sheet"
-import { AIChatPanel } from "./ai-chat-panel"
 import { WhyThisResult } from "./why-this-result"
 
 type CompatibilityType = "love" | "marriage" | "business" | "friendship"
@@ -44,8 +43,6 @@ export function CompatibilityScreen() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [deepDiveOpen, setDeepDiveOpen] = useState(false)
-  const [chatOpen, setChatOpen] = useState(false)
-
   const canSubmit = partnerDate.length === 10 && birthInfo
 
   const handleAnalyze = async () => {
@@ -310,12 +307,7 @@ export function CompatibilityScreen() {
         open={deepDiveOpen}
         onOpenChange={setDeepDiveOpen}
         context="decision"
-        onOpenChat={() => {
-          setDeepDiveOpen(false)
-          setChatOpen(true)
-        }}
       />
-      <AIChatPanel open={chatOpen} onOpenChange={setChatOpen} context="decision" />
     </>
   )
 }

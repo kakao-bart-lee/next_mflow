@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AlertCircle, ArrowRight, RotateCcw, Sparkles } from "lucide-react"
 import { DeepDiveSheet } from "./deep-dive-sheet"
-import { AIChatPanel } from "./ai-chat-panel"
 import { WhyThisResult } from "./why-this-result"
 import { useSaju } from "@/lib/contexts/saju-context"
 
@@ -48,7 +47,6 @@ export function DecisionHelper() {
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [currentQ, setCurrentQ] = useState(0)
   const [deepDiveOpen, setDeepDiveOpen] = useState(false)
-  const [chatOpen, setChatOpen] = useState(false)
   const [aiResult, setAiResult] = useState<{
     recommendation: "A" | "B"
     headline: string
@@ -411,12 +409,7 @@ export function DecisionHelper() {
         onOpenChange={setDeepDiveOpen}
         context="decision"
         contextData={{ decisionResult: aiResult ?? undefined }}
-        onOpenChat={() => {
-          setDeepDiveOpen(false)
-          setChatOpen(true)
-        }}
       />
-      <AIChatPanel open={chatOpen} onOpenChange={setChatOpen} context="decision" />
     </>
   )
 }

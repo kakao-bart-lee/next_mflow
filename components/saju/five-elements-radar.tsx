@@ -10,14 +10,6 @@ interface FiveElementsRadarProps {
   data: RadarDataPoint[]
 }
 
-const ELEMENT_COLORS: Record<string, string> = {
-  목: "var(--chart-4)", // green
-  화: "var(--chart-5)", // red
-  토: "var(--chart-3)", // purple
-  금: "var(--chart-1)", // gold
-  수: "var(--chart-2)", // blue
-}
-
 export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
   if (data.length !== 5) return null
 
@@ -25,7 +17,7 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
   const cx = size / 2
   const cy = size / 2
   const maxR = 80
-  const angleOffset = -Math.PI / 2 // start from top
+  const angleOffset = -Math.PI / 2
 
   const maxValue = Math.max(...data.map((d) => d.value), 1)
 
@@ -49,7 +41,7 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
 
   return (
     <svg viewBox={`0 0 ${size} ${size}`} className="mx-auto w-full max-w-[220px]">
-      {/* Background grid -- 3 levels */}
+      {/* Background grid */}
       {[0.33, 0.66, 1].map((scale) => (
         <polygon
           key={scale}
@@ -67,10 +59,7 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
         return (
           <line
             key={i}
-            x1={cx}
-            y1={cy}
-            x2={px}
-            y2={py}
+            x1={cx} y1={cy} x2={px} y2={py}
             stroke="var(--border)"
             strokeWidth="0.5"
             opacity="0.3"
@@ -91,13 +80,7 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
         const r = (d.value / maxValue) * maxR
         const [px, py] = getPoint(i, r)
         return (
-          <circle
-            key={d.element}
-            cx={px}
-            cy={py}
-            r="3"
-            fill="var(--primary)"
-          />
+          <circle key={d.element} cx={px} cy={py} r="3" fill="var(--primary)" />
         )
       })}
 
@@ -106,16 +89,9 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
         const [px, py] = getPoint(i, maxR + 18)
         return (
           <g key={`label-${d.element}`}>
-            <circle
-              cx={px}
-              cy={py}
-              r="12"
-              fill={ELEMENT_COLORS[d.element] ?? "var(--muted)"}
-              opacity="0.2"
-            />
+            <circle cx={px} cy={py} r="12" fill="var(--primary)" opacity="0.15" />
             <text
-              x={px}
-              y={py}
+              x={px} y={py}
               textAnchor="middle"
               dominantBaseline="central"
               fontSize="10"

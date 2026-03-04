@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
+import { SKIP_AUTH, DEV_USER } from "@/lib/auth/auth.config"
 import { BirthInfoSchema, type BirthInfo } from "@/lib/schemas/birth-info"
 import { analyzeSaju } from "@/lib/use-cases/analyze-saju"
 import { analyzeAstrologyStatic } from "@/lib/use-cases/analyze-astrology-static"
@@ -16,8 +17,11 @@ export async function POST(req: NextRequest) {
 
   // 인증 확인
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "로그인이 필요합니다" }, { status: 401 })
+    if (!SKIP_AUTH) {
+      return NextResponse.json({ error: "로그인이 필요합니다" }, { status: 401 })
+    }
   }
+  const userId = session?.user?.id ?? DEV_USER.id
 
   // Request body 파싱
   let birthInfo: BirthInfo
@@ -35,23 +39,37 @@ export async function POST(req: NextRequest) {
     } else {
       // user.birthInfo에서 가져오기
       const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
+        where: { id: userId },
         select: { birthInfo: true },
       })
       if (!user?.birthInfo) {
-        return NextResponse.json(
-          { error: "출생 정보가 필요합니다. 프로필에서 입력해주세요." },
-          { status: 422 },
-        )
+        if (SKIP_AUTH) {
+          birthInfo = {
+            birthDate: "1990-06-15",
+            birthTime: "14:30",
+            isTimeUnknown: false,
+            timezone: "Asia/Seoul",
+            gender: "M",
+            latitude: 37.5665,
+            longitude: 126.9780,
+            locationName: "Seoul",
+          }
+        } else {
+          return NextResponse.json(
+            { error: "출생 정보가 필요합니다. 프로필에서 입력해주세요." },
+            { status: 422 },
+          )
+        }
+      } else {
+        const parsed = BirthInfoSchema.safeParse(user.birthInfo)
+        if (!parsed.success) {
+          return NextResponse.json(
+            { error: "저장된 출생 정보가 올바르지 않습니다" },
+            { status: 422 },
+          )
+        }
+        birthInfo = parsed.data
       }
-      const parsed = BirthInfoSchema.safeParse(user.birthInfo)
-      if (!parsed.success) {
-        return NextResponse.json(
-          { error: "저장된 출생 정보가 올바르지 않습니다" },
-          { status: 422 },
-        )
-      }
-      birthInfo = parsed.data
     }
   } catch {
     return NextResponse.json({ error: "잘못된 요청 형식입니다" }, { status: 400 })
@@ -60,7 +78,7 @@ export async function POST(req: NextRequest) {
   // 설정 로드 + 사주/점성술 계산 병렬 실행
   const [debateSettings, sajuApiResult, astrologyApiResult] = await Promise.all([
     loadDebateSettings(),
-    analyzeSaju(birthInfo, session.user.id),
+    analyzeSaju(birthInfo, userId),
     analyzeAstrologyStatic(birthInfo),
   ])
 
@@ -76,7 +94,7 @@ export async function POST(req: NextRequest) {
   const creditCost = debateSettings.creditCost
   if (isCreditEnabled()) {
     const credit = await prisma.credit.findUnique({
-      where: { userId: session.user.id },
+      where: { userId },
       select: { balance: true },
     })
     if ((credit?.balance ?? 0) < creditCost) {
@@ -103,7 +121,7 @@ export async function POST(req: NextRequest) {
   // ChatSession 생성
   const chatSession = await prisma.chatSession.create({
     data: {
-      userId: session.user.id,
+      userId,
       expertId: "debate",
       title: "사주 × 점성술 토론",
     },
@@ -114,7 +132,6 @@ export async function POST(req: NextRequest) {
   const writer = writable.getWriter()
 
   // 비동기로 토론 실행 (스트림은 즉시 반환)
-  const userId = session.user.id
   const sessionId = chatSession.id
   const useMock = process.env.MOCK_DEBATE === "true" || debateSettings.mockMode
 
