@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/tooltip"
 import { useSaju } from "@/lib/contexts/saju-context"
 import type { FortuneResponse } from "@/lib/saju-core"
-import { PLANET_ORDER } from "@/lib/astrology/static/constants"
+import { PLANET_ORDER, SIGN_LABEL_KO } from "@/lib/astrology/static/constants"
 import { computeTransits, type TransitAspect } from "@/lib/astrology/static/transits"
 import type { PlanetId } from "@/lib/astrology/static/types"
 
@@ -127,7 +127,7 @@ const PLANET_POSITIONS: PlanetDisplay[] = [
     id: "SUN",
     symbol: "☉",
     name: "태양 (Sun)",
-    sign: "Pisces 10°",
+    sign: "물고기자리(Pisces) 10°",
     house: 12,
     sajuMap: "식신 (食神)",
     description: "감성과 직관이 강한 시기. 내면의 표현을 밖으로 드러내는 에너지입니다.",
@@ -136,7 +136,7 @@ const PLANET_POSITIONS: PlanetDisplay[] = [
     id: "MOON",
     symbol: "☽",
     name: "달 (Moon)",
-    sign: "Cancer 5°",
+    sign: "게자리(Cancer) 5°",
     house: 4,
     sajuMap: "편인 (偏印)",
     description: "가정과 안식에 마음이 향합니다. 직감과 영감이 높아지는 시간.",
@@ -145,7 +145,7 @@ const PLANET_POSITIONS: PlanetDisplay[] = [
     id: "MERCURY",
     symbol: "☿",
     name: "수성 (Mercury)",
-    sign: "Aquarius 22°",
+    sign: "물병자리(Aquarius) 22°",
     house: 11,
     sajuMap: "편관 (偏官)",
     description: "독창적인 아이디어가 떠오르는 시기. 기존 틀을 벗어난 사고가 빛납니다.",
@@ -154,7 +154,7 @@ const PLANET_POSITIONS: PlanetDisplay[] = [
     id: "VENUS",
     symbol: "♀",
     name: "금성 (Venus)",
-    sign: "Aries 15°",
+    sign: "양자리(Aries) 15°",
     house: 1,
     sajuMap: "정재 (正財)",
     description: "관계에서 주도적인 에너지. 새로운 만남이나 시작에 좋은 기운.",
@@ -163,7 +163,7 @@ const PLANET_POSITIONS: PlanetDisplay[] = [
     id: "MARS",
     symbol: "♂",
     name: "화성 (Mars)",
-    sign: "Gemini 8°",
+    sign: "쌍둥이자리(Gemini) 8°",
     house: 3,
     sajuMap: "상관 (傷官)",
     description: "소통과 이동에 활발한 에너지. 적극적 표현이 성과를 만듭니다.",
@@ -172,7 +172,7 @@ const PLANET_POSITIONS: PlanetDisplay[] = [
     id: "JUPITER",
     symbol: "♃",
     name: "목성 (Jupiter)",
-    sign: "Gemini 2°",
+    sign: "쌍둥이자리(Gemini) 2°",
     house: 3,
     sajuMap: "정인 (正印)",
     description: "배움과 교류가 확장되는 시기. 새로운 지식이 행운을 가져옵니다.",
@@ -181,7 +181,7 @@ const PLANET_POSITIONS: PlanetDisplay[] = [
     id: "SATURN",
     symbol: "♄",
     name: "토성 (Saturn)",
-    sign: "Pisces 15°",
+    sign: "물고기자리(Pisces) 15°",
     house: 12,
     sajuMap: "비견 (比肩)",
     description: "내면의 규율과 성찰이 필요한 시기. 조용한 노력이 결실을 맺습니다.",
@@ -267,7 +267,7 @@ export function ExploreScreen() {
         id: planet,
         symbol: base.symbol,
         name: base.name,
-        sign: `${position.signLabel} ${position.degreeInSign}°`,
+        sign: `${SIGN_LABEL_KO[position.sign] ?? position.signLabel}(${position.signLabel}) ${position.degreeInSign}°`,
         house: chartCoreHouse ?? position.house,
         sajuMap: base.sajuMap,
         description: influence.interpretation,
