@@ -71,7 +71,7 @@ export default function MainLayout({ children }: MainLayoutProps): ReactNode {
       />
 
       {/* Sticky header */}
-      <header className="sticky top-0 z-30 border-b border-border/20 bg-background/60 backdrop-blur-xl">
+      <header className="fixed inset-x-0 top-0 z-30 border-b border-border/20 bg-background/40 backdrop-blur-xl">
         <div className="flex h-14 items-center justify-between px-5">
           {/* Logo */}
           <Link
@@ -119,7 +119,7 @@ export default function MainLayout({ children }: MainLayoutProps): ReactNode {
       </header>
 
       {/* Scrollable content */}
-      <main className="relative z-10 flex-1 overflow-y-auto pb-20">
+      <main className="relative z-10 flex-1 overflow-y-auto pt-14 pb-20">
         {children}
       </main>
 
