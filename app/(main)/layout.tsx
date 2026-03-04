@@ -20,8 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 const SERVICE_LABELS: Record<string, string> = {
-  "saju-playbook": "Saju Playbook",
-  "moonlit": "Moonlit",
+  "moonlit": "moonlit",
   "astro-rain-cat": "Astro Rain Cat",
 }
 
@@ -32,7 +31,7 @@ interface MainLayoutProps {
 export default function MainLayout({ children }: MainLayoutProps): ReactNode {
   const { clearData } = useSaju()
   const [mounted, setMounted] = useState(false)
-  const [serviceName, setServiceName] = useState("saju-playbook")
+  const [serviceName, setServiceName] = useState("moonlit")
 
   useEffect(() => {
     setMounted(true)
@@ -80,7 +79,7 @@ export default function MainLayout({ children }: MainLayoutProps): ReactNode {
             className="flex items-center gap-2 font-serif text-base font-semibold text-foreground/90 transition-opacity hover:opacity-70"
           >
             {serviceName === "moonlit" && <MoonIcon size={20} className="text-primary" />}
-            {SERVICE_LABELS[serviceName] ?? "Saju Playbook"}
+            {SERVICE_LABELS[serviceName] ?? "moonlit"}
           </Link>
 
           {/* Controls */}

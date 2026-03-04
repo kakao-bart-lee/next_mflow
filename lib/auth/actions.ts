@@ -16,8 +16,14 @@ export async function googleSignInAction(formData: FormData) {
  * SKIP_AUTH 모드에서는 middleware가 비활성화되므로 /today로 직접 이동.
  */
 export async function devSignInAction(formData: FormData) {
-  const callbackUrl = formData.get("callbackUrl") as string | null
-  await signIn("dev-login", { redirectTo: callbackUrl || "/today" })
+  const callbackUrl = (formData.get("callbackUrl") as string | null) || "/today"
+  
+  if (process.env.SKIP_AUTH === "true") {
+    // 개발 모드에서는 NextAuth 루프를 피하기 위해 클라이언트 사이드 리다이렉트를 시도하거나 
+    // 직접 호출을 최적화할 수 있지만, 일단은 signIn을 호출하되 redirect 옵션을 확인합니다.
+  }
+  
+  await signIn("dev-login", { redirectTo: callbackUrl })
 }
 
 export async function logoutAction() {

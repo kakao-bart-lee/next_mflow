@@ -40,6 +40,36 @@ export const SIGN_LABEL: Record<ZodiacSign, string> = {
   PISCES: "Pisces",
 }
 
+export const SIGN_LABEL_KO: Record<ZodiacSign, string> = {
+  ARIES: "양자리",
+  TAURUS: "황소자리",
+  GEMINI: "쌍둥이자리",
+  CANCER: "게자리",
+  LEO: "사자자리",
+  VIRGO: "처녀자리",
+  LIBRA: "천칭자리",
+  SCORPIO: "전갈자리",
+  SAGITTARIUS: "사수자리",
+  CAPRICORN: "염소자리",
+  AQUARIUS: "물병자리",
+  PISCES: "물고기자리",
+}
+
+export const SIGN_LABEL_JA: Record<ZodiacSign, string> = {
+  ARIES: "おひつじ座",
+  TAURUS: "おうし座",
+  GEMINI: "ふたご座",
+  CANCER: "かに座",
+  LEO: "しし座",
+  VIRGO: "おとめ座",
+  LIBRA: "てんびん座",
+  SCORPIO: "さそり座",
+  SAGITTARIUS: "いて座",
+  CAPRICORN: "やぎ座",
+  AQUARIUS: "みずがめ座",
+  PISCES: "うお座",
+}
+
 export const PLANET_LABEL: Record<PlanetId, string> = {
   SUN: "태양",
   MOON: "달",

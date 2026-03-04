@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import {
   Drawer,
   DrawerContent,
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/sheet"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { X, BookOpen, HelpCircle, Star, MessageCircle, AlertTriangle } from "lucide-react"
+import { ChatInterface } from "./chat-interface"
 import {
   Tooltip,
   TooltipContent,
@@ -34,6 +36,7 @@ import type {
 import type { DecisionFortune } from "@/lib/use-cases/interpret-saju"
 import type { HyungchungResult } from "@/lib/saju-core/saju/hyungchung"
 import { PLANET_LABEL, PLANET_THEME } from "@/lib/astrology/static/constants"
+import { ELEMENT_HEX, ELEMENT_LABEL as ELEMENT_LABEL_SHARED } from "@/lib/constants/element-colors"
 
 export type DeepDiveContext = "today" | "weekly" | "decision"
 
@@ -45,31 +48,22 @@ interface DeepDiveSheetProps {
     dayDate?: string
     decisionResult?: DecisionFortune
   }
-  onOpenChat?: () => void
+  onActionsGenerated?: (actions: string[]) => void
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    상수
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const ELEMENT_LABEL: Record<string, string> = {
-  목: "Wood", 화: "Fire", 토: "Earth", 금: "Metal", 수: "Water",
-}
-
-const ELEMENT_COLOR: Record<string, { color: string; textColor: string }> = {
-  목: { color: "bg-primary", textColor: "text-primary-foreground" },
-  화: { color: "bg-accent", textColor: "text-accent-foreground" },
-  토: { color: "bg-muted-foreground", textColor: "text-background" },
-  금: { color: "bg-border", textColor: "text-foreground" },
-  수: { color: "bg-primary/70", textColor: "text-primary-foreground" },
-}
+// ELEMENT_LABEL, ELEMENT_HEX → @/lib/constants/element-colors 에서 import
+const ELEMENT_LABEL = ELEMENT_LABEL_SHARED
 
 const FALLBACK_ELEMENTS: FiveElementItem[] = [
-  { element: "목", label: "Wood", value: 2, color: "bg-primary", textColor: "text-primary-foreground" },
-  { element: "화", label: "Fire", value: 1, color: "bg-accent", textColor: "text-accent-foreground" },
-  { element: "토", label: "Earth", value: 3, color: "bg-muted-foreground", textColor: "text-background" },
-  { element: "금", label: "Metal", value: 1, color: "bg-border", textColor: "text-foreground" },
-  { element: "수", label: "Water", value: 1, color: "bg-primary/70", textColor: "text-primary-foreground" },
+  { element: "목", label: "Wood", value: 2, color: ELEMENT_HEX["목"], textColor: "text-white" },
+  { element: "화", label: "Fire", value: 1, color: ELEMENT_HEX["화"], textColor: "text-white" },
+  { element: "토", label: "Earth", value: 3, color: ELEMENT_HEX["토"], textColor: "text-white" },
+  { element: "금", label: "Metal", value: 1, color: ELEMENT_HEX["금"], textColor: "text-white" },
+  { element: "수", label: "Water", value: 1, color: ELEMENT_HEX["수"], textColor: "text-white" },
 ]
 
 const PLANET_COLOR: Record<PlanetId, string> = {
@@ -151,8 +145,8 @@ function buildFiveElements(sajuResult: FortuneResponse | null): FiveElementItem[
     element: el,
     label: ELEMENT_LABEL[el] ?? el,
     value: Math.round((powers[el] ?? 0) * 10) / 10,
-    color: ELEMENT_COLOR[el]?.color ?? "bg-border",
-    textColor: ELEMENT_COLOR[el]?.textColor ?? "text-foreground",
+    color: ELEMENT_HEX[el] ?? "#888",
+    textColor: "text-white",
   }))
 }
 
@@ -281,8 +275,11 @@ function FiveElementsGrid({ elements, description }: { elements: FiveElementItem
       <div className="grid grid-cols-5 gap-2">
         {elements.map((item) => (
           <div key={item.element} className="text-center">
-            <div className={`mx-auto flex h-10 w-10 items-center justify-center rounded-lg ${item.color}`}>
-              <span className={`font-serif text-sm font-bold ${item.textColor}`}>
+            <div
+              className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg"
+              style={{ backgroundColor: item.color }}
+            >
+              <span className="font-serif text-sm font-bold text-white">
                 {item.element}
               </span>
             </div>
@@ -825,13 +822,18 @@ function DecisionDeepDive({
 function DeepDiveContent({
   context = "today",
   contextData,
-  onOpenChat,
+  onActionsGenerated,
 }: {
   context?: DeepDiveContext
   contextData?: DeepDiveSheetProps["contextData"]
-  onOpenChat?: () => void
+  onActionsGenerated?: (actions: string[]) => void
 }) {
   const { sajuResult, astrologyResult } = useSaju()
+  const [chatOpen, setChatOpen] = useState(false)
+
+  // Map DeepDiveContext → ChatInterface context
+  const chatContext =
+    context === "weekly" ? "week" : context === "decision" ? "decision" : "today"
 
   const shared: SharedDeepDiveProps = {
     sajuResult,
@@ -843,28 +845,44 @@ function DeepDiveContent({
     planetSummaries: buildPlanetSummaries(astrologyResult),
     todayInsight: extractTodayInsight(astrologyResult),
     hyungchungItems: extractHyungchungItems(sajuResult),
-    onOpenChat,
+    onOpenChat: () => setChatOpen(true),
   }
 
-  switch (context) {
-    case "weekly":
-      return (
-        <WeeklyDeepDive
-          {...shared}
-          dayDate={contextData?.dayDate}
-          futureDays={extractFutureDays(astrologyResult)}
-        />
-      )
-    case "decision":
-      return (
-        <DecisionDeepDive
-          {...shared}
-          decisionResult={contextData?.decisionResult}
-        />
-      )
-    default:
-      return <TodayDeepDive {...shared} />
-  }
+  const deepDiveView = (() => {
+    switch (context) {
+      case "weekly":
+        return (
+          <WeeklyDeepDive
+            {...shared}
+            dayDate={contextData?.dayDate}
+            futureDays={extractFutureDays(astrologyResult)}
+          />
+        )
+      case "decision":
+        return (
+          <DecisionDeepDive
+            {...shared}
+            decisionResult={contextData?.decisionResult}
+          />
+        )
+      default:
+        return <TodayDeepDive {...shared} />
+    }
+  })()
+
+  return (
+    <>
+      {deepDiveView}
+      <ChatInterface
+        mode="sheet"
+        agents="single"
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        context={chatContext}
+        onActionsGenerated={onActionsGenerated}
+      />
+    </>
+  )
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -877,7 +895,7 @@ const CONTEXT_DESCRIPTION: Record<DeepDiveContext, string> = {
   decision: "사주 에너지와 행성 영향력이 추천에 어떻게 반영되었는지 확인하세요",
 }
 
-export function DeepDiveSheet({ open, onOpenChange, context = "today", contextData, onOpenChat }: DeepDiveSheetProps) {
+export function DeepDiveSheet({ open, onOpenChange, context = "today", contextData, onActionsGenerated }: DeepDiveSheetProps) {
   const isMobile = useIsMobile()
   const description = CONTEXT_DESCRIPTION[context]
 
@@ -900,7 +918,7 @@ export function DeepDiveSheet({ open, onOpenChange, context = "today", contextDa
             </DrawerDescription>
           </DrawerHeader>
           <div className="overflow-y-auto px-4 pb-8">
-            <DeepDiveContent context={context} contextData={contextData} onOpenChat={onOpenChat} />
+            <DeepDiveContent context={context} contextData={contextData} onActionsGenerated={onActionsGenerated} />
           </div>
         </DrawerContent>
       </Drawer>
@@ -922,7 +940,7 @@ export function DeepDiveSheet({ open, onOpenChange, context = "today", contextDa
           </SheetDescription>
         </SheetHeader>
         <div className="mt-4 px-1 pb-8">
-          <DeepDiveContent context={context} contextData={contextData} onOpenChat={onOpenChat} />
+          <DeepDiveContent context={context} contextData={contextData} onActionsGenerated={onActionsGenerated} />
         </div>
       </SheetContent>
     </Sheet>

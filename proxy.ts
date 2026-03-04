@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import NextAuth from "next-auth"
-import authConfig from "@/lib/auth/auth.config"
+import authConfig, { SKIP_AUTH } from "@/lib/auth/auth.config"
 
 const { auth } = NextAuth(authConfig)
 
@@ -16,17 +16,15 @@ const PROTECTED_ROUTES = [
 
 export default auth((req) => {
   const { nextUrl } = req
-  const session = req.auth
-  const isLoggedIn = !!session?.user
   const path = nextUrl.pathname
 
   // 1. SKIP_AUTH → 전부 통과 (개발모드)
-  if (
-    process.env.SKIP_AUTH === "true" ||
-    process.env.NEXT_PUBLIC_SKIP_AUTH === "true"
-  ) {
+  if (SKIP_AUTH) {
     return NextResponse.next()
   }
+
+  const session = req.auth
+  const isLoggedIn = !!session?.user
 
   // 2. /today?demo=true → 통과 (데모)
   if (path === "/today" && nextUrl.searchParams.get("demo") === "true") {

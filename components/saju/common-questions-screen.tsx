@@ -6,7 +6,6 @@ import { AlertCircle, Sparkles, TrendingUp, Heart, Briefcase, Activity, Calendar
 import { useSaju } from "@/lib/contexts/saju-context"
 import { WhyThisResult } from "./why-this-result"
 import { DeepDiveSheet } from "./deep-dive-sheet"
-import { AIChatPanel } from "./ai-chat-panel"
 import type { ElementType } from "react"
 
 interface QuestionCard {
@@ -38,8 +37,6 @@ export function CommonQuestionsScreen() {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [deepDiveOpen, setDeepDiveOpen] = useState(false)
-  const [chatOpen, setChatOpen] = useState(false)
-
   const handleQuestion = async (q: QuestionCard) => {
     if (answers[q.id]) {
       setSelectedQ(selectedQ === q.id ? null : q.id)
@@ -188,12 +185,7 @@ export function CommonQuestionsScreen() {
       <DeepDiveSheet
         open={deepDiveOpen}
         onOpenChange={setDeepDiveOpen}
-        onOpenChat={() => {
-          setDeepDiveOpen(false)
-          setChatOpen(true)
-        }}
       />
-      <AIChatPanel open={chatOpen} onOpenChange={setChatOpen} />
     </>
   )
 }

@@ -20,7 +20,6 @@ import {
 import Link from "next/link"
 import { CheckInChips } from "./check-in-chips"
 import { DeepDiveSheet } from "./deep-dive-sheet"
-import { AIChatPanel } from "./ai-chat-panel"
 import { WhyThisResult } from "./why-this-result"
 import { useSaju } from "@/lib/contexts/saju-context"
 import { useSajuInterpret } from "@/lib/hooks/use-saju-interpret"
@@ -269,7 +268,6 @@ export function TodayScreen() {
   const { sajuResult, birthInfo, isLoading, isDemo } = useSaju()
   const [checkedActions, setCheckedActions] = useState<Set<string>>(new Set())
   const [deepDiveOpen, setDeepDiveOpen] = useState(false)
-  const [chatOpen, setChatOpen] = useState(false)
   const [aiActions, setAiActions] = useState<string[]>([])
 
   // localStorage에서 오늘의 완료된 액션 로드
@@ -566,19 +564,8 @@ export function TodayScreen() {
       <DeepDiveSheet
         open={deepDiveOpen}
         onOpenChange={setDeepDiveOpen}
-        onOpenChat={isDemo ? undefined : () => {
-          setDeepDiveOpen(false)
-          setChatOpen(true)
-        }}
+        onActionsGenerated={isDemo ? undefined : setAiActions}
       />
-      {!isDemo && (
-        <AIChatPanel
-          open={chatOpen}
-          onOpenChange={setChatOpen}
-          context="today"
-          onActionsGenerated={setAiActions}
-        />
-      )}
     </>
   )
 }

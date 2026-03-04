@@ -83,7 +83,7 @@ export function LoginV2({ skipAuth, callbackUrl }: LoginV2Props) {
           </div>
 
           <p className="mt-12 text-center text-[11px] tracking-wide text-muted-foreground/40">
-            Saju Playbook · talelapse
+            moonlit · talelapse
           </p>
         </div>
       </div>

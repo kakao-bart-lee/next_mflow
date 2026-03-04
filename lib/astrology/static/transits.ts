@@ -25,6 +25,14 @@ interface AspectNarrative {
   body: string
 }
 
+const ASPECT_LABEL_KO: Record<AspectName, string> = {
+  conjunction: "합(☌)",
+  opposition: "충(☍)",
+  trine:       "삼각(△)",
+  square:      "사각(□)",
+  sextile:     "육각(⚹)",
+}
+
 const ASPECT_RULES: AspectRule[] = [
   { name: "conjunction", angle: 0, orb: 8, significance: "high" },
   { name: "opposition", angle: 180, orb: 8, significance: "high" },
@@ -157,7 +165,7 @@ export function computeTransits(positions: Record<PlanetId, AstrologyPosition>):
         id: `${leftPlanet}-${aspect.rule.name}-${rightPlanet}`,
         type: classifyTransitType(leftPlanet, rightPlanet),
         headline: `${PLANET_KR[leftPlanet]}·${PLANET_KR[rightPlanet]} ${narrative.headline}`,
-        planets: `${PLANET_SYMBOL[leftPlanet]} ${aspect.rule.name} ${PLANET_SYMBOL[rightPlanet]}`,
+        planets: `${PLANET_SYMBOL[leftPlanet]} ${ASPECT_LABEL_KO[aspect.rule.name]} ${PLANET_SYMBOL[rightPlanet]}`,
         sajuResonance: makeSajuResonance(leftPlanet, rightPlanet),
         body: narrative.body,
         significance: aspect.rule.significance,

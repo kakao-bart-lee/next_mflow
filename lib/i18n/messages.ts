@@ -81,7 +81,7 @@ const messages = {
       explore: "Explore",
     },
     onboarding: {
-      brand: "Saju Playbook",
+      brand: "moonlit",
       tagline: "Your daily guide to living well",
       step1Label: "Basic info",
       step2Label: "More details",
@@ -138,7 +138,7 @@ const messages = {
       explore: "探索",
     },
     onboarding: {
-      brand: "四柱プレイブック",
+      brand: "moonlit",
       tagline: "今日をうまく使う方法をお伝えします",
       step1Label: "基本情報",
       step2Label: "追加情報",
