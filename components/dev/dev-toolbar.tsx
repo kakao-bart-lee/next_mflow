@@ -133,8 +133,7 @@ interface ServicePreset {
 }
 
 const SERVICE_PRESETS: ServicePreset[] = [
-  { id: "saju-playbook", label: "Saju Playbook" },
-  { id: "moonlit", label: "Moonlit" },
+  { id: "moonlit", label: "moonlit" },
   { id: "astro-rain-cat", label: "Astro Rain Cat" },
 ]
 
@@ -160,7 +159,7 @@ export function DevToolbar(): ReactNode {
   const [pos, setPos] = useState<Position | null>(null)
   const [activePaletteId, setActivePaletteId] = useState<string>("cosmic-dark")
   const [activeFontId, setActiveFontId] = useState<string>("pretendard")
-  const [activeServiceId, setActiveServiceId] = useState<string>("saju-playbook")
+  const [activeServiceId, setActiveServiceId] = useState<string>("moonlit")
 
   useEffect(() => {
     const saved = loadPos()
@@ -184,7 +183,7 @@ export function DevToolbar(): ReactNode {
       const fontPreset = FONT_PRESETS.find((f) => f.id === savedFont)
       if (fontPreset) applyFont(fontPreset)
 
-      const savedService = localStorage.getItem(SERVICE_KEY) ?? "saju-playbook"
+      const savedService = localStorage.getItem(SERVICE_KEY) ?? "moonlit"
       setActiveServiceId(savedService)
     } catch {
       // ignore
@@ -254,7 +253,7 @@ export function DevToolbar(): ReactNode {
   return (
     <div
       ref={containerRef}
-      className={`fixed z-[9999] select-none ${pos ? "" : "bottom-4 left-4"}`}
+      className={`fixed z-[9999] select-none ${pos ? "" : "bottom-20 left-4"}`}
       style={posStyle}
     >
       <div className="overflow-hidden rounded-lg border border-border/80 bg-card/95 shadow-lg shadow-black/10 backdrop-blur-sm">

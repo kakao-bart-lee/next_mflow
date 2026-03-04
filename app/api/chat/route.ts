@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
+import { SKIP_AUTH, DEV_USER } from "@/lib/auth/auth.config"
 import { isCreditEnabled, consumeCredit, CREDIT_COSTS } from "@/lib/credit-service"
 import { getStringSystemSetting } from "@/lib/system-settings"
 import { logLlmUsage } from "@/lib/llm-usage"
@@ -96,7 +97,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "사용자 메시지가 필요합니다" }, { status: 400 })
   }
 
-  const userId = session?.user?.id ?? "anonymous"
+  const userId = session?.user?.id ?? (SKIP_AUTH ? DEV_USER.id : "anonymous")
   const modelId = process.env.MASTRA_ASTROLOGY_MODEL || process.env.MASTRA_SAJU_MODEL || "gpt-4o-mini"
   const startTime = Date.now()
 
