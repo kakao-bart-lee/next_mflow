@@ -42,7 +42,7 @@ test.describe("에러 및 그레이스풀 디그레이데이션", () => {
     await page.goto("/today")
 
     await expect(page).toHaveURL("/", { timeout: 5000 })
-    await expect(page.getByText("사주 플레이북")).toBeVisible()
+    await expect(page.getByText("moonlit")).toBeVisible()
   })
 
   test("잘못된 birthInfo 형식에도 크래시하지 않는다", async ({ page }) => {
@@ -56,7 +56,7 @@ test.describe("에러 및 그레이스풀 디그레이데이션", () => {
 
     const path = new URL(page.url()).pathname
     if (path === "/") {
-      await expect(page.getByText("사주 플레이북")).toBeVisible()
+      await expect(page.getByText("moonlit")).toBeVisible()
       return
     }
 

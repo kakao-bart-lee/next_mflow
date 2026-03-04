@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db/prisma";
 import Link from "next/link";
 import { LayoutDashboard, Users, CreditCard, Star, Settings, LogOut, MessageSquare, Cpu, BarChart2, DollarSign } from "lucide-react";
 
-export const metadata = { title: "관리자 | 사주 플레이북" };
+export const metadata = { title: "관리자 | moonlit" };
 
 const navItems = [
   { href: "/admin", label: "대시보드", icon: LayoutDashboard, exact: true },
@@ -39,7 +39,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       {/* 사이드바 */}
       <aside className="w-60 shrink-0 border-r border-border bg-card">
         <div className="flex h-14 items-center border-b border-border px-4">
-          <span className="font-semibold text-sm text-foreground">사주 플레이북 관리</span>
+          <span className="font-semibold text-sm text-foreground">moonlit 관리</span>
         </div>
 
         <nav className="p-2">

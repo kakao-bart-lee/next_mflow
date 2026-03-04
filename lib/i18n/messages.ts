@@ -24,7 +24,7 @@ const messages = {
       explore: "탐색",
     },
     onboarding: {
-      brand: "사주 플레이북",
+      brand: "moonlit",
       tagline: "오늘을 잘 쓰는 방법을 알려드릴게요",
       step1Label: "기본 정보",
       step2Label: "추가 정보",

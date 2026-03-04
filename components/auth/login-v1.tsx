@@ -40,7 +40,7 @@ export function LoginV1({ skipAuth, callbackUrl }: LoginV1Props) {
           <div className="mb-10 text-center animate-fade-in-up">
             <MoonIcon size={48} className="mx-auto mb-4 text-primary animate-float" />
             <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground">
-              사주 플레이북
+              moonlit
             </h1>
             <p className="mt-3 text-sm text-muted-foreground">
               당신의 운명을 탐구하세요

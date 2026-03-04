@@ -30,7 +30,7 @@ test.describe("신규 유저 플로우", () => {
 
   test("/ 접속 시 Landing 화면이 표시된다", async ({ page }) => {
     await expect(page).toHaveURL("/")
-    await expect(page.getByText("사주 플레이북")).toBeVisible()
+    await expect(page.getByText("moonlit")).toBeVisible()
     // CTA 버튼이 존재
     await expect(page.getByRole("button", { name: /시작/ })).toBeVisible()
   })

@@ -11,7 +11,7 @@ test.describe("온보딩 플로우", () => {
 
   test("랜딩 화면에서 시작 버튼을 누르면 온보딩이 표시된다", async ({ page }) => {
     // Landing 화면
-    await expect(page.getByText("사주 플레이북")).toBeVisible()
+    await expect(page.getByText("moonlit")).toBeVisible()
     // CTA → /onboarding
     await page.getByRole("button", { name: /시작/ }).click()
     await expect(page).toHaveURL("/onboarding")

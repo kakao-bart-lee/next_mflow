@@ -52,7 +52,7 @@ export function LoginV2({ skipAuth, callbackUrl }: LoginV2Props) {
 
           <h1 className="font-serif text-2xl font-bold text-foreground">로그인</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            사주 플레이북에 오신 것을 환영합니다
+            moonlit에 오신 것을 환영합니다
           </p>
 
           <div className="mt-8">
