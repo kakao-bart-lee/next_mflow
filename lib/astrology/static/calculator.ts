@@ -277,6 +277,7 @@ export function calculateAstrologyWithOptions(
     planetLongitudes?: Partial<Record<PlanetId, number>>
     observationTimeUtc?: string
     calculationMode?: "STATIC_V1" | "HORIZONS_V1"
+    targetDate?: string
   }
 ): AstrologyStaticResult {
   const seed = makeSeed(input)
@@ -292,9 +293,11 @@ export function calculateAstrologyWithOptions(
     .sort((a, b) => influences[b].finalScore - influences[a].finalScore)
 
   const dominant = ranking[0] ?? "SUN"
-  const now = new Date()
   const timezone = input.timezone || "UTC"
-  const todayPart = getDatePartsInTimezone(now, timezone)
+
+  // targetDate가 있으면 해당 날짜 기준, 없으면 오늘 기준
+  const baseDate = options?.targetDate ? new Date(`${options.targetDate}T12:00:00Z`) : new Date()
+  const todayPart = getDatePartsInTimezone(baseDate, timezone)
   const todayUtcDate = new Date(
     Date.UTC(todayPart.yyyy, Math.max(todayPart.mm - 1, 0), todayPart.dd)
   )

@@ -140,7 +140,10 @@ function getTimeoutMs(): number {
   return Math.floor(parsed)
 }
 
-export async function fetchHorizonsEphemeris(input: BirthInfo): Promise<HorizonsEphemerisResponse> {
+export async function fetchHorizonsEphemeris(
+  input: BirthInfo,
+  options?: { targetDate?: string }
+): Promise<HorizonsEphemerisResponse> {
   if (!hasLocation(input)) {
     throw new HorizonsClientError(
       "점성술 계산에는 위치(latitude, longitude)가 필요합니다",
@@ -150,7 +153,7 @@ export async function fetchHorizonsEphemeris(input: BirthInfo): Promise<Horizons
   }
 
   const baseUrl = getBaseUrl()
-  const body = buildHorizonsPositionsRequestBody(input)
+  const body = buildHorizonsPositionsRequestBody(input, options?.targetDate)
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -206,7 +209,7 @@ export async function fetchHorizonsEphemeris(input: BirthInfo): Promise<Horizons
   return validateResponseShape(payload)
 }
 
-export function buildHorizonsPositionsRequestBody(input: BirthInfo) {
+export function buildHorizonsPositionsRequestBody(input: BirthInfo, targetDate?: string) {
   const location = toHarunaLocationPayload(input, 0.0)
   if (!location) {
     throw new HorizonsClientError(
@@ -216,8 +219,14 @@ export function buildHorizonsPositionsRequestBody(input: BirthInfo) {
     )
   }
 
+  const birth = toHarunaBirthPayload(input)
+  // targetDate가 있으면 관측 시점을 해당 날짜 정오로 오버라이드
+  if (targetDate) {
+    birth.local_datetime = `${targetDate}T12:00:00`
+  }
+
   return {
-    birth: toHarunaBirthPayload(input),
+    birth,
     location,
     bodies: PLANET_ORDER,
     options: {
