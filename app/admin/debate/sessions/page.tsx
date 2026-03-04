@@ -108,31 +108,35 @@ export default async function DebateSessionsPage({ searchParams }: Props) {
                 {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} / {total.toLocaleString()}건
               </p>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  asChild
-                  disabled={page <= 1}
-                >
-                  <Link href={`/admin/debate/sessions?page=${page - 1}`}>
+                {page > 1 ? (
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/admin/debate/sessions?page=${page - 1}`}>
+                      <ChevronLeft className="h-4 w-4" />
+                      이전
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" disabled>
                     <ChevronLeft className="h-4 w-4" />
                     이전
-                  </Link>
-                </Button>
+                  </Button>
+                )}
                 <span className="text-muted-foreground">
                   {page} / {totalPages}
                 </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  asChild
-                  disabled={page >= totalPages}
-                >
-                  <Link href={`/admin/debate/sessions?page=${page + 1}`}>
+                {page < totalPages ? (
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/admin/debate/sessions?page=${page + 1}`}>
+                      다음
+                      <ChevronRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" disabled>
                     다음
                     <ChevronRight className="h-4 w-4" />
-                  </Link>
-                </Button>
+                  </Button>
+                )}
               </div>
             </div>
           )}

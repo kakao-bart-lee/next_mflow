@@ -23,6 +23,7 @@ function UserSearchField({
   const [results, setResults] = useState<UserResult[]>([]);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<UserResult | null>(null);
+  const [fetchError, setFetchError] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -36,10 +37,15 @@ function UserSearchField({
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
+      setFetchError(false);
       const res = await fetch(
         `/api/admin/users?q=${encodeURIComponent(query)}&limit=5`
       );
-      if (!res.ok) return;
+      if (!res.ok) {
+        setFetchError(true);
+        setOpen(true);
+        return;
+      }
       const data = await res.json();
       setResults(data.users ?? []);
       setOpen(true);
@@ -72,6 +78,7 @@ function UserSearchField({
     setSelected(null);
     setQuery("");
     setResults([]);
+    setFetchError(false);
     onSelect({ id: "", name: null, email: "", credit: null });
   };
 
@@ -121,7 +128,13 @@ function UserSearchField({
         </div>
       )}
 
-      {open && results.length === 0 && query.trim() && (
+      {open && fetchError && (
+        <div className="absolute z-10 mt-1 w-full rounded-md border border-destructive/30 bg-card px-3 py-2 text-sm text-destructive shadow-md">
+          검색 중 오류가 발생했습니다
+        </div>
+      )}
+
+      {open && !fetchError && results.length === 0 && query.trim() && (
         <div className="absolute z-10 mt-1 w-full rounded-md border bg-card px-3 py-2 text-sm text-muted-foreground shadow-md">
           검색 결과가 없습니다
         </div>
@@ -144,7 +157,7 @@ export default function AdminCreditsPage() {
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!userId.trim() || !amount || !reason.trim()) return;
 
