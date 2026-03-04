@@ -48,30 +48,41 @@ export const DEV_USER = {
   name: "개발자",
 }
 
-const providers = SKIP_AUTH
-  ? [
-      Credentials({
-        id: "dev-login",
-        name: "Development Login",
-        credentials: {},
-        async authorize() {
-          return DEV_USER
-        },
-      }),
-    ]
-  : [
-      Google({
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        allowDangerousEmailAccountLinking: true,
-      }),
-      Twitter({
-        clientId: process.env.TWITTER_CLIENT_ID,
-        clientSecret: process.env.TWITTER_CLIENT_SECRET,
-        allowDangerousEmailAccountLinking: true,
-      }),
-      KakaoProvider,
-    ]
+const providers = [
+  // 소셜 로그인 — 키가 있으면 항상 등록
+  ...(process.env.GOOGLE_CLIENT_ID
+    ? [
+        Google({
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          allowDangerousEmailAccountLinking: true,
+        }),
+      ]
+    : []),
+  ...(process.env.TWITTER_CLIENT_ID
+    ? [
+        Twitter({
+          clientId: process.env.TWITTER_CLIENT_ID,
+          clientSecret: process.env.TWITTER_CLIENT_SECRET,
+          allowDangerousEmailAccountLinking: true,
+        }),
+      ]
+    : []),
+  ...(process.env.KAKAO_CLIENT_ID ? [KakaoProvider] : []),
+  // Dev login — SKIP_AUTH일 때만 추가
+  ...(SKIP_AUTH
+    ? [
+        Credentials({
+          id: "dev-login",
+          name: "Development Login",
+          credentials: {},
+          async authorize() {
+            return DEV_USER
+          },
+        }),
+      ]
+    : []),
+]
 
 /**
  * JWT callback 베이스 로직 (Edge-safe).
