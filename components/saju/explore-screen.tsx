@@ -77,12 +77,21 @@ const ELEMENT_LABEL: Record<string, string> = {
   수: "Water",
 }
 
+// 오행 전통 색상 (radar와 동일한 팔레트)
+const ELEMENT_HEX: Record<string, string> = {
+  목: "#22c55e", // 木 — 초록
+  화: "#ef4444", // 火 — 빨강
+  토: "#eab308", // 土 — 노랑
+  금: "#94a3b8", // 金 — 은빛
+  수: "#3b82f6", // 水 — 파랑
+}
+
 const ELEMENT_COLOR: Record<string, { color: string; textColor: string }> = {
-  목: { color: "bg-primary", textColor: "text-primary-foreground" },
-  화: { color: "bg-accent", textColor: "text-accent-foreground" },
-  토: { color: "bg-muted-foreground", textColor: "text-background" },
-  금: { color: "bg-border", textColor: "text-foreground" },
-  수: { color: "bg-primary/70", textColor: "text-primary-foreground" },
+  목: { color: "bg-green-500", textColor: "text-white" },
+  화: { color: "bg-red-500", textColor: "text-white" },
+  토: { color: "bg-yellow-500", textColor: "text-white" },
+  금: { color: "bg-slate-400", textColor: "text-white" },
+  수: { color: "bg-blue-500", textColor: "text-white" },
 }
 
 const ELEMENT_MEANINGS: Record<string, string> = {
@@ -190,10 +199,10 @@ const PLANET_POSITIONS: PlanetDisplay[] = [
 
 
 const TRANSITS: TransitAspect[] = [
-  { id: "t1", type: "daily" as const, headline: "감정의 조화로운 흐름", planets: "☽ trine ♀", sajuResonance: "식신과 정재의 만남 — 표현이 결실로 이어지는 날", body: "달과 금성의 트라인이 형성됩니다. 사주 관점에서 식신과 정재의 조화는 내면의 재능이 현실 성과로 연결되는 에너지예요.", significance: "high" as const },
-  { id: "t2", type: "daily" as const, headline: "소통과 확장의 기회", planets: "☿ sextile ♃", sajuResonance: "편관과 정인의 교류 — 학습과 도전이 만나는 때", body: "수성과 목성의 섹스타일이 아이디어의 확장을 도와줍니다. 새로운 도전과 지적 성장이 함께하는 시간입니다.", significance: "medium" as const },
-  { id: "t3", type: "weekly" as const, headline: "인내가 필요한 한 주", planets: "♂ square ♄", sajuResonance: "상관과 비견의 긴장 — 독단보다 협력이 유리한 시기", body: "화성과 토성의 스퀘어는 행동에 제약을 줄 수 있어요. 혼자 밀어붙이면 마찰이 커지지만, 함께하면 단단해지는 에너지입니다.", significance: "high" as const },
-  { id: "t4", type: "special" as const, headline: "꿈과 직관의 합", planets: "♀ conjunction ♆", sajuResonance: "정재와 편인의 합류 — 현실과 영감 사이의 균형점", body: "금성-해왕성 합은 예술적 영감을 높입니다. 현실적 성과와 직관적 통찰이 만나는 특별한 에너지입니다.", significance: "medium" as const },
+  { id: "t1", type: "daily" as const, headline: "감정의 조화로운 흐름", planets: "☽ 삼각(△) ♀", sajuResonance: "식신과 정재의 만남 — 표현이 결실로 이어지는 날", body: "달과 금성의 삼각이 형성됩니다. 사주 관점에서 식신과 정재의 조화는 내면의 재능이 현실 성과로 연결되는 에너지예요.", significance: "high" as const },
+  { id: "t2", type: "daily" as const, headline: "소통과 확장의 기회", planets: "☿ 육각(⚹) ♃", sajuResonance: "편관과 정인의 교류 — 학습과 도전이 만나는 때", body: "수성과 목성의 육각이 아이디어의 확장을 도와줍니다. 새로운 도전과 지적 성장이 함께하는 시간입니다.", significance: "medium" as const },
+  { id: "t3", type: "weekly" as const, headline: "인내가 필요한 한 주", planets: "♂ 사각(□) ♄", sajuResonance: "상관과 비견의 긴장 — 독단보다 협력이 유리한 시기", body: "화성과 토성의 사각은 행동에 제약을 줄 수 있어요. 혼자 밀어붙이면 마찰이 커지지만, 함께하면 단단해지는 에너지입니다.", significance: "high" as const },
+  { id: "t4", type: "special" as const, headline: "꿈과 직관의 합", planets: "♀ 합(☌) ♆", sajuResonance: "정재와 편인의 합류 — 현실과 영감 사이의 균형점", body: "금성-해왕성 합은 예술적 영감을 높입니다. 현실적 성과와 직관적 통찰이 만나는 특별한 에너지입니다.", significance: "medium" as const },
 ]
 
 /* ─── 유틸 ─── */
@@ -507,8 +516,11 @@ export function ExploreScreen() {
                           const pct = (el.value / maxVal) * 100
                           return (
                             <div key={el.element} className="flex items-center gap-3">
-                              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${el.color}`}>
-                                <span className={`font-serif text-xs font-bold ${el.textColor}`}>{el.element}</span>
+                              <div
+                                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                                style={{ backgroundColor: ELEMENT_HEX[el.element] ?? "var(--muted)" }}
+                              >
+                                <span className="font-serif text-xs font-bold text-white">{el.element}</span>
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between text-xs">
@@ -516,7 +528,10 @@ export function ExploreScreen() {
                                   <span className="text-muted-foreground">{el.value}</span>
                                 </div>
                                 <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
-                                  <div className={`h-full rounded-full ${el.color} transition-all duration-500`} style={{ width: `${pct}%` }} />
+                                  <div
+                                    className="h-full rounded-full transition-all duration-500"
+                                    style={{ width: `${pct}%`, backgroundColor: ELEMENT_HEX[el.element] ?? "var(--primary)" }}
+                                  />
                                 </div>
                               </div>
                             </div>
@@ -588,7 +603,7 @@ export function ExploreScreen() {
                           <p className="text-sm leading-relaxed text-muted-foreground">{transit.body}</p>
                           <button onClick={() => setChatOpen(true)} className="mt-3 flex items-center gap-1.5 text-xs font-medium text-primary transition-colors hover:text-primary/80" type="button">
                             <MessageCircle className="h-3 w-3" />
-                            이 트랜짓에 대해 더 알아보기
+                            이 하늘의 흐름에 대해 더 알아보기
                           </button>
                         </div>
                       )}
