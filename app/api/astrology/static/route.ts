@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { BirthInfoSchema } from "@/lib/schemas/birth-info"
 import { analyzeAstrologyStatic } from "@/lib/use-cases/analyze-astrology-static"
 import { prisma } from "@/lib/db/prisma"
+
+const RequestSchema = BirthInfoSchema.and(
+  z.object({ targetDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() })
+)
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -14,7 +19,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "잘못된 요청 형식입니다" }, { status: 400 })
   }
 
-  const parsed = BirthInfoSchema.safeParse(body)
+  const parsed = RequestSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json(
       { error: "입력 정보가 올바르지 않습니다", details: parsed.error.flatten() },
@@ -22,7 +27,8 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const result = await analyzeAstrologyStatic(parsed.data)
+  const { targetDate, ...birthInfo } = parsed.data
+  const result = await analyzeAstrologyStatic(birthInfo, { targetDate })
   if (!result.success) {
     return NextResponse.json({ error: result.error, code: result.code }, { status: result.status })
   }

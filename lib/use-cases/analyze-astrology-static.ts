@@ -1,7 +1,7 @@
 import type { BirthInfo } from "@/lib/schemas/birth-info"
 import { fetchHorizonsEphemeris, HorizonsClientError } from "@/lib/astrology/horizons-client"
 import { PLANET_ORDER } from "@/lib/astrology/static/constants"
-import { calculateAstrologyWithOptions, calculateStaticAstrology } from "@/lib/astrology/static/calculator"
+import { calculateAstrologyWithOptions } from "@/lib/astrology/static/calculator"
 import type { AstrologyStaticResult } from "@/lib/astrology/static/types"
 
 export type AnalyzeAstrologyStaticResult =
@@ -9,14 +9,15 @@ export type AnalyzeAstrologyStaticResult =
   | { success: false; error: string; code: string; status: number }
 
 export async function analyzeAstrologyStatic(
-  input: BirthInfo
+  input: BirthInfo,
+  options?: { targetDate?: string }
 ): Promise<AnalyzeAstrologyStaticResult> {
   const useHorizons = process.env.ASTROLOGY_USE_HORIZONS !== "false"
   const hasHorizonsBaseUrl = Boolean(process.env.HARUNA_HORIZONS_BASE_URL?.trim())
 
   if (useHorizons && hasHorizonsBaseUrl) {
     try {
-      const ephemeris = await fetchHorizonsEphemeris(input)
+      const ephemeris = await fetchHorizonsEphemeris(input, { targetDate: options?.targetDate })
       const longitudes = PLANET_ORDER.reduce<Partial<Record<(typeof PLANET_ORDER)[number], number>>>(
         (acc, planet) => {
           acc[planet] = ephemeris.results[planet]?.lon_deg
@@ -28,6 +29,7 @@ export async function analyzeAstrologyStatic(
         planetLongitudes: longitudes,
         observationTimeUtc: ephemeris.observation_time_utc,
         calculationMode: "HORIZONS_V1",
+        targetDate: options?.targetDate,
       })
       return { success: true, data }
     } catch (err) {
@@ -52,7 +54,7 @@ export async function analyzeAstrologyStatic(
   }
 
   try {
-    const data = calculateStaticAstrology(input)
+    const data = calculateAstrologyWithOptions(input, { targetDate: options?.targetDate })
     return { success: true, data }
   } catch (err) {
     return {

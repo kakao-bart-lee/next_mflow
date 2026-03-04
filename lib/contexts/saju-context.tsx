@@ -25,6 +25,10 @@ interface SajuContextValue {
   isHydrated: boolean
   isDemo: boolean
   error: string | null
+  targetDate: string | null
+  setTargetDate: (date: string | null) => void
+  /** 사주는 유지하고 특정 날짜 기준 점성술만 재계산 */
+  fetchAstrologyForDate: (targetDate: string) => Promise<void>
   setBirthInfo: (info: BirthInfo) => Promise<void>
   clearData: () => void
   /** 데모 모드 전용: localStorage에 저장하지 않고 샘플 데이터로 분석 실행 */
@@ -67,9 +71,11 @@ function getSajuCacheKey(info: BirthInfo): string {
   return `${info.birthDate}:${info.birthTime ?? "unknown"}:${info.gender}:${info.timezone}`
 }
 
-// 점성술 캐시: 날짜별 1일 TTL
+// 점성술 캐시: 날짜별 1일 TTL (targetDate 포함)
 interface AstroCacheEntry {
   date: string
+  fingerprint: string
+  targetDate?: string
   data: AstrologyStaticResult
 }
 
@@ -96,6 +102,7 @@ export function SajuProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null)
   const [isHydrated, setIsHydrated] = useState(false)
   const [isDemo, setIsDemo] = useState(false)
+  const [targetDate, setTargetDate] = useState<string | null>(null)
 
   const fetchAnalysis = useCallback(async (info: BirthInfo) => {
     setIsLoading(true)
@@ -110,10 +117,12 @@ export function SajuProvider({ children }: { children: ReactNode }) {
     const cachedSajuMap = tryGetCached<Record<string, FortuneResponse>>(SAJU_CACHE_KEY)
     const cachedSaju = cachedSajuMap?.[sajuFingerprint] ?? null
 
-    // 점성술 캐시: 당일 + 같은 birthInfo만 유효
-    const cachedAstroEntry = tryGetCached<AstroCacheEntry & { fingerprint: string }>(ASTRO_CACHE_KEY)
+    // 점성술 캐시: 당일 + 같은 birthInfo + targetDate 없음(오늘 기준)만 유효
+    const cachedAstroEntry = tryGetCached<AstroCacheEntry>(ASTRO_CACHE_KEY)
     const cachedAstro =
-      cachedAstroEntry?.date === todayStr && cachedAstroEntry?.fingerprint === sajuFingerprint
+      cachedAstroEntry?.date === todayStr &&
+      cachedAstroEntry?.fingerprint === sajuFingerprint &&
+      !cachedAstroEntry?.targetDate
         ? cachedAstroEntry.data
         : null
 
@@ -171,12 +180,12 @@ export function SajuProvider({ children }: { children: ReactNode }) {
 
     if (astrologyApi.ok) {
       setAstrologyResult(astrologyApi.data)
-      // 점성술 캐시 저장 (당일 + fingerprint)
+      // 점성술 캐시 저장 (당일 + fingerprint, targetDate 없음)
       trySetCache(ASTRO_CACHE_KEY, {
         date: todayStr,
         fingerprint: sajuFingerprint,
         data: astrologyApi.data,
-      })
+      } satisfies AstroCacheEntry)
     } else {
       setAstrologyResult(null)
     }
@@ -213,6 +222,35 @@ export function SajuProvider({ children }: { children: ReactNode }) {
       if (vedicCoreData) setVedicCore(vedicCoreData)
     })
   }, [])
+
+  const fetchAstrologyForDate = useCallback(async (date: string) => {
+    if (!birthInfo) return
+    setIsLoading(true)
+    setError(null)
+    try {
+      const res = await fetch("/api/astrology/static", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...birthInfo, targetDate: date }),
+      })
+      if (res.ok) {
+        const data = (await res.json()) as AstrologyStaticResult
+        setAstrologyResult(data)
+        setTargetDate(date)
+      } else {
+        let message = "점성술 분석 중 오류가 발생했습니다"
+        try {
+          const errData = await res.json()
+          message = errData.error ?? message
+        } catch { /* ignore */ }
+        setError(message)
+      }
+    } catch {
+      setError("네트워크 오류가 발생했습니다")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [birthInfo])
 
   // SSR-safe hydration: localStorage 우선, 없으면 DB에서 birthInfo 로드
   useEffect(() => {
@@ -282,6 +320,7 @@ export function SajuProvider({ children }: { children: ReactNode }) {
     setVedicCore(null)
     setIsDemo(false)
     setError(null)
+    setTargetDate(null)
     try {
       localStorage.removeItem(STORAGE_KEY)
     } catch {
@@ -302,6 +341,9 @@ export function SajuProvider({ children }: { children: ReactNode }) {
         isHydrated,
         isDemo,
         error,
+        targetDate,
+        setTargetDate,
+        fetchAstrologyForDate,
         setBirthInfo,
         clearData,
         initDemoMode,
