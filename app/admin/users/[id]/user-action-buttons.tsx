@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Shield, Ban, CreditCard, Plus, Minus } from "lucide-react";
 import {
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export function UserActionButtons({ userId, isAdmin, isSuspended, currentUserId }: Props) {
+  const router = useRouter();
   const [creditDialogOpen, setCreditDialogOpen] = useState(false);
   const [creditAmount, setCreditAmount] = useState("");
   const [creditReason, setCreditReason] = useState("");
@@ -42,7 +44,7 @@ export function UserActionButtons({ userId, isAdmin, isSuspended, currentUserId 
       body: JSON.stringify({ isAdmin: !isAdmin }),
     });
 
-    if (res.ok) location.reload();
+    if (res.ok) router.refresh();
     else alert("오류가 발생했습니다");
   };
 
@@ -55,7 +57,7 @@ export function UserActionButtons({ userId, isAdmin, isSuspended, currentUserId 
       body: JSON.stringify({ isSuspended: !isSuspended }),
     });
 
-    if (res.ok) location.reload();
+    if (res.ok) router.refresh();
     else alert("오류가 발생했습니다");
   };
 
@@ -78,7 +80,7 @@ export function UserActionButtons({ userId, isAdmin, isSuspended, currentUserId 
         setCreditDialogOpen(false);
         setCreditAmount("");
         setCreditReason("");
-        location.reload();
+        router.refresh();
       } else {
         const data = await res.json();
         alert(data.error ?? "오류가 발생했습니다");

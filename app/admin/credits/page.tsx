@@ -1,11 +1,140 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreditCard } from "lucide-react";
+import { CreditCard, Search, X } from "lucide-react";
+
+interface UserResult {
+  id: string;
+  name: string | null;
+  email: string;
+  credit: { balance: number } | null;
+}
+
+function UserSearchField({
+  onSelect,
+}: {
+  onSelect: (user: UserResult) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<UserResult[]>([]);
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<UserResult | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selected) return;
+    if (!query.trim()) {
+      setResults([]);
+      setOpen(false);
+      return;
+    }
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      const res = await fetch(
+        `/api/admin/users?q=${encodeURIComponent(query)}&limit=5`
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      setResults(data.users ?? []);
+      setOpen(true);
+    }, 300);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query, selected]);
+
+  // 외부 클릭 시 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelect = (user: UserResult) => {
+    setSelected(user);
+    setQuery(user.email);
+    setOpen(false);
+    onSelect(user);
+  };
+
+  const handleClear = () => {
+    setSelected(null);
+    setQuery("");
+    setResults([]);
+    onSelect({ id: "", name: null, email: "", credit: null });
+  };
+
+  return (
+    <div ref={containerRef} className="relative">
+      <div className="relative">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          value={query}
+          onChange={(e) => {
+            setSelected(null);
+            setQuery(e.target.value);
+          }}
+          placeholder="이메일 또는 이름으로 검색"
+          className="pl-8 pr-8"
+          onFocus={() => results.length > 0 && setOpen(true)}
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      {open && results.length > 0 && (
+        <div className="absolute z-10 mt-1 w-full rounded-md border bg-card shadow-md">
+          {results.map((user) => (
+            <button
+              key={user.id}
+              type="button"
+              className="flex w-full flex-col px-3 py-2 text-left text-sm hover:bg-muted transition-colors"
+              onClick={() => handleSelect(user)}
+            >
+              <span className="font-medium">{user.name ?? "이름 없음"}</span>
+              <span className="text-xs text-muted-foreground">
+                {user.email}
+                {user.credit != null && (
+                  <span className="ml-2">· 잔액 {user.credit.balance.toLocaleString()}C</span>
+                )}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {open && results.length === 0 && query.trim() && (
+        <div className="absolute z-10 mt-1 w-full rounded-md border bg-card px-3 py-2 text-sm text-muted-foreground shadow-md">
+          검색 결과가 없습니다
+        </div>
+      )}
+
+      {selected && (
+        <p className="mt-1 text-xs text-muted-foreground">
+          ID: <span className="font-mono">{selected.id}</span>
+        </p>
+      )}
+    </div>
+  );
+}
 
 export default function AdminCreditsPage() {
   const [userId, setUserId] = useState("");
@@ -15,7 +144,7 @@ export default function AdminCreditsPage() {
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!userId.trim() || !amount || !reason.trim()) return;
 
@@ -60,15 +189,10 @@ export default function AdminCreditsPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label>회원 ID</Label>
-              <Input
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                placeholder="회원 ID를 입력하세요"
+              <Label>회원 검색</Label>
+              <UserSearchField
+                onSelect={(user) => setUserId(user.id)}
               />
-              <p className="text-xs text-muted-foreground">
-                회원 상세 페이지 URL에서 확인할 수 있습니다
-              </p>
             </div>
 
             <div className="space-y-1.5">
@@ -119,7 +243,7 @@ export default function AdminCreditsPage() {
               </p>
             )}
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full" disabled={loading || !userId}>
               {loading ? "처리 중…" : "확인"}
             </Button>
           </form>
