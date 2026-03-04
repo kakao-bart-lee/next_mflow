@@ -36,6 +36,7 @@ import type {
 import type { DecisionFortune } from "@/lib/use-cases/interpret-saju"
 import type { HyungchungResult } from "@/lib/saju-core/saju/hyungchung"
 import { PLANET_LABEL, PLANET_THEME } from "@/lib/astrology/static/constants"
+import { ELEMENT_HEX, ELEMENT_LABEL as ELEMENT_LABEL_SHARED } from "@/lib/constants/element-colors"
 
 export type DeepDiveContext = "today" | "weekly" | "decision"
 
@@ -54,24 +55,15 @@ interface DeepDiveSheetProps {
    상수
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const ELEMENT_LABEL: Record<string, string> = {
-  목: "Wood", 화: "Fire", 토: "Earth", 금: "Metal", 수: "Water",
-}
-
-const ELEMENT_COLOR: Record<string, { color: string; textColor: string }> = {
-  목: { color: "bg-primary", textColor: "text-primary-foreground" },
-  화: { color: "bg-accent", textColor: "text-accent-foreground" },
-  토: { color: "bg-muted-foreground", textColor: "text-background" },
-  금: { color: "bg-border", textColor: "text-foreground" },
-  수: { color: "bg-primary/70", textColor: "text-primary-foreground" },
-}
+// ELEMENT_LABEL, ELEMENT_HEX → @/lib/constants/element-colors 에서 import
+const ELEMENT_LABEL = ELEMENT_LABEL_SHARED
 
 const FALLBACK_ELEMENTS: FiveElementItem[] = [
-  { element: "목", label: "Wood", value: 2, color: "bg-primary", textColor: "text-primary-foreground" },
-  { element: "화", label: "Fire", value: 1, color: "bg-accent", textColor: "text-accent-foreground" },
-  { element: "토", label: "Earth", value: 3, color: "bg-muted-foreground", textColor: "text-background" },
-  { element: "금", label: "Metal", value: 1, color: "bg-border", textColor: "text-foreground" },
-  { element: "수", label: "Water", value: 1, color: "bg-primary/70", textColor: "text-primary-foreground" },
+  { element: "목", label: "Wood", value: 2, color: ELEMENT_HEX["목"], textColor: "text-white" },
+  { element: "화", label: "Fire", value: 1, color: ELEMENT_HEX["화"], textColor: "text-white" },
+  { element: "토", label: "Earth", value: 3, color: ELEMENT_HEX["토"], textColor: "text-white" },
+  { element: "금", label: "Metal", value: 1, color: ELEMENT_HEX["금"], textColor: "text-white" },
+  { element: "수", label: "Water", value: 1, color: ELEMENT_HEX["수"], textColor: "text-white" },
 ]
 
 const PLANET_COLOR: Record<PlanetId, string> = {
@@ -153,8 +145,8 @@ function buildFiveElements(sajuResult: FortuneResponse | null): FiveElementItem[
     element: el,
     label: ELEMENT_LABEL[el] ?? el,
     value: Math.round((powers[el] ?? 0) * 10) / 10,
-    color: ELEMENT_COLOR[el]?.color ?? "bg-border",
-    textColor: ELEMENT_COLOR[el]?.textColor ?? "text-foreground",
+    color: ELEMENT_HEX[el] ?? "#888",
+    textColor: "text-white",
   }))
 }
 
@@ -283,8 +275,11 @@ function FiveElementsGrid({ elements, description }: { elements: FiveElementItem
       <div className="grid grid-cols-5 gap-2">
         {elements.map((item) => (
           <div key={item.element} className="text-center">
-            <div className={`mx-auto flex h-10 w-10 items-center justify-center rounded-lg ${item.color}`}>
-              <span className={`font-serif text-sm font-bold ${item.textColor}`}>
+            <div
+              className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg"
+              style={{ backgroundColor: item.color }}
+            >
+              <span className="font-serif text-sm font-bold text-white">
                 {item.element}
               </span>
             </div>

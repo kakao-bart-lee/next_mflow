@@ -30,6 +30,7 @@ import type { FortuneResponse } from "@/lib/saju-core"
 import { PLANET_ORDER, SIGN_LABEL_KO } from "@/lib/astrology/static/constants"
 import { computeTransits, type TransitAspect } from "@/lib/astrology/static/transits"
 import type { PlanetId } from "@/lib/astrology/static/types"
+import { ELEMENT_HEX, ELEMENT_LABEL as ELEMENT_LABEL_SHARED } from "@/lib/constants/element-colors"
 
 /* ─── 실제 사주 데이터 파생 ─── */
 
@@ -69,30 +70,8 @@ const PLANET_META: Record<PlanetId, { symbol: string; name: string; sajuMap: str
   SATURN: { symbol: "♄", name: "토성 (Saturn)", sajuMap: "비견 (比肩)" },
 }
 
-const ELEMENT_LABEL: Record<string, string> = {
-  목: "Wood",
-  화: "Fire",
-  토: "Earth",
-  금: "Metal",
-  수: "Water",
-}
-
-// 오행 전통 색상 (radar와 동일한 팔레트)
-const ELEMENT_HEX: Record<string, string> = {
-  목: "#22c55e", // 木 — 초록
-  화: "#ef4444", // 火 — 빨강
-  토: "#eab308", // 土 — 노랑
-  금: "#94a3b8", // 金 — 은빛
-  수: "#3b82f6", // 水 — 파랑
-}
-
-const ELEMENT_COLOR: Record<string, { color: string; textColor: string }> = {
-  목: { color: "bg-green-500", textColor: "text-white" },
-  화: { color: "bg-red-500", textColor: "text-white" },
-  토: { color: "bg-yellow-500", textColor: "text-white" },
-  금: { color: "bg-slate-400", textColor: "text-white" },
-  수: { color: "bg-blue-500", textColor: "text-white" },
-}
+// ELEMENT_LABEL, ELEMENT_HEX → @/lib/constants/element-colors 에서 import
+const ELEMENT_LABEL = ELEMENT_LABEL_SHARED
 
 const ELEMENT_MEANINGS: Record<string, string> = {
   목: "성장과 시작의 기운이 강한 일주. 새로운 것을 개척하는 힘이 있습니다.",
@@ -124,8 +103,8 @@ function buildFiveElements(result: FortuneResponse): FiveElementDisplay[] {
     element: el,
     label: ELEMENT_LABEL[el] ?? el,
     value: Math.round((powers[el] ?? 0) * 10) / 10,
-    color: ELEMENT_COLOR[el]?.color ?? "bg-border",
-    textColor: ELEMENT_COLOR[el]?.textColor ?? "text-foreground",
+    color: ELEMENT_HEX[el] ?? "#888",
+    textColor: "text-white",
   }))
 }
 

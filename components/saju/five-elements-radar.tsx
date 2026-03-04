@@ -1,5 +1,7 @@
 "use client"
 
+import { ELEMENT_HEX } from "@/lib/constants/element-colors"
+
 interface RadarDataPoint {
   element: string
   label: string
@@ -8,15 +10,6 @@ interface RadarDataPoint {
 
 interface FiveElementsRadarProps {
   data: RadarDataPoint[]
-}
-
-// 오행 전통 색상
-const ELEMENT_COLORS: Record<string, string> = {
-  목: "#22c55e", // 木 — 초록
-  화: "#ef4444", // 火 — 빨강
-  토: "#eab308", // 土 — 노랑
-  금: "#94a3b8", // 金 — 은빛
-  수: "#3b82f6", // 水 — 파랑
 }
 
 export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
@@ -53,7 +46,7 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
       <defs>
         {/* 각 오행별 radial gradient — 배경 섹터 glow */}
         {data.map((d) => {
-          const color = ELEMENT_COLORS[d.element] ?? "#888"
+          const color = ELEMENT_HEX[d.element] ?? "#888"
           return (
             <radialGradient key={`grad-${d.element}`} id={`grad-${d.element}`} cx="50%" cy="50%" r="50%">
               <stop offset="0%" stopColor={color} stopOpacity="0.25" />
@@ -78,7 +71,7 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
       {/* Axis lines — 각 오행 색상 */}
       {data.map((d, i) => {
         const [px, py] = getPoint(i, maxR)
-        const color = ELEMENT_COLORS[d.element] ?? "var(--border)"
+        const color = ELEMENT_HEX[d.element] ?? "var(--border)"
         return (
           <line
             key={i}
@@ -100,7 +93,7 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
         const nextR = (data[nextIdx].value / maxValue) * maxR
         const [px, py] = getPoint(i, r)
         const [nx, ny] = getPoint(nextIdx, nextR)
-        const color = ELEMENT_COLORS[d.element] ?? "#888"
+        const color = ELEMENT_HEX[d.element] ?? "#888"
         return (
           <polygon
             key={`sector-${i}`}
@@ -125,7 +118,7 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
       {data.map((d, i) => {
         const r = (d.value / maxValue) * maxR
         const [px, py] = getPoint(i, r)
-        const color = ELEMENT_COLORS[d.element] ?? "var(--primary)"
+        const color = ELEMENT_HEX[d.element] ?? "var(--primary)"
         return (
           <circle
             key={`dot-${d.element}`}
@@ -142,7 +135,7 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
       {/* Vertex labels */}
       {data.map((d, i) => {
         const [px, py] = getPoint(i, maxR + 18)
-        const color = ELEMENT_COLORS[d.element] ?? "var(--muted)"
+        const color = ELEMENT_HEX[d.element] ?? "var(--muted)"
         return (
           <g key={`label-${d.element}`}>
             <circle
