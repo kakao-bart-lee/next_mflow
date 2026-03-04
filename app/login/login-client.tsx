@@ -6,12 +6,19 @@ import { LoginV2 } from "@/components/auth/login-v2"
 
 const STORAGE_KEY = "saju-login-version"
 
+export interface EnabledProviders {
+  google: boolean
+  twitter: boolean
+  kakao: boolean
+}
+
 interface LoginClientProps {
   skipAuth: boolean
   callbackUrl: string
+  enabledProviders: EnabledProviders
 }
 
-export function LoginClient({ skipAuth, callbackUrl }: LoginClientProps) {
+export function LoginClient({ skipAuth, callbackUrl, enabledProviders }: LoginClientProps) {
   const [version, setVersion] = useState<"v1" | "v2">("v1")
 
   useEffect(() => {
@@ -45,9 +52,9 @@ export function LoginClient({ skipAuth, callbackUrl }: LoginClientProps) {
       </button>
 
       {version === "v1" ? (
-        <LoginV1 skipAuth={skipAuth} callbackUrl={callbackUrl} />
+        <LoginV1 skipAuth={skipAuth} callbackUrl={callbackUrl} enabledProviders={enabledProviders} />
       ) : (
-        <LoginV2 skipAuth={skipAuth} callbackUrl={callbackUrl} />
+        <LoginV2 skipAuth={skipAuth} callbackUrl={callbackUrl} enabledProviders={enabledProviders} />
       )}
     </div>
   )

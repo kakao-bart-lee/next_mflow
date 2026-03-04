@@ -8,12 +8,19 @@ import { LocaleToggle } from "@/components/saju/locale-toggle"
 import { googleSignInAction, twitterSignInAction, kakaoSignInAction, devSignInAction } from "@/lib/auth/actions"
 import { Globe, ArrowRight, MessageCircle } from "lucide-react"
 
+interface EnabledProviders {
+  google: boolean
+  twitter: boolean
+  kakao: boolean
+}
+
 interface LoginV2Props {
   skipAuth: boolean
   callbackUrl: string
+  enabledProviders: EnabledProviders
 }
 
-export function LoginV2({ skipAuth, callbackUrl }: LoginV2Props) {
+export function LoginV2({ skipAuth, callbackUrl, enabledProviders }: LoginV2Props) {
   return (
     <main className="flex min-h-svh bg-background">
       {/* Left — visual panel (hidden on mobile) */}
@@ -69,39 +76,45 @@ export function LoginV2({ skipAuth, callbackUrl }: LoginV2Props) {
               </form>
             ) : (
               <div className="space-y-3">
-                <form action={googleSignInAction}>
-                  <input type="hidden" name="callbackUrl" value={callbackUrl} />
-                  <Button
-                    type="submit"
-                    variant="outline"
-                    className="h-12 w-full rounded-xl border-border/40 hover:bg-secondary"
-                  >
-                    <Globe className="mr-2 h-4 w-4" />
-                    Google로 계속하기
-                  </Button>
-                </form>
-                <form action={twitterSignInAction}>
-                  <input type="hidden" name="callbackUrl" value={callbackUrl} />
-                  <Button
-                    type="submit"
-                    variant="outline"
-                    className="h-12 w-full rounded-xl border-border/40 hover:bg-secondary"
-                  >
-                    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    X로 계속하기
-                  </Button>
-                </form>
-                <form action={kakaoSignInAction}>
-                  <input type="hidden" name="callbackUrl" value={callbackUrl} />
-                  <Button
-                    type="submit"
-                    variant="outline"
-                    className="h-12 w-full rounded-xl border-border/40 bg-[#FEE500]/10 hover:bg-[#FEE500]/20"
-                  >
-                    <MessageCircle className="mr-2 h-4 w-4" />
-                    카카오로 계속하기
-                  </Button>
-                </form>
+                {enabledProviders.google && (
+                  <form action={googleSignInAction}>
+                    <input type="hidden" name="callbackUrl" value={callbackUrl} />
+                    <Button
+                      type="submit"
+                      variant="outline"
+                      className="h-12 w-full rounded-xl border-border/40 hover:bg-secondary"
+                    >
+                      <Globe className="mr-2 h-4 w-4" />
+                      Google로 계속하기
+                    </Button>
+                  </form>
+                )}
+                {enabledProviders.twitter && (
+                  <form action={twitterSignInAction}>
+                    <input type="hidden" name="callbackUrl" value={callbackUrl} />
+                    <Button
+                      type="submit"
+                      variant="outline"
+                      className="h-12 w-full rounded-xl border-border/40 hover:bg-secondary"
+                    >
+                      <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                      X로 계속하기
+                    </Button>
+                  </form>
+                )}
+                {enabledProviders.kakao && (
+                  <form action={kakaoSignInAction}>
+                    <input type="hidden" name="callbackUrl" value={callbackUrl} />
+                    <Button
+                      type="submit"
+                      variant="outline"
+                      className="h-12 w-full rounded-xl border-border/40 bg-[#FEE500]/10 hover:bg-[#FEE500]/20"
+                    >
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      카카오로 계속하기
+                    </Button>
+                  </form>
+                )}
               </div>
             )}
           </div>
