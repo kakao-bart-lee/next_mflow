@@ -20,7 +20,7 @@ const notoSerifKR = Noto_Serif_KR({
 })
 
 export const metadata: Metadata = {
-  title: 'Saju Playbook',
+  title: 'moonlit',
   description: '오늘을 잘 쓰는 방법 — moonlit',
 }
 

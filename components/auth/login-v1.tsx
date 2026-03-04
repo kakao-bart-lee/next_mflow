@@ -86,7 +86,7 @@ export function LoginV1({ skipAuth, callbackUrl }: LoginV1Props) {
             className="mt-8 text-center text-[11px] tracking-wide text-muted-foreground/40"
             style={{ animation: "fade-in-up 0.6s ease-out 0.4s both" }}
           >
-            Saju Playbook · talelapse
+            moonlit · talelapse
           </p>
         </div>
       </div>

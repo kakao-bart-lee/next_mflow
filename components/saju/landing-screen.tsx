@@ -111,7 +111,7 @@ export function LandingScreen() {
             className="mt-10 text-[11px] tracking-wide text-muted-foreground/40"
             style={{ animation: "fade-in-up 0.6s ease-out 550ms both" }}
           >
-            Saju Playbook · talelapse
+            moonlit · talelapse
           </p>
         </div>
       </div>
