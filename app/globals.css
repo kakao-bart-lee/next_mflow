@@ -94,8 +94,8 @@
   --muted: #1A1F38;
   --muted-foreground: #CBD5E0;
 
-  /* Accent: Neon Cyan */
-  --accent: #00F5FF;
+  /* Accent: Muted Sky Blue */
+  --accent: #5BA4CF;
   --accent-foreground: #0B0D17;
 
   --destructive: #FF4D4D;
@@ -342,7 +342,7 @@
   --muted: #1E1840;
   --muted-foreground: #A0AABB;
 
-  --accent: #67E8F9;
+  --accent: #5BAED4;
   --accent-foreground: #0D0B1A;
 
   --destructive: #FF4D4D;

@@ -314,7 +314,7 @@ export function ExploreScreen() {
                 {/* Top image with gradient overlay and astro badge pills */}
                 <div className="relative h-32 md:h-40 overflow-hidden">
                   <Image
-                    src="/placeholder.jpg"
+                    src="/explore-hero.jpeg"
                     alt="밤하늘 일러스트"
                     fill
                     className="object-cover object-center"

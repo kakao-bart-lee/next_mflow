@@ -231,7 +231,7 @@ function SingleChatContent({
       )}
 
       {/* Input area */}
-      <div className="border-t border-border/20 bg-background/40 p-3 pb-safe backdrop-blur-sm">
+      <div className="border-t border-border/20 bg-background/30 p-3 pb-safe backdrop-blur-sm">
         <div className="mx-auto flex max-w-2xl items-end gap-2">
           <button
             onClick={handleReset}
@@ -462,7 +462,7 @@ export function ChatInterface({
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="right" className="flex w-full max-w-md flex-col gap-0 p-0 sm:max-w-lg">
-          <SheetHeader className="flex flex-row items-center border-b border-border/20 bg-background/60 px-4 py-3 backdrop-blur-xl">
+          <SheetHeader className="flex flex-row items-center border-b border-border/20 bg-background/50 px-4 py-3 backdrop-blur-xl">
             <div className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15">
                 <Sparkles className="h-4 w-4 text-primary" />
@@ -485,8 +485,8 @@ export function ChatInterface({
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background animate-fade-in-up">
-      <header className="flex items-center justify-between border-b border-border/20 bg-background/60 px-4 py-3 backdrop-blur-xl">
+    <div className="fixed inset-0 z-50 flex flex-col bg-background/80 backdrop-blur-xl animate-fade-in-up">
+      <header className="flex items-center justify-between border-b border-border/20 bg-background/50 px-4 py-3 backdrop-blur-xl">
         <div className="flex items-center gap-3">
           <button
             onClick={() => onOpenChange(false)}
