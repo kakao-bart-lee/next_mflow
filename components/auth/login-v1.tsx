@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { StarfieldBg } from "@/components/starfield-bg"
+import { MeteorShower } from "./meteor-shower"
 import { MoonIcon } from "@/components/moon-icon"
 import { ThemeToggle } from "@/components/saju/theme-toggle"
 import { LocaleToggle } from "@/components/saju/locale-toggle"
@@ -24,6 +25,7 @@ export function LoginV1({ skipAuth, callbackUrl, enabledProviders }: LoginV1Prop
   return (
     <main className="relative flex min-h-svh flex-col bg-background">
       <StarfieldBg />
+      <MeteorShower />
 
       {/* Ambient glow */}
       <div
