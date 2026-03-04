@@ -23,17 +23,19 @@ interface LoginV2Props {
 
 export function LoginV2({ skipAuth, callbackUrl, enabledProviders }: LoginV2Props) {
   return (
-    <main className="flex min-h-svh bg-background">
+    <main className="relative flex min-h-svh bg-background overflow-hidden">
+      {/* Full-screen background effects */}
+      <StarfieldBg />
+      <MeteorShower />
+
       {/* Left — visual panel (hidden on mobile) */}
       <div
-        className="relative hidden flex-1 overflow-hidden lg:flex lg:flex-col lg:items-center lg:justify-center"
+        className="relative hidden flex-1 lg:flex lg:flex-col lg:items-center lg:justify-center"
         style={{
           background:
-            "linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, var(--background)), color-mix(in srgb, var(--accent) 6%, var(--background)))",
+            "linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, transparent), color-mix(in srgb, var(--accent) 6%, transparent))",
         }}
       >
-        <StarfieldBg />
-        <MeteorShower />
         <div className="relative z-10 flex flex-col items-center px-12 text-center">
           <MoonIcon size={80} className="mb-6 text-primary animate-float" />
           <h2 className="font-serif text-3xl font-bold text-foreground">
