@@ -125,7 +125,20 @@ export function OnboardingScreen() {
   function handleDatePartChange(field: DateFieldKey, raw: string) {
     const digits = raw.replace(/\D/g, "")
     const maxLen = field === "year" ? 4 : 2
-    const value = digits.slice(0, maxLen)
+    let value = digits.slice(0, maxLen)
+
+    // 범위 클램핑 (입력 완료된 경우)
+    if (field === "month" && value.length === 2) {
+      const n = parseInt(value, 10)
+      if (n < 1) value = "01"
+      else if (n > 12) value = "12"
+    }
+    if (field === "day" && value.length === 2) {
+      const n = parseInt(value, 10)
+      if (n < 1) value = "01"
+      else if (n > 31) value = "31"
+    }
+
     const next = { ...dateParts, [field]: value }
     setDateParts(next)
     setValue("birthDate", assembleDateValue(next), { shouldValidate: false })
