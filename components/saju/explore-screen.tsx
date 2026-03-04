@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import Image from "next/image"
 import { ChatInterface } from "./chat-interface"
 import { FiveElementsRadar } from "./five-elements-radar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { MoonIcon } from "@/components/moon-icon"
 import {
+  Moon,
   MessageCircle,
   Sparkles,
   ChevronDown,
@@ -290,94 +291,88 @@ export function ExploreScreen() {
   return (
     <>
       <div className="mx-auto w-full max-w-2xl px-5 pb-8 pt-6 lg:max-w-5xl lg:px-8">
-        {/* Hero banner */}
-        <header className="relative overflow-hidden rounded-2xl border border-border/40 bg-card/40 px-5 py-5 backdrop-blur-sm lg:px-7 lg:py-6"
-          style={{
-            background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, var(--card)), color-mix(in srgb, var(--accent) 6%, var(--card)))",
-          }}
-        >
-          {/* Ambient moon decoration */}
-          <MoonIcon size={48} className="absolute right-4 top-4 text-primary opacity-20 animate-float" />
-
-          <div className="relative z-10">
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground/70">탐색</p>
-            <h1 className="mt-1.5 text-balance font-serif text-2xl font-semibold leading-snug text-foreground lg:text-3xl">
-              나의 하늘과 사주
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              오늘의 별자리와 사주가 말하는 것
-            </p>
-
-            {/* Planet symbol row */}
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {["☉", "☽", "☿", "♀", "♂", "♃", "♄"].map((sym) => (
-                <span
-                  key={sym}
-                  className="flex h-6 w-6 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-xs text-muted-foreground"
-                >
-                  {sym}
-                </span>
-              ))}
-              <span className="ml-1 flex items-center rounded-full border border-primary/20 bg-primary/10 px-2.5 text-[11px] font-medium text-primary">
-                사주 + 점성술
-              </span>
-            </div>
+        {/* Hero header */}
+        <div className="mb-8 animate-fade-in-up">
+          <div className="flex items-center gap-2 mb-1">
+            <Moon className="w-4 h-4 text-primary" />
+            <p className="text-xs text-muted-foreground tracking-widest uppercase">탐색</p>
           </div>
-        </header>
+          <h1 className="font-serif text-2xl lg:text-3xl font-semibold text-foreground mb-2 text-balance leading-tight">
+            나의 하늘과 사주
+          </h1>
+          <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
+            동양의 사주와 서양의 점성술을 하나의 시선으로 읽습니다
+          </p>
+        </div>
 
         <div className="lg:flex lg:gap-10">
           {/* Main column */}
           <div className="lg:max-w-2xl lg:flex-1">
             {/* ─── 1. Headline: Fused reading ─── */}
-            <section className="mt-6" aria-label="오늘의 융합 해석">
-              <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-6">
-                {/* Saju pillar + planet pills */}
-                {isLoading ? (
-                  <div className="flex gap-2">
-                    <Skeleton className="h-6 w-32 rounded-full" />
-                    <Skeleton className="h-6 w-24 rounded-full" />
+            <section className="mb-8 animate-fade-in-up" style={{ animationDelay: "80ms" }} aria-label="오늘의 융합 해석">
+              <div className="rounded-2xl border border-border/30 bg-card/50 backdrop-blur-sm overflow-hidden">
+                {/* Top image with gradient overlay and astro badge pills */}
+                <div className="relative h-32 md:h-40 overflow-hidden">
+                  <Image
+                    src="/placeholder.jpg"
+                    alt="밤하늘 일러스트"
+                    fill
+                    className="object-cover object-center"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
+                  {/* Astro badge pills float at bottom of image */}
+                  <div className="absolute bottom-3 left-4 right-4 flex flex-wrap gap-1.5">
+                    {isLoading ? (
+                      <>
+                        <Skeleton className="h-6 w-28 rounded-full" />
+                        <Skeleton className="h-6 w-20 rounded-full" />
+                        <Skeleton className="h-6 w-20 rounded-full" />
+                      </>
+                    ) : (
+                      <>
+                        {sajuPillar && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-background/60 backdrop-blur-md text-foreground/80 border border-border/20">
+                            {sajuPillar.heavenlyStem}{sajuPillar.earthlyBranch} / {sajuPillar.element}
+                          </span>
+                        )}
+                        {planetPositions.slice(0, 3).map((p) => (
+                          <span key={p.id} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-background/60 backdrop-blur-md text-foreground/80 border border-border/20">
+                            {p.symbol} {p.sign}
+                          </span>
+                        ))}
+                      </>
+                    )}
                   </div>
-                ) : sajuPillar ? (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                      {sajuPillar.heavenlyStem}{sajuPillar.earthlyBranch} / {sajuPillar.element}
-                    </span>
-                    {planetPositions.slice(0, 3).map((p) => (
-                      <span key={p.name} className="flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs text-secondary-foreground">
-                        <span className="text-sm">{p.symbol}</span>
-                        {p.sign}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
+                </div>
 
-                {/* Summary */}
-                <h2 className="mt-4 font-serif text-lg font-semibold leading-snug text-foreground">
-                  {headlineTitle}
-                </h2>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  {astrologyResult ? (
-                    headlineBody
-                  ) : (
-                    <>
-                      사주의{" "}
-                      <TermTooltip term="식신" definition="일간이 생(生)하는 오행 중 음양이 같은 것. 표현, 재능, 식복을 의미합니다." />
-                      {" "}기운과 태양의 물고기자리 에너지가 함께 흐르고 있습니다.
-                      이성적 판단보다 직관을 신뢰하되, 오행의{" "}
-                      <TermTooltip term="토(Earth)" definition="오행 중 안정과 중심을 상징. 균형을 잡아주는 역할을 합니다." />
-                      {" "}에너지로 현실 감각을 유지하세요.
-                    </>
-                  )}
-                </p>
-
-                <button
-                  onClick={() => setChatOpen(true)}
-                  className="mt-4 flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
-                  type="button"
-                >
-                  <MessageCircle className="h-3.5 w-3.5" />
-                  이 해석에 대해 더 이야기하기
-                </button>
+                {/* Card content area */}
+                <div className="p-5 md:p-6">
+                  <h2 className="font-serif text-lg font-semibold text-foreground mb-2">
+                    {headlineTitle}
+                  </h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                    {astrologyResult ? (
+                      headlineBody
+                    ) : (
+                      <>
+                        사주의{" "}
+                        <TermTooltip term="식신" definition="일간이 생(生)하는 오행 중 음양이 같은 것. 표현, 재능, 식복을 의미합니다." />
+                        {" "}기운과 태양의 물고기자리 에너지가 함께 흐르고 있습니다.
+                        이성적 판단보다 직관을 신뢰하되, 오행의{" "}
+                        <TermTooltip term="토(Earth)" definition="오행 중 안정과 중심을 상징. 균형을 잡아주는 역할을 합니다." />
+                        {" "}에너지로 현실 감각을 유지하세요.
+                      </>
+                    )}
+                  </p>
+                  <button
+                    onClick={() => setChatOpen(true)}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent/80 transition-colors"
+                    type="button"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    이 해석에 대해 더 이야기하기
+                  </button>
+                </div>
               </div>
             </section>
 
