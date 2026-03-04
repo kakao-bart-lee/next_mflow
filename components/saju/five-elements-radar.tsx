@@ -99,7 +99,7 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
             key={`sector-${i}`}
             points={`${cx},${cy} ${px},${py} ${nx},${ny}`}
             fill={color}
-            opacity="0.35"
+            opacity="0.22"
           />
         )
       })}
@@ -124,8 +124,9 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
             key={`dot-${d.element}`}
             cx={px}
             cy={py}
-            r="4"
+            r="3.5"
             fill={color}
+            fillOpacity="0.85"
             stroke="var(--background)"
             strokeWidth="1.5"
           />

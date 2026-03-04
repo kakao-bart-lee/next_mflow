@@ -6,13 +6,13 @@
 
 export type ElementKey = "목" | "화" | "토" | "금" | "수"
 
-/** 오행별 hex 색상 (바 차트, 인라인 스타일 등에 사용) */
+/** 오행별 hex 색상 (바 차트, 인라인 스타일 등에 사용) — muted/desaturated 팔레트 */
 export const ELEMENT_HEX: Record<string, string> = {
-  목: "#16a34a", // 木 — 초록 (green-600)
-  화: "#dc2626", // 火 — 빨강 (red-600)
-  토: "#ca8a04", // 土 — 황금 (yellow-600)
-  금: "#64748b", // 金 — 슬레이트 (slate-500)
-  수: "#2563eb", // 水 — 파랑 (blue-600)
+  목: "#5a9e74", // 木 — 세이지 그린 (muted sage green)
+  화: "#c46b65", // 火 — 더스티 로즈 (muted dusty coral)
+  토: "#b89444", // 土 — 웜 앰버 (muted warm amber)
+  금: "#7a90a3", // 金 — 스틸 블루그레이 (muted steel)
+  수: "#4a7dc4", // 水 — 더스티 블루 (muted cornflower)
 }
 
 /** 오행별 연한 배경색 (카드 배경, 뱃지 등에 사용) */
