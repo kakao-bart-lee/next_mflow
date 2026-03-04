@@ -245,12 +245,12 @@ export function ExploreScreen() {
   const planetPositions = useMemo<PlanetDisplay[]>(() => {
     if (!astrologyResult) return PLANET_POSITIONS
 
-    return PLANET_ORDER.map((planet) => {
+    return PLANET_ORDER.filter((planet) => astrologyResult.positions[planet]).map((planet) => {
       const base = PLANET_META[planet]
       const position = astrologyResult.positions[planet]
-      const influence = astrologyResult.influences[planet]
+      const influence = astrologyResult.influences?.[planet]
       // chartCore 하우스 데이터가 있으면 우선 사용
-      const chartCoreHouse = chartCore?.planets[planet]?.house ?? null
+      const chartCoreHouse = chartCore?.planets?.[planet]?.house ?? null
       return {
         id: planet,
         symbol: base.symbol,
