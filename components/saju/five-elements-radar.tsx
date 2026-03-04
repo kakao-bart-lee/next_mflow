@@ -1,7 +1,5 @@
 "use client"
 
-import { ELEMENT_HEX } from "@/lib/constants/element-colors"
-
 interface RadarDataPoint {
   element: string
   label: string
@@ -55,12 +53,12 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
         />
       ))}
 
-      {/* 배경 축선 — 가이드용 (연하게) */}
+      {/* Axis lines */}
       {data.map((_, i) => {
         const [px, py] = getPoint(i, maxR)
         return (
           <line
-            key={`axis-bg-${i}`}
+            key={i}
             x1={cx} y1={cy} x2={px} y2={py}
             stroke="var(--border)"
             strokeWidth="0.5"
@@ -69,70 +67,36 @@ export function FiveElementsRadar({ data }: FiveElementsRadarProps) {
         )
       })}
 
-      {/* 데이터 폴리곤 — 중립 색상으로 전체 형태 표시 */}
+      {/* Data polygon */}
       <polygon
         points={dataPolygonPoints()}
-        fill="var(--foreground)"
-        fillOpacity="0.05"
-        stroke="var(--foreground)"
-        strokeWidth="0.8"
-        strokeOpacity="0.2"
-        strokeLinejoin="round"
+        fill="color-mix(in srgb, var(--primary) 15%, transparent)"
+        stroke="var(--primary)"
+        strokeWidth="1.5"
       />
 
-      {/*
-        핵심: 각 원소의 스포크(spoke) — 축 위에 해당 원소 색의 굵은 선으로 값만큼만 표시.
-        이 방식은 인접 원소의 영향 없이, 각 원소의 값을 독립적으로 색상 표현함.
-      */}
+      {/* Data points */}
       {data.map((d, i) => {
         const r = (d.value / maxValue) * maxR
         const [px, py] = getPoint(i, r)
-        const color = ELEMENT_HEX[d.element] ?? "var(--primary)"
         return (
-          <line
-            key={`spoke-${d.element}`}
-            x1={cx} y1={cy}
-            x2={px} y2={py}
-            stroke={color}
-            strokeWidth="4"
-            strokeLinecap="round"
-            opacity="0.65"
-          />
+          <circle key={d.element} cx={px} cy={py} r="3" fill="var(--primary)" />
         )
       })}
 
-      {/* 데이터 꼭짓점 dot — 오행 색상 */}
-      {data.map((d, i) => {
-        const r = (d.value / maxValue) * maxR
-        const [px, py] = getPoint(i, r)
-        const color = ELEMENT_HEX[d.element] ?? "var(--primary)"
-        return (
-          <circle
-            key={`dot-${d.element}`}
-            cx={px} cy={py}
-            r="4"
-            fill={color}
-            stroke="var(--background)"
-            strokeWidth="1.5"
-          />
-        )
-      })}
-
-      {/* Vertex 레이블 */}
+      {/* Vertex labels */}
       {data.map((d, i) => {
         const [px, py] = getPoint(i, maxR + 18)
-        const color = ELEMENT_HEX[d.element] ?? "var(--muted)"
         return (
           <g key={`label-${d.element}`}>
-            <circle cx={px} cy={py} r="13" fill={color} opacity="0.15" />
-            <circle cx={px} cy={py} r="13" fill="none" stroke={color} strokeWidth="1" opacity="0.35" />
+            <circle cx={px} cy={py} r="12" fill="var(--primary)" opacity="0.15" />
             <text
               x={px} y={py}
               textAnchor="middle"
               dominantBaseline="central"
-              fontSize="11"
-              fontWeight="700"
-              fill={color}
+              fontSize="10"
+              fontWeight="600"
+              fill="var(--foreground)"
             >
               {d.element}
             </text>
