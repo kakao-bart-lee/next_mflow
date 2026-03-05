@@ -4,7 +4,10 @@ import type { PlanetId } from "@/lib/astrology/static/types"
 import type {
   ChartCoreResponse,
   AspectsResponse,
+  DashaPeriod,
   VedicCoreResponse,
+  NakshatraData,
+  VedicPlanetPosition,
   EssentialScoreResponse,
   AccidentalScoreResponse,
   VimshottariResponse,
@@ -291,6 +294,183 @@ async function fetchDerived<T>(endpoint: string, input: BirthInfo): Promise<T> {
   return payload as T
 }
 
+function readNumber(obj: Record<string, unknown>, ...keys: string[]): number | null {
+  for (const key of keys) {
+    const v = obj[key]
+    if (typeof v === "number" && Number.isFinite(v)) return v
+  }
+  return null
+}
+
+function readString(obj: Record<string, unknown>, ...keys: string[]): string | null {
+  for (const key of keys) {
+    const v = obj[key]
+    if (typeof v === "string" && v.length > 0) return v
+  }
+  return null
+}
+
+function normalizeNakshatra(raw: unknown): NakshatraData | null {
+  if (!raw || typeof raw !== "object") return null
+  const obj = raw as Record<string, unknown>
+
+  const name = readString(obj, "name")
+  const pada = readNumber(obj, "pada")
+  const lord = readString(obj, "lord")
+  const degreesInNakshatra = readNumber(obj, "degreesInNakshatra", "degrees_in_nakshatra")
+  const startDeg = readNumber(obj, "startDeg", "start_deg")
+  const endDeg = readNumber(obj, "endDeg", "end_deg")
+
+  if (
+    !name ||
+    pada === null ||
+    !lord ||
+    degreesInNakshatra === null ||
+    startDeg === null ||
+    endDeg === null
+  ) {
+    return null
+  }
+
+  return {
+    name,
+    pada,
+    lord,
+    degreesInNakshatra,
+    startDeg,
+    endDeg,
+  }
+}
+
+function normalizeVedicPlanet(raw: unknown, planet: PlanetId): VedicPlanetPosition | null {
+  if (!raw || typeof raw !== "object") return null
+  const obj = raw as Record<string, unknown>
+
+  const siderealLonDeg = readNumber(obj, "siderealLonDeg", "sidereal_lon_deg")
+  const sign = readString(obj, "sign")
+  const signLabel = readString(obj, "signLabel", "sign_label") ?? sign
+  const degreeInSign = readNumber(obj, "degreeInSign", "degree_in_sign")
+  const nakshatra = normalizeNakshatra(obj.nakshatra)
+
+  if (
+    siderealLonDeg === null ||
+    !sign ||
+    !signLabel ||
+    degreeInSign === null ||
+    !nakshatra
+  ) {
+    return null
+  }
+
+  return {
+    planet,
+    siderealLonDeg,
+    sign,
+    signLabel,
+    degreeInSign,
+    nakshatra,
+  }
+}
+
+function normalizeVedicCoreResponse(payload: unknown): VedicCoreResponse {
+  if (!payload || typeof payload !== "object") {
+    throw new HorizonsClientError("베딕 코어 응답 형식이 올바르지 않습니다", 502, "HORIZONS_BAD_RESPONSE")
+  }
+  const obj = payload as Record<string, unknown>
+
+  const ayanamsa = readNumber(obj, "ayanamsa")
+  const ayanamsaType = readString(obj, "ayanamsaType", "ayanamsa_type")
+  const observation = readString(obj, "observation_time_utc", "observationTimeUtc")
+  const rawPlanets = obj.planets
+  if (ayanamsa === null || !ayanamsaType || !observation || !rawPlanets || typeof rawPlanets !== "object") {
+    throw new HorizonsClientError("베딕 코어 응답 필드가 누락되었습니다", 502, "HORIZONS_BAD_RESPONSE")
+  }
+
+  const planetsRecord = rawPlanets as Record<string, unknown>
+  const planets = {} as Record<PlanetId, VedicPlanetPosition>
+  for (const planet of PLANET_ORDER) {
+    const normalized = normalizeVedicPlanet(planetsRecord[planet], planet)
+    if (!normalized) {
+      throw new HorizonsClientError(`베딕 코어 응답의 ${planet} 데이터가 유효하지 않습니다`, 502, "HORIZONS_BAD_RESPONSE")
+    }
+    planets[planet] = normalized
+  }
+
+  const moonNakshatra =
+    normalizeNakshatra(obj.moonNakshatra) ??
+    normalizeNakshatra(obj.moon_nakshatra) ??
+    planets.MOON?.nakshatra ??
+    null
+
+  if (!moonNakshatra) {
+    throw new HorizonsClientError("베딕 코어 응답에 moonNakshatra가 없습니다", 502, "HORIZONS_BAD_RESPONSE")
+  }
+
+  return {
+    ayanamsa,
+    ayanamsaType,
+    planets,
+    moonNakshatra,
+    observation_time_utc: observation,
+  }
+}
+
+function normalizeDashaLevel(raw: unknown): DashaPeriod["level"] | null {
+  if (raw === "maha" || raw === "antar" || raw === "pratyantar") return raw
+  if (raw === "MAHA") return "maha"
+  if (raw === "ANTAR") return "antar"
+  if (raw === "PRATYANTAR") return "pratyantar"
+  return null
+}
+
+function normalizeDashaPeriod(raw: unknown, fallbackLevel?: DashaPeriod["level"]): DashaPeriod | null {
+  if (!raw || typeof raw !== "object") return null
+  const obj = raw as Record<string, unknown>
+  const lord = readString(obj, "lord")
+  const startDate = readString(obj, "startDate", "start_date")
+  const endDate = readString(obj, "endDate", "end_date")
+  const level = normalizeDashaLevel(obj.level) ?? fallbackLevel ?? null
+  if (!lord || !startDate || !endDate || !level) return null
+  return { lord, startDate, endDate, level }
+}
+
+function normalizeVimshottariResponse(payload: unknown): VimshottariResponse {
+  if (!payload || typeof payload !== "object") {
+    throw new HorizonsClientError("비묘타리 응답 형식이 올바르지 않습니다", 502, "HORIZONS_BAD_RESPONSE")
+  }
+  const obj = payload as Record<string, unknown>
+  const observation = readString(obj, "observation_time_utc", "observationTimeUtc")
+
+  const currentMahaDasha =
+    normalizeDashaPeriod(obj.currentMahaDasha, "maha") ??
+    normalizeDashaPeriod(obj.current_maha_dasha, "maha")
+  const currentAntarDasha =
+    normalizeDashaPeriod(obj.currentAntarDasha, "antar") ??
+    normalizeDashaPeriod(obj.current_antar_dasha, "antar")
+  const currentPratyantarDasha =
+    normalizeDashaPeriod(obj.currentPratyantarDasha, "pratyantar") ??
+    normalizeDashaPeriod(obj.current_pratyantar_dasha, "pratyantar")
+
+  const rawUpcoming = obj.upcoming
+  const upcoming = Array.isArray(rawUpcoming)
+    ? rawUpcoming
+        .map((item) => normalizeDashaPeriod(item))
+        .filter((item): item is DashaPeriod => item !== null)
+    : []
+
+  if (!currentMahaDasha || !currentAntarDasha || !currentPratyantarDasha || !observation) {
+    throw new HorizonsClientError("비묘타리 응답 필드가 누락되었습니다", 502, "HORIZONS_BAD_RESPONSE")
+  }
+
+  return {
+    currentMahaDasha,
+    currentAntarDasha,
+    currentPratyantarDasha,
+    upcoming,
+    observation_time_utc: observation,
+  }
+}
+
 /** 10-1. 네이탈 차트 핵심 데이터 (ASC/MC + 12 하우스 + 행성 배치) */
 export async function fetchChartCore(input: BirthInfo): Promise<ChartCoreResponse> {
   return fetchDerived<ChartCoreResponse>("/v1/derived/chart-core", input)
@@ -303,7 +483,8 @@ export async function fetchAspects(input: BirthInfo): Promise<AspectsResponse> {
 
 /** 10-3. 달의 낙샤트라 (베딕 사이드리얼) */
 export async function fetchVedicCore(input: BirthInfo): Promise<VedicCoreResponse> {
-  return fetchDerived<VedicCoreResponse>("/v1/vedic/sidereal-core", input)
+  const payload = await fetchDerived<unknown>("/v1/vedic/sidereal-core", input)
+  return normalizeVedicCoreResponse(payload)
 }
 
 /* ─── 준비만 (타입 + fetch 함수) ─── */
@@ -320,7 +501,8 @@ export async function fetchAccidentalScore(input: BirthInfo): Promise<Accidental
 
 /** 10-5. 비묘타리 다샤 */
 export async function fetchVimshottari(input: BirthInfo): Promise<VimshottariResponse> {
-  return fetchDerived<VimshottariResponse>("/v1/vedic/vimshottari", input)
+  const payload = await fetchDerived<unknown>("/v1/vedic/vimshottari", input)
+  return normalizeVimshottariResponse(payload)
 }
 
 /** 10-6. 헬레니스틱 핵심 (세크트, 로트, ASC/MC) */

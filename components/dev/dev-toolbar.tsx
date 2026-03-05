@@ -152,6 +152,7 @@ const VIEW_OPTIONS = [
   { path: "/week", label: "Week" },
   { path: "/decision", label: "Decision" },
   { path: "/explore", label: "Explore" },
+  { path: "/lab", label: "Lab" },
 ] as const
 
 export function DevToolbar(): ReactNode {
