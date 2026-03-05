@@ -14,7 +14,7 @@ import type { AstrologyStaticResult } from "@/lib/astrology/static/types"
 import type { ChartCoreResponse, AspectsResponse, VedicCoreResponse } from "@/lib/astrology/types"
 import type { DailyFortune } from "@/lib/use-cases/interpret-saju"
 
-interface SajuContextValue {
+interface FortuneContextValue {
   birthInfo: BirthInfo | null
   sajuResult: FortuneResponse | null
   astrologyResult: AstrologyStaticResult | null
@@ -60,7 +60,7 @@ export const DEMO_DAILY_FORTUNE: DailyFortune = {
   avoid: "조급한 결정이나 무리한 일정 변경은 오늘은 피하세요",
 }
 
-const SajuContext = createContext<SajuContextValue | null>(null)
+const FortuneContext = createContext<FortuneContextValue | null>(null)
 
 const STORAGE_KEY = "saju_birth_info"
 const SAJU_CACHE_KEY = "saju_analysis_cache"
@@ -91,7 +91,7 @@ function trySetCache(key: string, value: unknown): void {
   try { localStorage.setItem(key, JSON.stringify(value)) } catch { /* ignore */ }
 }
 
-export function SajuProvider({ children }: { children: ReactNode }) {
+export function FortuneProvider({ children }: { children: ReactNode }) {
   const [birthInfo, setBirthInfoState] = useState<BirthInfo | null>(null)
   const [sajuResult, setSajuResult] = useState<FortuneResponse | null>(null)
   const [astrologyResult, setAstrologyResult] = useState<AstrologyStaticResult | null>(null)
@@ -283,7 +283,7 @@ export function SajuProvider({ children }: { children: ReactNode }) {
   }, [fetchAnalysis])
 
   // Auto-reanalyze: if birthInfo exists but sajuResult is missing (e.g. after refresh),
-  // trigger analysis automatically. This covers the case where SajuProvider is in root
+  // trigger analysis automatically. This covers the case where FortuneProvider is in root
   // layout and doesn't remount on navigation.
   useEffect(() => {
     if (isHydrated && birthInfo && !sajuResult && !isLoading && !error) {
@@ -329,7 +329,7 @@ export function SajuProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <SajuContext.Provider
+    <FortuneContext.Provider
       value={{
         birthInfo,
         sajuResult,
@@ -350,12 +350,12 @@ export function SajuProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
-    </SajuContext.Provider>
+    </FortuneContext.Provider>
   )
 }
 
-export function useSaju() {
-  const ctx = useContext(SajuContext)
-  if (!ctx) throw new Error("useSaju must be used within SajuProvider")
+export function useFortune() {
+  const ctx = useContext(FortuneContext)
+  if (!ctx) throw new Error("useFortune must be used within FortuneProvider")
   return ctx
 }

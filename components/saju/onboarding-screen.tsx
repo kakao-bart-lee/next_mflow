@@ -21,7 +21,7 @@ import { LocationSearch, type LocationResult } from "./location-search"
 import { ThemeToggle } from "./theme-toggle"
 import { LocaleToggle } from "./locale-toggle"
 import { useLocale } from "@/lib/contexts/locale-context"
-import { useSaju } from "@/lib/contexts/saju-context"
+import { useFortune } from "@/lib/contexts/fortune-context"
 import { updateSessionAction } from "@/lib/auth/actions"
 import type { BirthInfo } from "@/lib/schemas/birth-info"
 import type { Locale } from "@/lib/i18n"
@@ -63,7 +63,7 @@ function stagger(index: number, baseDelay = 0.1) {
 
 export function OnboardingScreen() {
   const router = useRouter()
-  const { setBirthInfo } = useSaju()
+  const { setBirthInfo } = useFortune()
   const { locale, t } = useLocale()
   const msg = t.onboarding
   const common = t.common
@@ -191,7 +191,7 @@ export function OnboardingScreen() {
       // DB 저장 실패해도 계속 진행 (localStorage에는 저장됨)
     }
 
-    // 2. SajuContext에 설정 (localStorage + 분석 트리거)
+    // 2. FortuneContext에 설정 (localStorage + 분석 트리거)
     await setBirthInfo(info)
 
     // 3. JWT 세션 갱신 (middleware가 hasBirthInfo를 읽을 수 있도록)

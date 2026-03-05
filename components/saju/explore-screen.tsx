@@ -24,7 +24,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { useSaju } from "@/lib/contexts/saju-context"
+import { useFortune } from "@/lib/contexts/fortune-context"
 import type { FortuneResponse } from "@/lib/saju-core"
 import { PLANET_ORDER, SIGN_LABEL_KO } from "@/lib/astrology/static/constants"
 import { computeTransits, type TransitAspect } from "@/lib/astrology/static/transits"
@@ -165,7 +165,7 @@ function getTransitTypeLabel(type: "daily" | "weekly" | "special") {
 /* ─── 메인 컴포넌트 ─── */
 
 export function ExploreScreen() {
-  const { sajuResult, astrologyResult, chartCore, vedicCore, isLoading } = useSaju()
+  const { sajuResult, astrologyResult, chartCore, vedicCore, isLoading } = useFortune()
 
   const [chatOpen, setChatOpen] = useState(false)
   const [selectedPeriod, setSelectedPeriod] = useState<SelectedPeriod>("today")

@@ -3,7 +3,7 @@ import { Noto_Sans_KR, Noto_Serif_KR } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { LocaleProvider } from '@/lib/contexts/locale-context'
-import { SajuProvider } from '@/lib/contexts/saju-context'
+import { FortuneProvider } from '@/lib/contexts/fortune-context'
 import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
@@ -58,9 +58,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <LocaleProvider>
-            <SajuProvider>
+            <FortuneProvider>
               {children}
-            </SajuProvider>
+            </FortuneProvider>
           </LocaleProvider>
           <Toaster />
         </ThemeProvider>

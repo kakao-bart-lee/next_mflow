@@ -244,7 +244,7 @@ export async function interpretSaju<T extends InterpretationType>(
   const systemPrompt = await getStringSystemSetting(settingKey, defaultPrompt);
 
   // 사주 컨텍스트 구성
-  const sajuContext = buildSajuContext(
+  const sajuContext = buildFortuneContext(
     sajuData,
     type,
     weekStartDate,
@@ -331,7 +331,7 @@ export async function interpretSaju<T extends InterpretationType>(
 // Context builder
 // =============================================================================
 
-function buildSajuContext(
+function buildFortuneContext(
   sajuData: FortuneResponse,
   type: InterpretationType,
   weekStartDate?: string,

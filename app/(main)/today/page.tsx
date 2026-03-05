@@ -5,7 +5,7 @@ import type { ReactNode } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { Sparkles } from "lucide-react"
-import { useSaju } from "@/lib/contexts/saju-context"
+import { useFortune } from "@/lib/contexts/fortune-context"
 import { useRequireBirthInfo } from "@/lib/hooks/use-require-birth-info"
 import { TodayScreen } from "@/components/saju/today-screen"
 import { Button } from "@/components/ui/button"
@@ -25,9 +25,9 @@ function DemoBanner(): ReactNode {
   )
 }
 
-/** 데모 모드: SajuContext에 샘플 데이터 로드 후 화면 표시 */
+/** 데모 모드: FortuneContext에 샘플 데이터 로드 후 화면 표시 */
 function DemoTodayPage(): ReactNode {
-  const { initDemoMode, isHydrated } = useSaju()
+  const { initDemoMode, isHydrated } = useFortune()
   const [ready, setReady] = useState(false)
 
   useEffect(() => {

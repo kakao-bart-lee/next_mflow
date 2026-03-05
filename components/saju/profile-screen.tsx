@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useSaju } from "@/lib/contexts/saju-context"
+import { useFortune } from "@/lib/contexts/fortune-context"
 import { useLocale } from "@/lib/contexts/locale-context"
 import { LOCALES, type Locale } from "@/lib/i18n"
 import { User, LogOut, Calendar, Clock, MapPin, ChevronRight, Coins, Languages, RefreshCw } from "lucide-react"
@@ -103,7 +103,7 @@ interface UserProfile {
 }
 
 export function ProfileScreen() {
-  const { birthInfo, sajuResult, clearData } = useSaju()
+  const { birthInfo, sajuResult, clearData } = useFortune()
   const { locale, setLocale, t } = useLocale()
   const router = useRouter()
 

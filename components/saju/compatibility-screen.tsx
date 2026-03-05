@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AlertCircle, ArrowRight, Heart, Sparkles } from "lucide-react"
-import { useSaju } from "@/lib/contexts/saju-context"
+import { useFortune } from "@/lib/contexts/fortune-context"
 import { DeepDiveSheet } from "./deep-dive-sheet"
 import { WhyThisResult } from "./why-this-result"
 
@@ -33,7 +33,7 @@ interface CompatibilityResult {
 type Step = "input" | "result"
 
 export function CompatibilityScreen() {
-  const { birthInfo } = useSaju()
+  const { birthInfo } = useFortune()
   const [step, setStep] = useState<Step>("input")
   const [partnerDate, setPartnerDate] = useState("")
   const [partnerTime, setPartnerTime] = useState("")

@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { LogOut, Settings, User } from "lucide-react"
 import { logoutAction } from "@/lib/auth/actions"
-import { useSaju } from "@/lib/contexts/saju-context"
+import { useFortune } from "@/lib/contexts/fortune-context"
 import { BottomNav } from "@/components/saju/bottom-nav"
 import { DevToolbar } from "@/components/dev/dev-toolbar"
 import { ThemeToggle } from "@/components/saju/theme-toggle"
@@ -29,7 +29,7 @@ interface MainLayoutProps {
 }
 
 export default function MainLayout({ children }: MainLayoutProps): ReactNode {
-  const { clearData } = useSaju()
+  const { clearData } = useFortune()
   const [mounted, setMounted] = useState(false)
   const [serviceName, setServiceName] = useState("moonlit")
 

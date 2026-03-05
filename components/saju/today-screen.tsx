@@ -21,8 +21,8 @@ import Link from "next/link"
 import { CheckInChips } from "./check-in-chips"
 import { DeepDiveSheet } from "./deep-dive-sheet"
 import { WhyThisResult } from "./why-this-result"
-import { useSaju } from "@/lib/contexts/saju-context"
-import { useSajuInterpret } from "@/lib/hooks/use-saju-interpret"
+import { useFortune } from "@/lib/contexts/fortune-context"
+import { useFortuneInterpret } from "@/lib/hooks/use-saju-interpret"
 import type { FortuneResponse } from "@/lib/saju-core"
 
 /* ─── 오행 기반 오늘의 데이터 매핑 ─── */
@@ -265,7 +265,7 @@ function RecentHistory() {
 /* ─── 메인 컴포넌트 ─── */
 
 export function TodayScreen() {
-  const { sajuResult, birthInfo, isLoading, isDemo } = useSaju()
+  const { sajuResult, birthInfo, isLoading, isDemo } = useFortune()
   const [checkedActions, setCheckedActions] = useState<Set<string>>(new Set())
   const [deepDiveOpen, setDeepDiveOpen] = useState(false)
   const [aiActions, setAiActions] = useState<string[]>([])
@@ -286,7 +286,7 @@ export function TodayScreen() {
     }
   }, [])
   // LLM 동적 콘텐츠 fetch
-  const { data: llmDaily, isLoading: llmLoading, error: llmError } = useSajuInterpret("daily", birthInfo)
+  const { data: llmDaily, isLoading: llmLoading, error: llmError } = useFortuneInterpret("daily", birthInfo)
 
   const todayData = useMemo(() => {
     if (!sajuResult) return null

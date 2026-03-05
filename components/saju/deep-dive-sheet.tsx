@@ -25,7 +25,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { useSaju } from "@/lib/contexts/saju-context"
+import { useFortune } from "@/lib/contexts/fortune-context"
 import type { FortuneResponse } from "@/lib/saju-core"
 import type {
   AstrologyStaticResult,
@@ -828,7 +828,7 @@ function DeepDiveContent({
   contextData?: DeepDiveSheetProps["contextData"]
   onActionsGenerated?: (actions: string[]) => void
 }) {
-  const { sajuResult, astrologyResult } = useSaju()
+  const { sajuResult, astrologyResult } = useFortune()
   const [chatOpen, setChatOpen] = useState(false)
 
   // Map DeepDiveContext → ChatInterface context
