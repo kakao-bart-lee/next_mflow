@@ -190,7 +190,7 @@ export function ExploreScreen() {
       const base = PLANET_META[planet]
       const position = astrologyResult.positions[planet]
       const influence = astrologyResult.influences[planet]
-      const chartCoreHouse = chartCore?.planets?.[planet]?.house ?? null
+      const chartCoreHouse = chartCore?.planets[planet]?.house ?? null
       return {
         id: planet,
         symbol: base.symbol,
@@ -251,17 +251,18 @@ export function ExploreScreen() {
 
   const periodLabel = PERIODS.find((p) => p.id === selectedPeriod)?.label ?? "오늘"
 
+
   return (
     <>
-      <div className="mx-auto w-full max-w-2xl px-5 pb-8 pt-6">
+      <div className="mx-auto w-full max-w-5xl px-5 pb-8 pt-6">
 
         {/* 페이지 헤더 */}
-        <div className="mb-6 animate-fade-in-up">
+        <div className="mb-4 animate-fade-in-up">
           <div className="flex items-center gap-2 mb-1">
             <Moon className="w-4 h-4 text-primary" />
             <p className="text-xs text-muted-foreground tracking-widest uppercase">탐색</p>
           </div>
-          <h1 className="font-serif text-2xl font-semibold text-foreground mb-2 leading-tight">
+          <h1 className="font-serif text-2xl font-semibold text-foreground mb-1 leading-tight">
             나의 하늘과 사주
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -269,72 +270,69 @@ export function ExploreScreen() {
           </p>
         </div>
 
-        {/* A. 시간 선택기 */}
-        <div className="mb-6 flex gap-2 animate-fade-in-up" style={{ animationDelay: "40ms" }}>
-          {PERIODS.map(({ id, label }) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setSelectedPeriod(id)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                selectedPeriod === id
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+        {/* 시간 탭 */}
+        <div className="mb-6 border-b border-border animate-fade-in-up" style={{ animationDelay: "40ms" }}>
+          <div className="grid grid-cols-3 gap-0">
+            {PERIODS.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setSelectedPeriod(id)}
+                className={`w-full py-3 text-sm transition-colors ${
+                  selectedPeriod === id
+                    ? "border-b-2 border-primary text-primary font-semibold"
+                    : "border-b border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* B. 오늘의 융합 리딩 (Hero) */}
-        <section className="mb-6 animate-fade-in-up" style={{ animationDelay: "80ms" }} aria-label="융합 리딩">
-          <div className="rounded-2xl border border-border/30 bg-card/50 backdrop-blur-sm overflow-hidden">
-            {/* 배경 이미지 + 배지 pills */}
-            <div className="relative h-32 overflow-hidden">
+        {/* ══════════════════════════════════════════
+            LAYER 3 — 둘이 만나면 오늘 무슨 일?
+        ══════════════════════════════════════════ */}
+        <section className="animate-fade-in-up" style={{ animationDelay: "60ms" }} aria-label="융합 해석">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+            오늘의 융합 해석
+          </p>
+
+          {/* 융합 리딩 Hero */}
+          <div className="rounded-2xl border border-border/30 bg-card/50 backdrop-blur-sm overflow-hidden mb-4">
+            <div className="relative h-40 overflow-hidden">
               <Image src="/explore-hero.jpeg" alt="밤하늘 일러스트" fill className="object-cover object-center" />
               <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
               <div className="absolute bottom-3 left-4 right-4 flex flex-wrap gap-1.5">
                 {isLoading ? (
-                  <>
-                    <Skeleton className="h-6 w-28 rounded-full" />
-                    <Skeleton className="h-6 w-20 rounded-full" />
-                    <Skeleton className="h-6 w-20 rounded-full" />
-                  </>
+                  <><Skeleton className="h-6 w-28 rounded-full" /><Skeleton className="h-6 w-20 rounded-full" /></>
                 ) : (
                   <>
                     {sajuPillar && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-background/60 backdrop-blur-md text-foreground/80 border border-border/20">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-background/60 backdrop-blur-md text-foreground/80 border border-border/20">
                         {sajuPillar.heavenlyStem}{sajuPillar.earthlyBranch} / {sajuPillar.element}
                       </span>
                     )}
-                    {planetPositions.slice(0, 3).map((p) => (
-                      <span key={p.id} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-background/60 backdrop-blur-md text-foreground/80 border border-border/20">
-                        {p.symbol} {p.sign}
+                    {activePlanet && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-primary/20 backdrop-blur-md text-primary border border-primary/20">
+                        {activePlanet.symbol} {activePlanet.sajuMap.split(" (")[0]}
                       </span>
-                    ))}
+                    )}
                   </>
                 )}
               </div>
             </div>
-
-            {/* 카드 본문 */}
             <div className="p-5">
               <span className="inline-block text-[11px] text-muted-foreground bg-secondary rounded-full px-2.5 py-0.5 mb-2">
                 {periodLabel}
               </span>
               <h2 className="font-serif text-lg font-semibold text-foreground mb-2">{headlineTitle}</h2>
               <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                {astrologyResult ? (
-                  headlineBody
-                ) : (
+                {astrologyResult ? headlineBody : (
                   <>
                     사주의{" "}
                     <TermTooltip term="식신" definition="일간이 생(生)하는 오행 중 음양이 같은 것. 표현, 재능, 식복을 의미합니다." />
                     {" "}기운과 태양의 물고기자리 에너지가 함께 흐르고 있습니다.
-                    이성적 판단보다 직관을 신뢰하되, 오행의{" "}
-                    <TermTooltip term="토(Earth)" definition="오행 중 안정과 중심을 상징. 균형을 잡아주는 역할을 합니다." />
-                    {" "}에너지로 현실 감각을 유지하세요.
                   </>
                 )}
               </p>
@@ -344,372 +342,265 @@ export function ExploreScreen() {
                 type="button"
               >
                 <MessageCircle className="w-3.5 h-3.5" />
-                이 해석에 대해 더 이야기하기
+                AI와 더 깊이 이야기하기
               </button>
             </div>
           </div>
-        </section>
 
-        {/* 사주 일주 + 대운/세운 + 낙샤트라 — 통합 그리드 */}
-        <section className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 animate-fade-in-up" style={{ animationDelay: "100ms" }} aria-label="사주 일주 정보">
-          {/* 사주 일주 배지 */}
-          <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">나의 사주 일주</h3>
-            {isLoading ? (
-              <div className="flex items-center gap-3">
-                <Skeleton className="h-14 w-14 rounded-full" />
-                <div className="space-y-2">
-                  <Skeleton className="h-3 w-24" />
-                  <Skeleton className="h-3 w-32" />
+          {/* 하늘의 변화 (트랜짓) + 사주 공명 */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">하늘의 변화</h2>
+              <Sparkles className="h-4 w-4 text-accent/60" />
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">
+              {selectedPeriod === "today" && "오늘의 주요 행성 흐름"}
+              {selectedPeriod === "tomorrow" && "내일 예상되는 행성 흐름"}
+              {selectedPeriod === "week" && "이번 주 전체 행성 변화"}
+            </p>
+            <div className="space-y-2">
+              {filteredTransits.length === 0 ? (
+                <div className="rounded-xl border border-border bg-card px-4 py-6 text-center text-sm text-muted-foreground">
+                  해당 기간의 주요 트랜짓이 없습니다
                 </div>
-              </div>
-            ) : sajuPillar ? (
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-full animate-glow-pulse"
-                  style={{ background: "color-mix(in srgb, var(--primary) 15%, transparent)" }}
-                >
-                  <span className="font-serif text-base font-bold text-primary leading-none">{sajuPillar.heavenlyStem}</span>
-                  <span className="font-serif text-sm text-primary/80 leading-none mt-0.5">{sajuPillar.earthlyBranch}</span>
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-primary" />
-                    <p className="text-sm font-medium text-foreground">{sajuPillar.element}</p>
-                  </div>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground line-clamp-2">{sajuPillar.meaning}</p>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">온보딩 후 표시됩니다</p>
-            )}
-          </div>
-
-          {/* 대운/세운 + 낙샤트라 */}
-          <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-4 space-y-3">
-            {sajuResult ? (
-              <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">대운 / 세운</h3>
-                <div className="space-y-1.5">
-                  {greatFortune?.current_period && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">현재 대운</span>
-                      <span className="text-sm font-medium text-foreground">
-                        {greatFortune.current_period.heavenly_stem}{greatFortune.current_period.earthly_branch}
-                      </span>
+              ) : (
+                filteredTransits.map((transit) => {
+                  const isExpanded = expandedTransit === transit.id
+                  return (
+                    <div
+                      key={transit.id}
+                      className={`rounded-xl border transition-colors ${isExpanded ? "border-primary/20 bg-card" : "border-border bg-card"}`}
+                    >
+                      <button
+                        onClick={() => setExpandedTransit(isExpanded ? null : transit.id)}
+                        className="flex w-full items-center gap-3 p-4 text-left"
+                        type="button"
+                        aria-expanded={isExpanded}
+                      >
+                        <div className={`h-2 w-2 shrink-0 rounded-full ${getSignificanceDot(transit.significance)}`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm">{transit.planets}</span>
+                            <h3 className="text-sm font-medium text-foreground truncate">{transit.headline}</h3>
+                          </div>
+                          <p className="mt-0.5 text-[11px] text-accent/80 truncate">{transit.sajuResonance}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-secondary-foreground">
+                            {getTransitTypeLabel(transit.type)}
+                          </span>
+                          {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                        </div>
+                      </button>
+                      {isExpanded && (
+                        <div className="border-t border-border px-4 pb-4 pt-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                          <p className="text-sm leading-relaxed text-muted-foreground">{transit.body}</p>
+                          <button
+                            onClick={() => setChatOpen(true)}
+                            className="mt-3 flex items-center gap-1.5 text-xs font-medium text-primary transition-colors hover:text-primary/80"
+                            type="button"
+                          >
+                            <MessageCircle className="h-3 w-3" />
+                            이 흐름에 대해 AI와 이야기하기
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {sinyakSingangData?.strength_type && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">신강/신약</span>
-                      <span className="text-sm font-medium text-foreground">{sinyakSingangData.strength_type}</span>
+                  )
+                })
+              )}
+            </div>
+          </div>
+        {/* ══════════════════════════════════════════
+            LAYER 2 — 지금 하늘은 어떤가?
+        ══════════════════════════════════════════ */}
+        <section className="mb-6 animate-fade-in-up" style={{ animationDelay: "100ms" }} aria-label="하늘의 현재">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+            지금 하늘
+          </p>
+
+          {/* 태양계 공전 궤도 뷰 — 100% */}
+          <div className="rounded-2xl border border-border/40 bg-[#07070f] overflow-hidden mb-3" style={{ minHeight: "360px" }}>
+            <SolarSystemView
+              activePlanetIdx={activePlanetIdx}
+              onPlanetClick={handleSolarPlanetClick}
+              planetDegrees={planetDegrees}
+              sizeMode="influence"
+            />
+          </div>
+
+          {/* 사주 연동 패널 — 행성 선택 시 */}
+          {activePlanet ? (
+            <div className="rounded-2xl border border-primary/20 bg-primary/5 backdrop-blur-sm p-4 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="flex items-start gap-4">
+                <span className="text-3xl">{activePlanet.symbol}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{activePlanet.name.split(" (")[0]}</p>
+                      <p className="text-[11px] text-muted-foreground">{activePlanet.sign}</p>
                     </div>
-                  )}
-                </div>
-              </div>
-            ) : null}
-
-            {vedicCore?.moonNakshatra && (
-              <div className={sajuResult ? "border-t border-border/30 pt-3" : ""}>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">달의 낙샤트라</h3>
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/15">
-                    <span className="text-base">☽</span>
+                    <button
+                      type="button"
+                      onClick={() => setActivePlanetId(null)}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="닫기"
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </button>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{vedicCore.moonNakshatra.name}</p>
-                    <p className="text-xs text-muted-foreground">파다 {vedicCore.moonNakshatra.pada} · {vedicCore.moonNakshatra.lord}</p>
-                  </div>
-                </div>
-              </div>
-            )}
 
-            {!sajuResult && !vedicCore?.moonNakshatra && (
-              <p className="text-sm text-muted-foreground">온보딩 후 표시됩니다</p>
-            )}
-          </div>
-        </section>
-
-        {/* C. 사주 × 행성 매핑 */}
-        <section className="mb-6 animate-fade-in-up" style={{ animationDelay: "120ms" }} aria-label="사주와 행성 매핑">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">사주 × 행성 매핑</h2>
-            <Sparkles className="h-4 w-4 text-accent/60" />
-          </div>
-
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-            {planetPositions.map((p) => {
-              const isActive = activePlanetId === p.id
-              return isActive ? (
-                /* 확장 상태 — 전체 너비 */
-                <div
-                  key={p.id}
-                  className="col-span-3 sm:col-span-4 rounded-2xl border border-primary/30 bg-primary/5 p-4 animate-in fade-in slide-in-from-top-2 duration-200"
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">{p.symbol}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-semibold text-foreground">{p.name}</h4>
-                        <button
-                          type="button"
-                          onClick={() => setActivePlanetId(null)}
-                          className="text-muted-foreground hover:text-foreground transition-colors"
-                          aria-label="닫기"
-                        >
-                          <ChevronUp className="h-4 w-4" />
-                        </button>
-                      </div>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        {p.sign}{p.house ? ` / House ${p.house}` : ""}
-                      </p>
-                      <div className="mt-2 flex items-center gap-1.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-3 mt-3">
+                    {/* 사주 십신 */}
+                    <div className="rounded-xl bg-background/60 border border-border/40 px-3 py-2">
+                      <div className="flex items-center gap-1.5 mb-1">
                         <BookOpen className="h-3 w-3 text-accent" />
-                        <span className="text-xs font-medium text-accent">사주 대응: {p.sajuMap}</span>
+                        <span className="text-[10px] font-semibold text-accent uppercase tracking-wide">사주 십신</span>
                       </div>
-                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
+                      <p className="text-sm font-bold text-foreground">{activePlanet.sajuMap}</p>
                     </div>
+
+                    {/* 오행 */}
+                    {fiveElements && (() => {
+                      const elemKey = ["목", "화", "토", "금", "수"][
+                        ["SUN","MOON","MARS","VENUS","MERCURY","JUPITER","SATURN"].indexOf(activePlanet.id) % 5
+                      ]
+                      const el = fiveElements.find((e) => e.element === elemKey)
+                      return el ? (
+                        <div className="rounded-xl bg-background/60 border border-border/40 px-3 py-2">
+                          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide block mb-1">오행</span>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold text-white"
+                              style={{ backgroundColor: ELEMENT_HEX[el.element] ?? "var(--muted)" }}
+                            >
+                              {el.element}
+                            </div>
+                            <div className="flex-1">
+                              <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                                <div
+                                  className="h-full rounded-full"
+                                  style={{
+                                    width: `${(el.value / Math.max(...fiveElements.map((e) => e.value), 1)) * 100}%`,
+                                    backgroundColor: ELEMENT_HEX[el.element] ?? "var(--primary)",
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <span className="text-[11px] text-muted-foreground">{el.value}</span>
+                          </div>
+                        </div>
+                      ) : null
+                    })()}
+                  </div>
+
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{activePlanet.description}</p>
+                  {activePlanet.house && (
+                    <p className="mt-1 text-[11px] text-muted-foreground/60">House {activePlanet.house}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-center text-xs text-muted-foreground/60">
+              행성을 탭하면 사주 십신과 오행 연결을 볼 수 있습니다
+            </p>
+          )}
+        </section>
+        {/* ══════════════════════════════════════════
+            LAYER 1 — 지금 나는 어떤 에너지인가?
+        ══════════════════════════════════════════ */}
+        <section className="mb-6 animate-fade-in-up" style={{ animationDelay: "140ms" }} aria-label="나의 에너지">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+            나의 에너지
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* 사주 일주 */}
+            <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-4">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">사주 일주</h3>
+              {isLoading ? (
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-14 w-14 rounded-full" />
+                  <div className="space-y-2"><Skeleton className="h-3 w-24" /><Skeleton className="h-3 w-32" /></div>
+                </div>
+              ) : sajuPillar ? (
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-full animate-glow-pulse"
+                    style={{ background: "color-mix(in srgb, var(--primary) 15%, transparent)" }}
+                  >
+                    <span className="font-serif text-base font-bold text-primary leading-none">{sajuPillar.heavenlyStem}</span>
+                    <span className="font-serif text-sm text-primary/80 leading-none mt-0.5">{sajuPillar.earthlyBranch}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="h-2 w-2 rounded-full bg-primary" />
+                      <p className="text-sm font-medium text-foreground">{sajuPillar.element}</p>
+                    </div>
+                    <p className="text-xs leading-relaxed text-muted-foreground line-clamp-2">{sajuPillar.meaning}</p>
+                    {/* 대운/세운 compact */}
+                    {greatFortune?.current_period && (
+                      <p className="mt-2 text-[11px] text-muted-foreground/70">
+                        대운 {greatFortune.current_period.heavenly_stem}{greatFortune.current_period.earthly_branch}
+                        {sinyakSingangData?.strength_type && ` · ${sinyakSingangData.strength_type}`}
+                      </p>
+                    )}
                   </div>
                 </div>
               ) : (
-                /* 축소 상태 */
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setActivePlanetId(p.id)}
-                  className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-3 text-center hover:border-primary/30 hover:bg-primary/5 transition-all"
-                  aria-label={`${p.name} 상세 보기`}
-                >
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-xl">{p.symbol}</span>
-                    <span className="text-[10px] font-medium text-foreground leading-tight">{p.name.split(" (")[0]}</span>
-                    <span className="text-[9px] text-accent/70 leading-tight">{p.sajuMap.split(" (")[0]}</span>
-                    <span className="text-[9px] text-muted-foreground/70 leading-tight truncate w-full">{p.sign.split("(")[0]}</span>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-          <p className="mt-2 text-center text-[11px] text-muted-foreground/70">
-            행성 카드를 탭하면 점성술 위치와 사주 십신 매핑을 볼 수 있습니다
-          </p>
-        </section>
-
-        {/* 태양계 공전 궤도 뷰 */}
-        {astrologyResult && (
-          <section className="mb-6 animate-fade-in-up" style={{ animationDelay: "120ms" }} aria-label="태양계 공전">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">지금 하늘</h2>
+                <p className="text-sm text-muted-foreground">온보딩 후 표시됩니다</p>
+              )}
             </div>
-            <div className="rounded-2xl border border-border/40 bg-[#07070f] overflow-hidden" style={{ minHeight: "360px" }}>
-              <SolarSystemView
-                activePlanetIdx={activePlanetIdx}
-                onPlanetClick={handleSolarPlanetClick}
-                planetDegrees={planetDegrees}
-                sizeMode="influence"
-              />
-            </div>
-          </section>
-        )}
 
-        {/* 네이탈 차트 휠 (Horizons 데이터 있을 때만) */}
-        {chartCore && (
-          <section className="mb-6 animate-fade-in-up" style={{ animationDelay: "130ms" }} aria-label="네이탈 차트">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">네이탈 차트</h2>
-              <span className="text-[10px] text-muted-foreground/60">Horizons Engine</span>
-            </div>
-            <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
-              <NatalChartWheel chartCore={chartCore} />
-              <div className="mt-3 flex flex-wrap justify-center gap-3 text-[10px] text-muted-foreground">
-                <span>ASC: {chartCore.ascendant?.signLabel} {chartCore.ascendant?.degreeInSign?.toFixed(1)}°</span>
-                <span>MC: {chartCore.midheaven?.signLabel} {chartCore.midheaven?.degreeInSign?.toFixed(1)}°</span>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* D. 오행 + 행성 에너지 (통합) */}
-        <section className="mb-6 animate-fade-in-up" style={{ animationDelay: "160ms" }} aria-label="오행 에너지와 행성 영향력">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">오행 + 행성 에너지</h2>
-            {fiveElements && (
-              <div className="inline-flex rounded-full border border-border p-0.5">
-                <button
-                  type="button"
-                  onClick={() => setElementChartMode("bar")}
-                  className={`rounded-full p-1.5 transition-colors ${elementChartMode === "bar" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
-                  aria-label="바 차트"
-                >
-                  <BarChart3 className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setElementChartMode("radar")}
-                  className={`rounded-full p-1.5 transition-colors ${elementChartMode === "radar" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
-                  aria-label="레이더 차트"
-                >
-                  <RadarIcon className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-5">
-            {/* 오행 분포 */}
-            {isLoading ? (
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <Skeleton className="h-8 w-8 rounded-lg" />
-                    <div className="flex-1 space-y-1.5">
-                      <Skeleton className="h-3 w-24" />
-                      <Skeleton className="h-1.5 w-full rounded-full" />
+            {/* 오행 바 차트 */}
+            <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-4">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">오행 분포</h3>
+              {isLoading ? (
+                <div className="space-y-2.5">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <Skeleton className="h-6 w-6 rounded" />
+                      <Skeleton className="h-2 flex-1 rounded-full" />
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : fiveElements ? (
-              <>
-                {elementChartMode === "bar" ? (
-                  <div className="space-y-3">
-                    {fiveElements.map((el) => {
-                      const maxVal = Math.max(...fiveElements.map((e) => e.value), 1)
-                      const pct = (el.value / maxVal) * 100
-                      return (
-                        <div key={el.element} className="flex items-center gap-3">
-                          <div
-                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-                            style={{ backgroundColor: ELEMENT_HEX[el.element] ?? "var(--muted)" }}
-                          >
-                            <span className="font-serif text-xs font-bold text-white">{el.element}</span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="font-medium text-foreground">{el.label}</span>
-                              <span className="text-muted-foreground">{el.value}</span>
-                            </div>
-                            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
-                              <div
-                                className="h-full rounded-full transition-all duration-500"
-                                style={{ width: `${pct}%`, backgroundColor: ELEMENT_HEX[el.element] ?? "var(--primary)" }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  <FiveElementsRadar data={fiveElements} />
-                )}
-                <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-                  {(() => {
-                    const dominant = fiveElements.reduce((a, b) => (a.value > b.value ? a : b))
-                    return `${dominant.element}(${dominant.label}) 기운이 가장 높습니다.`
-                  })()}
-                </p>
-              </>
-            ) : (
-              <div className="py-4 text-center text-sm text-muted-foreground">사주 분석 후 오행 분포가 표시됩니다</div>
-            )}
-
-            {/* 행성 영향력 스코어 */}
-            {astrologyResult && (
-              <div className="mt-5 border-t border-border/30 pt-4">
-                <h3 className="text-xs font-semibold text-muted-foreground mb-3">행성 영향력 스코어</h3>
-                <div className="flex gap-2 items-end justify-between">
-                  {planetPositions.map((p) => {
-                    const pct = maxPlanetScore > 0 ? (p.finalScore / maxPlanetScore) * 100 : 0
+                  ))}
+                </div>
+              ) : fiveElements ? (
+                <div className="space-y-2.5">
+                  {fiveElements.map((el) => {
+                    const maxVal = Math.max(...fiveElements.map((e) => e.value), 1)
+                    const pct = (el.value / maxVal) * 100
                     return (
-                      <div key={p.id} className="flex flex-col items-center gap-1 flex-1">
-                        <span className="text-[10px] text-muted-foreground">{p.finalScore > 0 ? p.finalScore.toFixed(0) : "—"}</span>
-                        <div className="w-full h-14 bg-secondary/60 rounded-sm relative overflow-hidden">
-                          <div
-                            className="absolute bottom-0 left-0 right-0 rounded-sm transition-all duration-500"
-                            style={{ height: `${pct}%`, backgroundColor: "var(--primary)", opacity: 0.55 }}
-                          />
+                      <div key={el.element} className="flex items-center gap-2">
+                        <div
+                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-[10px] font-bold text-white"
+                          style={{ backgroundColor: ELEMENT_HEX[el.element] ?? "var(--muted)" }}
+                        >
+                          {el.element}
                         </div>
-                        <span className="text-base">{p.symbol}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
+                            <div
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{ width: `${pct}%`, backgroundColor: ELEMENT_HEX[el.element] ?? "var(--primary)" }}
+                            />
+                          </div>
+                        </div>
+                        <span className="text-[11px] text-muted-foreground w-6 text-right shrink-0">{el.value}</span>
                       </div>
                     )
                   })}
                 </div>
-              </div>
-            )}
+              ) : (
+                <p className="text-sm text-muted-foreground">온보딩 후 표시됩니다</p>
+              )}
+            </div>
           </div>
         </section>
 
-        {/* E. 하늘의 변화 (트랜짓) */}
-        <section className="mb-8 animate-fade-in-up" style={{ animationDelay: "180ms" }} aria-label="트랜짓과 사주 공명">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">하늘의 변화</h2>
-            <Sparkles className="h-4 w-4 text-accent/60" />
-          </div>
-          <p className="text-xs text-muted-foreground mb-3">
-            {selectedPeriod === "today" && "오늘의 주요 행성 흐름"}
-            {selectedPeriod === "tomorrow" && "내일 예상되는 행성 흐름"}
-            {selectedPeriod === "week" && "이번 주 전체 행성 변화"}
-          </p>
-          <div className="space-y-2.5">
-            {filteredTransits.length === 0 ? (
-              <div className="rounded-xl border border-border bg-card px-4 py-6 text-center text-sm text-muted-foreground">
-                해당 기간의 주요 트랜짓이 없습니다
-              </div>
-            ) : (
-              filteredTransits.map((transit) => {
-                const isExpanded = expandedTransit === transit.id
-                return (
-                  <div
-                    key={transit.id}
-                    className={`rounded-xl border transition-colors ${isExpanded ? "border-primary/20 bg-card" : "border-border bg-card"}`}
-                  >
-                    <button
-                      onClick={() => setExpandedTransit(isExpanded ? null : transit.id)}
-                      className="flex w-full items-center gap-3 p-4 text-left"
-                      type="button"
-                      aria-expanded={isExpanded}
-                    >
-                      <div className={`h-2 w-2 shrink-0 rounded-full ${getSignificanceDot(transit.significance)}`} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">{transit.planets}</span>
-                          <h3 className="text-sm font-medium text-foreground truncate">{transit.headline}</h3>
-                        </div>
-                        <p className="mt-0.5 text-[11px] text-accent/80 truncate">{transit.sajuResonance}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-secondary-foreground">
-                          {getTransitTypeLabel(transit.type)}
-                        </span>
-                        {isExpanded
-                          ? <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                          : <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                        }
-                      </div>
-                    </button>
-                    {isExpanded && (
-                      <div className="border-t border-border px-4 pb-4 pt-3 animate-in fade-in slide-in-from-top-1 duration-200">
-                        <p className="text-sm leading-relaxed text-muted-foreground">{transit.body}</p>
-                        <button
-                          onClick={() => setChatOpen(true)}
-                          className="mt-3 flex items-center gap-1.5 text-xs font-medium text-primary transition-colors hover:text-primary/80"
-                          type="button"
-                        >
-                          <MessageCircle className="h-3 w-3" />
-                          이 하늘의 흐름에 대해 더 알아보기
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )
-              })
-            )}
-          </div>
         </section>
       </div>
 
-      {/* F. AI 대화 (모달) */}
+      {/* AI 대화 (모달) */}
       <ChatInterface mode="modal" agents="single" open={chatOpen} onOpenChange={setChatOpen} context="default" />
     </>
   )
