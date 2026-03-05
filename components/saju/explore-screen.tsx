@@ -5,6 +5,7 @@ import Image from "next/image"
 import { ChatInterface } from "./chat-interface"
 import { FiveElementsRadar } from "./five-elements-radar"
 import { NatalChartWheel } from "./natal-chart-wheel"
+import { SolarSystemView } from "./celestial/solar-system-view"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Moon,
@@ -189,7 +190,7 @@ export function ExploreScreen() {
       const base = PLANET_META[planet]
       const position = astrologyResult.positions[planet]
       const influence = astrologyResult.influences[planet]
-      const chartCoreHouse = chartCore?.planets[planet]?.house ?? null
+      const chartCoreHouse = chartCore?.planets?.[planet]?.house ?? null
       return {
         id: planet,
         symbol: base.symbol,
@@ -219,6 +220,23 @@ export function ExploreScreen() {
     "사주의 식신 기운과 태양의 물고기자리 에너지가 함께 흐르고 있습니다."
 
   const activePlanet = activePlanetId ? (planetPositions.find((p) => p.id === activePlanetId) ?? null) : null
+
+  const activePlanetIdx = useMemo(
+    () => (activePlanetId ? PLANET_ORDER.indexOf(activePlanetId) : null),
+    [activePlanetId],
+  )
+  const handleSolarPlanetClick = (i: number) => {
+    const id = PLANET_ORDER[i]
+    if (id) setActivePlanetId((prev) => (prev === id ? null : id))
+  }
+
+  const planetDegrees = useMemo(
+    () =>
+      astrologyResult
+        ? PLANET_ORDER.map((p) => astrologyResult.positions[p]?.lonDeg ?? 0)
+        : undefined,
+    [astrologyResult],
+  )
 
   const maxPlanetScore = useMemo(
     () => Math.max(...planetPositions.map((p) => p.finalScore), 1),
@@ -476,6 +494,23 @@ export function ExploreScreen() {
             행성 카드를 탭하면 점성술 위치와 사주 십신 매핑을 볼 수 있습니다
           </p>
         </section>
+
+        {/* 태양계 공전 궤도 뷰 */}
+        {astrologyResult && (
+          <section className="mb-6 animate-fade-in-up" style={{ animationDelay: "120ms" }} aria-label="태양계 공전">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">지금 하늘</h2>
+            </div>
+            <div className="rounded-2xl border border-border/40 bg-[#07070f] overflow-hidden" style={{ minHeight: "360px" }}>
+              <SolarSystemView
+                activePlanetIdx={activePlanetIdx}
+                onPlanetClick={handleSolarPlanetClick}
+                planetDegrees={planetDegrees}
+                sizeMode="influence"
+              />
+            </div>
+          </section>
+        )}
 
         {/* 네이탈 차트 휠 (Horizons 데이터 있을 때만) */}
         {chartCore && (
