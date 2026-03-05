@@ -3,10 +3,15 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react"
 import { Loader2, RefreshCw } from "lucide-react"
 import { useFortune } from "@/lib/contexts/fortune-context"
+import type { FortuneResponse } from "@/lib/saju-core"
+import type { AstrologyStaticResult } from "@/lib/astrology/static/types"
 import type {
   AccidentalScoreResponse,
+  AspectsResponse,
+  ChartCoreResponse,
   EssentialScoreResponse,
   HellenisticCoreResponse,
+  VedicCoreResponse,
   VimshottariResponse,
 } from "@/lib/astrology/types"
 import type {
@@ -14,6 +19,7 @@ import type {
   ZiweiRuntimeOverlayResponse,
 } from "@/lib/ziwei/types"
 import type { BirthInfo } from "@/lib/schemas/birth-info"
+import { inferInputTier } from "@/lib/astrology/shared/input-normalization"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,6 +36,12 @@ interface SectionState<T> {
   status: SectionStatus
   data: T | null
   error: string | null
+}
+
+interface RequestDebugState {
+  request: unknown
+  response: unknown
+  status: number
 }
 
 const sectionState = <T,>(): SectionState<T> => ({
@@ -192,6 +204,16 @@ function formatErrorMessage(payload: unknown, fallback: string): string {
   return fallback
 }
 
+function mapLabError(message: string, inputTier: string | null): string {
+  if (message.includes("Western accidental score requires input tier L2 or L3")) {
+    return `Accidental Score는 입력 티어 L2/L3가 필요합니다 (현재 ${inputTier ?? "L0"}). 장소(위도/경도)를 입력해 주세요.`
+  }
+  if (message.includes("비묘타리 응답 필드가 누락되었습니다")) {
+    return "Vimshottari 응답 필드가 일부 누락되었습니다. 외부 API 스키마 변형 가능성이 있어 raw JSON을 확인해 주세요."
+  }
+  return message
+}
+
 async function postJson<T>(url: string, body: unknown): Promise<T> {
   const res = await fetch(url, {
     method: "POST",
@@ -217,6 +239,7 @@ function StatusBadge({ status }: { status: SectionStatus }) {
 function SectionCard({
   title,
   description,
+  detail,
   status,
   summary,
   error,
@@ -225,6 +248,7 @@ function SectionCard({
 }: {
   title: string
   description: string
+  detail?: string
   status: SectionStatus
   summary: ReactNode
   error?: string | null
@@ -237,6 +261,7 @@ function SectionCard({
         <div>
           <h3 className="text-sm font-semibold text-foreground">{title}</h3>
           <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+          {detail && <p className="mt-1 text-[11px] text-muted-foreground/80">{detail}</p>}
         </div>
         <StatusBadge status={status} />
       </div>
@@ -267,9 +292,11 @@ function SectionCard({
 
 function BirthInfoEditor({
   birthInfo,
+  inputTier,
   onApply,
 }: {
   birthInfo: BirthInfo | null
+  inputTier: string | null
   onApply: (info: BirthInfo) => Promise<void>
 }) {
   const [draft, setDraft] = useState<BirthInfoDraft>(() =>
@@ -344,6 +371,7 @@ function BirthInfoEditor({
             Lab의 모든 호출은 이 값을 기준으로 실행됩니다. 성별은 사주 계산에 반영됩니다.
           </p>
         </div>
+        <Badge variant="secondary">입력 티어: {inputTier ?? "L0"}</Badge>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
@@ -505,6 +533,21 @@ export function LabScreen() {
   const [essential, setEssential] = useState<SectionState<EssentialScoreResponse>>(
     sectionState(),
   )
+  const [sajuManual, setSajuManual] = useState<SectionState<FortuneResponse>>(
+    sectionState(),
+  )
+  const [astrologyManual, setAstrologyManual] = useState<
+    SectionState<AstrologyStaticResult>
+  >(sectionState())
+  const [chartCoreManual, setChartCoreManual] = useState<
+    SectionState<ChartCoreResponse>
+  >(sectionState())
+  const [aspectsManual, setAspectsManual] = useState<SectionState<AspectsResponse>>(
+    sectionState(),
+  )
+  const [vedicCoreManual, setVedicCoreManual] = useState<
+    SectionState<VedicCoreResponse>
+  >(sectionState())
   const [accidental, setAccidental] = useState<
     SectionState<AccidentalScoreResponse>
   >(sectionState())
@@ -514,12 +557,19 @@ export function LabScreen() {
   const [vimshottari, setVimshottari] = useState<SectionState<VimshottariResponse>>(
     sectionState(),
   )
+  const [vimshottariDebug, setVimshottariDebug] = useState<RequestDebugState | null>(
+    null,
+  )
   const [ziweiBoard, setZiweiBoard] = useState<SectionState<ZiweiBoardResponse>>(
     sectionState(),
   )
   const [ziweiOverlay, setZiweiOverlay] = useState<
     SectionState<ZiweiRuntimeOverlayResponse>
   >(sectionState())
+  const inputTier = useMemo(
+    () => (birthInfo ? inferInputTier(birthInfo) : null),
+    [birthInfo],
+  )
 
   const setNoBirthInfoError = useCallback(
     <T,>(setter: (next: SectionState<T>) => void) => {
@@ -550,6 +600,97 @@ export function LabScreen() {
     }
   }, [birthInfo, setNoBirthInfoError])
 
+  const fetchSajuConnected = useCallback(async () => {
+    if (!birthInfo) return setNoBirthInfoError(setSajuManual)
+    setSajuManual((prev) => ({ ...prev, status: "loading", error: null }))
+    try {
+      const data = await postJson<FortuneResponse>("/api/saju/analyze", birthInfo)
+      setSajuManual({ status: "success", data, error: null })
+    } catch (err) {
+      setSajuManual({
+        status: "error",
+        data: null,
+        error: err instanceof Error ? err.message : "saju/analyze 호출 실패",
+      })
+    }
+  }, [birthInfo, setNoBirthInfoError])
+
+  const fetchAstrologyConnected = useCallback(async () => {
+    if (!birthInfo) return setNoBirthInfoError(setAstrologyManual)
+    setAstrologyManual((prev) => ({ ...prev, status: "loading", error: null }))
+    try {
+      const data = await postJson<AstrologyStaticResult>("/api/astrology/static", birthInfo)
+      setAstrologyManual({ status: "success", data, error: null })
+    } catch (err) {
+      setAstrologyManual({
+        status: "error",
+        data: null,
+        error: err instanceof Error ? err.message : "astrology/static 호출 실패",
+      })
+    }
+  }, [birthInfo, setNoBirthInfoError])
+
+  const fetchChartCoreConnected = useCallback(async () => {
+    if (!birthInfo) return setNoBirthInfoError(setChartCoreManual)
+    setChartCoreManual((prev) => ({ ...prev, status: "loading", error: null }))
+    try {
+      const data = await postJson<ChartCoreResponse>("/api/astrology/chart-core", birthInfo)
+      setChartCoreManual({ status: "success", data, error: null })
+    } catch (err) {
+      setChartCoreManual({
+        status: "error",
+        data: null,
+        error: err instanceof Error ? err.message : "astrology/chart-core 호출 실패",
+      })
+    }
+  }, [birthInfo, setNoBirthInfoError])
+
+  const fetchAspectsConnected = useCallback(async () => {
+    if (!birthInfo) return setNoBirthInfoError(setAspectsManual)
+    setAspectsManual((prev) => ({ ...prev, status: "loading", error: null }))
+    try {
+      const data = await postJson<AspectsResponse>("/api/astrology/aspects", birthInfo)
+      setAspectsManual({ status: "success", data, error: null })
+    } catch (err) {
+      setAspectsManual({
+        status: "error",
+        data: null,
+        error: err instanceof Error ? err.message : "astrology/aspects 호출 실패",
+      })
+    }
+  }, [birthInfo, setNoBirthInfoError])
+
+  const fetchVedicCoreConnected = useCallback(async () => {
+    if (!birthInfo) return setNoBirthInfoError(setVedicCoreManual)
+    setVedicCoreManual((prev) => ({ ...prev, status: "loading", error: null }))
+    try {
+      const data = await postJson<VedicCoreResponse>("/api/astrology/vedic-core", birthInfo)
+      setVedicCoreManual({ status: "success", data, error: null })
+    } catch (err) {
+      setVedicCoreManual({
+        status: "error",
+        data: null,
+        error: err instanceof Error ? err.message : "astrology/vedic-core 호출 실패",
+      })
+    }
+  }, [birthInfo, setNoBirthInfoError])
+
+  const fetchAllConnected = useCallback(async () => {
+    await Promise.all([
+      fetchSajuConnected(),
+      fetchAstrologyConnected(),
+      fetchChartCoreConnected(),
+      fetchAspectsConnected(),
+      fetchVedicCoreConnected(),
+    ])
+  }, [
+    fetchAspectsConnected,
+    fetchAstrologyConnected,
+    fetchChartCoreConnected,
+    fetchSajuConnected,
+    fetchVedicCoreConnected,
+  ])
+
   const fetchAccidental = useCallback(async () => {
     if (!birthInfo) return setNoBirthInfoError(setAccidental)
     setAccidental((prev) => ({ ...prev, status: "loading", error: null }))
@@ -560,13 +701,14 @@ export function LabScreen() {
       )
       setAccidental({ status: "success", data, error: null })
     } catch (err) {
+      const message = err instanceof Error ? err.message : "accidental-score 호출 실패"
       setAccidental({
         status: "error",
         data: null,
-        error: err instanceof Error ? err.message : "accidental-score 호출 실패",
+        error: mapLabError(message, inputTier),
       })
     }
-  }, [birthInfo, setNoBirthInfoError])
+  }, [birthInfo, inputTier, setNoBirthInfoError])
 
   const fetchHellenistic = useCallback(async () => {
     if (!birthInfo) return setNoBirthInfoError(setHellenistic)
@@ -588,21 +730,45 @@ export function LabScreen() {
 
   const fetchVimshottari = useCallback(async () => {
     if (!birthInfo) return setNoBirthInfoError(setVimshottari)
+    setVimshottariDebug(null)
     setVimshottari((prev) => ({ ...prev, status: "loading", error: null }))
+    const requestBody = JSON.parse(JSON.stringify(birthInfo)) as BirthInfo
     try {
-      const data = await postJson<VimshottariResponse>(
-        "/api/astrology/vimshottari",
-        birthInfo,
-      )
+      const res = await fetch("/api/astrology/vimshottari", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(birthInfo),
+      })
+      const rawText = await res.text()
+      let payload: unknown = null
+      if (rawText.trim().length > 0) {
+        try {
+          payload = JSON.parse(rawText)
+        } catch {
+          payload = rawText
+        }
+      }
+
+      if (!res.ok) {
+        setVimshottariDebug({
+          request: requestBody,
+          response: payload,
+          status: res.status,
+        })
+        throw new Error(formatErrorMessage(payload, `호출 실패 (${res.status})`))
+      }
+
+      const data = payload as VimshottariResponse
       setVimshottari({ status: "success", data, error: null })
     } catch (err) {
+      const message = err instanceof Error ? err.message : "vimshottari 호출 실패"
       setVimshottari({
         status: "error",
         data: null,
-        error: err instanceof Error ? err.message : "vimshottari 호출 실패",
+        error: mapLabError(message, inputTier),
       })
     }
-  }, [birthInfo, setNoBirthInfoError])
+  }, [birthInfo, inputTier, setNoBirthInfoError])
 
   const fetchZiweiBoard = useCallback(async () => {
     if (!birthInfo) return setNoBirthInfoError(setZiweiBoard)
@@ -658,10 +824,16 @@ export function LabScreen() {
   ])
 
   const resetExtended = useCallback(() => {
+    setSajuManual(sectionState())
+    setAstrologyManual(sectionState())
+    setChartCoreManual(sectionState())
+    setAspectsManual(sectionState())
+    setVedicCoreManual(sectionState())
     setEssential(sectionState())
     setAccidental(sectionState())
     setHellenistic(sectionState())
     setVimshottari(sectionState())
+    setVimshottariDebug(null)
     setZiweiBoard(sectionState())
     setZiweiOverlay(sectionState())
   }, [])
@@ -702,13 +874,36 @@ export function LabScreen() {
       ziweiOverlay.status,
     ],
   )
+  const hasConnectedLoading = useMemo(
+    () =>
+      [
+        sajuManual.status,
+        astrologyManual.status,
+        chartCoreManual.status,
+        aspectsManual.status,
+        vedicCoreManual.status,
+      ].includes("loading"),
+    [
+      aspectsManual.status,
+      astrologyManual.status,
+      chartCoreManual.status,
+      sajuManual.status,
+      vedicCoreManual.status,
+    ],
+  )
 
-  const dominantPlanet = astrologyResult?.today.dominantPlanet
-  const dayPillar = sajuResult?.sajuData.pillars.일
+  const sajuConnectedData = sajuManual.data ?? sajuResult
+  const astrologyConnectedData = astrologyManual.data ?? astrologyResult
+  const chartCoreConnectedData = chartCoreManual.data ?? chartCore
+  const aspectsConnectedData = aspectsManual.data ?? aspects
+  const vedicCoreConnectedData = vedicCoreManual.data ?? vedicCore
+
+  const dominantPlanet = astrologyConnectedData?.today.dominantPlanet
+  const dayPillar = sajuConnectedData?.sajuData.pillars.일
   const topEssential = getTopScoreLabel(essential.data?.scores)
   const topAccidental = getTopScoreLabel(accidental.data?.scores)
   const currentGreatFortuneLabel = getCurrentGreatFortuneLabel(
-    sajuResult?.greatFortune,
+    sajuConnectedData?.greatFortune,
   )
 
   return (
@@ -725,8 +920,27 @@ export function LabScreen() {
             <p className="mt-1 text-sm text-muted-foreground">
               기존 결과를 확인하고, 아직 연결하지 않은 API 응답을 수동으로 호출해 비교합니다.
             </p>
+            <p className="mt-1 text-xs text-muted-foreground/90">
+              현재 입력 티어: {inputTier ?? "L0"} (L2/L3는 위치 필요, L3는 위치+시간 필요)
+            </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={fetchAllConnected}
+              disabled={hasConnectedLoading}
+            >
+              {hasConnectedLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  호출 중...
+                </>
+              ) : (
+                "연결 API 전체 호출"
+              )}
+            </Button>
             <Button
               type="button"
               size="sm"
@@ -752,7 +966,7 @@ export function LabScreen() {
         </div>
       </header>
 
-      <BirthInfoEditor birthInfo={birthInfo} onApply={applyBirthInfo} />
+      <BirthInfoEditor birthInfo={birthInfo} inputTier={inputTier} onApply={applyBirthInfo} />
 
       {!birthInfo && (
         <p className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -766,15 +980,25 @@ export function LabScreen() {
           <SectionCard
             title="사주 분석 (/api/saju/analyze)"
             description="fortune-context 기본 데이터"
-            status={sajuResult ? "success" : fortuneError ? "error" : isLoading ? "loading" : "idle"}
+            status={
+              sajuManual.status !== "idle"
+                ? sajuManual.status
+                : sajuResult
+                  ? "success"
+                  : fortuneError
+                    ? "error"
+                    : isLoading
+                      ? "loading"
+                      : "idle"
+            }
             summary={
-              sajuResult ? (
+              sajuConnectedData ? (
                 <ul className="space-y-1 text-xs">
                   <li>
                     일주: {dayPillar?.천간} {dayPillar?.지지}
                   </li>
                   <li>
-                    신강/신약: {(sajuResult.sinyakSingang as { strength_type?: string } | undefined)?.strength_type ?? "-"}
+                    신강/신약: {(sajuConnectedData.sinyakSingang as { strength_type?: string } | undefined)?.strength_type ?? "-"}
                   </li>
                   <li>
                     현재 대운: {currentGreatFortuneLabel}
@@ -784,96 +1008,187 @@ export function LabScreen() {
                 <p className="text-xs text-muted-foreground">아직 결과가 없습니다.</p>
               )
             }
-            error={fortuneError}
-            jsonData={sajuResult}
+            error={sajuManual.error ?? fortuneError}
+            jsonData={sajuConnectedData}
+            action={
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={fetchSajuConnected}
+                disabled={sajuManual.status === "loading"}
+              >
+                호출
+              </Button>
+            }
           />
 
           <SectionCard
             title="정적 점성술 (/api/astrology/static)"
             description="오늘/7일 예보 + 출생 차트 랭킹"
-            status={astrologyResult ? "success" : isLoading ? "loading" : "idle"}
+            status={
+              astrologyManual.status !== "idle"
+                ? astrologyManual.status
+                : astrologyResult
+                  ? "success"
+                  : isLoading
+                    ? "loading"
+                    : "idle"
+            }
             summary={
-              astrologyResult ? (
+              astrologyConnectedData ? (
                 <ul className="space-y-1 text-xs">
-                  <li>오늘 헤드라인: {astrologyResult.today.headline}</li>
+                  <li>오늘 헤드라인: {astrologyConnectedData.today.headline}</li>
                   <li>지배 행성: {dominantPlanet}</li>
-                  <li>상위 랭킹: {astrologyResult.ranking.slice(0, 3).join(", ")}</li>
+                  <li>상위 랭킹: {astrologyConnectedData.ranking.slice(0, 3).join(", ")}</li>
                 </ul>
               ) : (
                 <p className="text-xs text-muted-foreground">아직 결과가 없습니다.</p>
               )
             }
-            jsonData={astrologyResult}
+            error={astrologyManual.error}
+            jsonData={astrologyConnectedData}
+            action={
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={fetchAstrologyConnected}
+                disabled={astrologyManual.status === "loading"}
+              >
+                호출
+              </Button>
+            }
           />
 
           <SectionCard
             title="차트 코어 (/api/astrology/chart-core)"
             description="ASC/MC/하우스/행성 배치"
-            status={chartCore ? "success" : isLoading ? "loading" : "idle"}
+            status={
+              chartCoreManual.status !== "idle"
+                ? chartCoreManual.status
+                : chartCore
+                  ? "success"
+                  : isLoading
+                    ? "loading"
+                    : "idle"
+            }
             summary={
-              chartCore ? (
+              chartCoreConnectedData ? (
                 <ul className="space-y-1 text-xs">
                   <li>
                     ASC:{" "}
-                    {chartCore.ascendant
-                      ? `${chartCore.ascendant.signLabel} ${chartCore.ascendant.degreeInSign}°`
+                    {chartCoreConnectedData.ascendant
+                      ? `${chartCoreConnectedData.ascendant.signLabel} ${chartCoreConnectedData.ascendant.degreeInSign}°`
                       : "-"}
                   </li>
                   <li>
                     MC:{" "}
-                    {chartCore.midheaven
-                      ? `${chartCore.midheaven.signLabel} ${chartCore.midheaven.degreeInSign}°`
+                    {chartCoreConnectedData.midheaven
+                      ? `${chartCoreConnectedData.midheaven.signLabel} ${chartCoreConnectedData.midheaven.degreeInSign}°`
                       : "-"}
                   </li>
-                  <li>하우스 개수: {Array.isArray(chartCore.houses) ? chartCore.houses.length : 0}</li>
+                  <li>하우스 개수: {Array.isArray(chartCoreConnectedData.houses) ? chartCoreConnectedData.houses.length : 0}</li>
                 </ul>
               ) : (
                 <p className="text-xs text-muted-foreground">아직 결과가 없습니다.</p>
               )
             }
-            jsonData={chartCore}
+            error={chartCoreManual.error}
+            jsonData={chartCoreConnectedData}
+            action={
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={fetchChartCoreConnected}
+                disabled={chartCoreManual.status === "loading"}
+              >
+                호출
+              </Button>
+            }
           />
 
           <SectionCard
             title="애스펙트 (/api/astrology/aspects)"
             description="행성 간 각도 관계"
-            status={aspects ? "success" : isLoading ? "loading" : "idle"}
+            status={
+              aspectsManual.status !== "idle"
+                ? aspectsManual.status
+                : aspects
+                  ? "success"
+                  : isLoading
+                    ? "loading"
+                    : "idle"
+            }
             summary={
-              aspects ? (
+              aspectsConnectedData ? (
                 <ul className="space-y-1 text-xs">
-                  <li>총 애스펙트: {aspects.aspects.length}개</li>
+                  <li>총 애스펙트: {aspectsConnectedData.aspects.length}개</li>
                   <li>
                     적용 중(applying):{" "}
-                    {aspects.aspects.filter((a) => a.applying).length}개
+                    {aspectsConnectedData.aspects.filter((a) => a.applying).length}개
                   </li>
                 </ul>
               ) : (
                 <p className="text-xs text-muted-foreground">아직 결과가 없습니다.</p>
               )
             }
-            jsonData={aspects}
+            error={aspectsManual.error}
+            jsonData={aspectsConnectedData}
+            action={
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={fetchAspectsConnected}
+                disabled={aspectsManual.status === "loading"}
+              >
+                호출
+              </Button>
+            }
           />
 
           <SectionCard
             title="베다 코어 (/api/astrology/vedic-core)"
             description="낙샤트라 중심 사이드리얼 결과"
-            status={vedicCore ? "success" : isLoading ? "loading" : "idle"}
+            status={
+              vedicCoreManual.status !== "idle"
+                ? vedicCoreManual.status
+                : vedicCore
+                  ? "success"
+                  : isLoading
+                    ? "loading"
+                    : "idle"
+            }
             summary={
-              vedicCore ? (
+              vedicCoreConnectedData ? (
                 <ul className="space-y-1 text-xs">
                   <li>
                     Moon Nakshatra:{" "}
-                    {vedicCore.moonNakshatra
-                      ? `${vedicCore.moonNakshatra.name} (pada ${vedicCore.moonNakshatra.pada})`
+                    {vedicCoreConnectedData.moonNakshatra
+                      ? `${vedicCoreConnectedData.moonNakshatra.name} (pada ${vedicCoreConnectedData.moonNakshatra.pada})`
                       : "-"}
                   </li>
-                  <li>Ayanamsa: {Math.round(vedicCore.ayanamsa * 100) / 100}°</li>
+                  <li>Ayanamsa: {Math.round(vedicCoreConnectedData.ayanamsa * 100) / 100}°</li>
                 </ul>
               ) : (
                 <p className="text-xs text-muted-foreground">아직 결과가 없습니다.</p>
               )
             }
-            jsonData={vedicCore}
+            error={vedicCoreManual.error}
+            jsonData={vedicCoreConnectedData}
+            action={
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={fetchVedicCoreConnected}
+                disabled={vedicCoreManual.status === "loading"}
+              >
+                호출
+              </Button>
+            }
           />
         </div>
       </section>
@@ -884,6 +1199,7 @@ export function LabScreen() {
           <SectionCard
             title="Essential Score"
             description="POST /api/astrology/essential-score"
+            detail="행성이 본래 위치에서 얼마나 강한지(품위: domicile/exaltation 등) 점수화합니다."
             status={essential.status}
             summary={
               essential.data ? (
@@ -910,6 +1226,7 @@ export function LabScreen() {
           <SectionCard
             title="Accidental Score"
             description="POST /api/astrology/accidental-score"
+            detail="행성의 상황적 상태(하우스, 역행, 연소 등)가 현재 표현력에 주는 영향을 점수화합니다."
             status={accidental.status}
             summary={
               accidental.data ? (
@@ -936,6 +1253,7 @@ export function LabScreen() {
           <SectionCard
             title="Hellenistic Core"
             description="POST /api/astrology/hellenistic-core"
+            detail="주간/야간 차트(sector), Lot of Fortune/Spirit, ASC/MC 등 헬레니즘 핵심 지표를 제공합니다."
             status={hellenistic.status}
             summary={
               hellenistic.data ? (
@@ -965,19 +1283,37 @@ export function LabScreen() {
           <SectionCard
             title="Vimshottari Dasha"
             description="POST /api/astrology/vimshottari"
+            detail="베다 점성술의 대주기/소주기 타이밍(마하다샤/안타르다샤/프라티안타르다샤)을 제공합니다."
             status={vimshottari.status}
             summary={
               vimshottari.data ? (
                 <ul className="space-y-1 text-xs">
-                  <li>현재 Maha: {vimshottari.data.currentMahaDasha?.lord ?? "-"}</li>
-                  <li>현재 Antar: {vimshottari.data.currentAntarDasha?.lord ?? "-"}</li>
+                  <li>
+                    현재 Maha:{" "}
+                    {vimshottari.data.currentMahaDasha?.lord ?? "데이터 누락(스키마 불일치 가능)"}
+                  </li>
+                  <li>
+                    현재 Antar:{" "}
+                    {vimshottari.data.currentAntarDasha?.lord ?? "데이터 누락(스키마 불일치 가능)"}
+                  </li>
                 </ul>
               ) : (
                 <p className="text-xs text-muted-foreground">아직 호출하지 않았습니다.</p>
               )
             }
             error={vimshottari.error}
-            jsonData={vimshottari.data}
+            jsonData={
+              vimshottari.data ??
+              (vimshottariDebug
+                ? {
+                    debug: {
+                      request: vimshottariDebug.request,
+                      response: vimshottariDebug.response,
+                      status: vimshottariDebug.status,
+                    },
+                  }
+                : undefined)
+            }
             action={
               <Button
                 type="button"
@@ -994,6 +1330,7 @@ export function LabScreen() {
           <SectionCard
             title="Ziwei Board"
             description="POST /api/ziwei/board"
+            detail="자미두수 명반(12궁/주성/보조성/사화/대한 등) 고정 구조를 제공합니다."
             status={ziweiBoard.status}
             summary={
               ziweiBoard.data ? (
@@ -1023,6 +1360,7 @@ export function LabScreen() {
           <SectionCard
             title="Ziwei Runtime Overlay"
             description="POST /api/ziwei/runtime-overlay"
+            detail="명반 위에 대한/유년/월운/일운/시운을 겹쳐 현재 활성 궁과 흐름을 보여줍니다."
             status={ziweiOverlay.status}
             summary={
               ziweiOverlay.data ? (
