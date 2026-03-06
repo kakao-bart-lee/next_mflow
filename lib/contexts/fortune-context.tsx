@@ -11,7 +11,13 @@ import {
 import type { BirthInfo } from "@/lib/schemas/birth-info"
 import type { FortuneResponse } from "@/lib/saju-core"
 import type { AstrologyStaticResult } from "@/lib/astrology/static/types"
-import type { ChartCoreResponse, AspectsResponse, VedicCoreResponse } from "@/lib/astrology/types"
+import type {
+  AccidentalScoreResponse,
+  AspectsResponse,
+  ChartCoreResponse,
+  EssentialScoreResponse,
+  VedicCoreResponse,
+} from "@/lib/astrology/types"
 import type { DailyFortune } from "@/lib/use-cases/interpret-saju"
 
 interface FortuneContextValue {
@@ -21,6 +27,8 @@ interface FortuneContextValue {
   chartCore: ChartCoreResponse | null
   aspects: AspectsResponse | null
   vedicCore: VedicCoreResponse | null
+  essentialScore: EssentialScoreResponse | null
+  accidentalScore: AccidentalScoreResponse | null
   isLoading: boolean
   isHydrated: boolean
   isDemo: boolean
@@ -98,6 +106,8 @@ export function FortuneProvider({ children }: { children: ReactNode }) {
   const [chartCore, setChartCore] = useState<ChartCoreResponse | null>(null)
   const [aspects, setAspects] = useState<AspectsResponse | null>(null)
   const [vedicCore, setVedicCore] = useState<VedicCoreResponse | null>(null)
+  const [essentialScore, setEssentialScore] = useState<EssentialScoreResponse | null>(null)
+  const [accidentalScore, setAccidentalScore] = useState<AccidentalScoreResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isHydrated, setIsHydrated] = useState(false)
@@ -198,7 +208,8 @@ export function FortuneProvider({ children }: { children: ReactNode }) {
 
     setIsLoading(false)
 
-    // Horizons 확장 API: chart-core, aspects, vedic-core (best-effort, 실패 시 무시)
+    // Horizons 확장 API: chart-core, aspects, vedic-core, essential-score, accidental-score
+    // (best-effort, 실패 시 무시)
     const extendedFetch = async <T,>(url: string): Promise<T | null> => {
       try {
         const res = await fetch(url, {
@@ -216,10 +227,20 @@ export function FortuneProvider({ children }: { children: ReactNode }) {
       extendedFetch<ChartCoreResponse>("/api/astrology/chart-core"),
       extendedFetch<AspectsResponse>("/api/astrology/aspects"),
       extendedFetch<VedicCoreResponse>("/api/astrology/vedic-core"),
-    ]).then(([chartCoreData, aspectsData, vedicCoreData]) => {
+      extendedFetch<EssentialScoreResponse>("/api/astrology/essential-score"),
+      extendedFetch<AccidentalScoreResponse>("/api/astrology/accidental-score"),
+    ]).then(([
+      chartCoreData,
+      aspectsData,
+      vedicCoreData,
+      essentialScoreData,
+      accidentalScoreData,
+    ]) => {
       if (chartCoreData) setChartCore(chartCoreData)
       if (aspectsData) setAspects(aspectsData)
       if (vedicCoreData) setVedicCore(vedicCoreData)
+      if (essentialScoreData) setEssentialScore(essentialScoreData)
+      if (accidentalScoreData) setAccidentalScore(accidentalScoreData)
     })
   }, [])
 
@@ -318,6 +339,8 @@ export function FortuneProvider({ children }: { children: ReactNode }) {
     setChartCore(null)
     setAspects(null)
     setVedicCore(null)
+    setEssentialScore(null)
+    setAccidentalScore(null)
     setIsDemo(false)
     setError(null)
     setTargetDate(null)
@@ -337,6 +360,8 @@ export function FortuneProvider({ children }: { children: ReactNode }) {
         chartCore,
         aspects,
         vedicCore,
+        essentialScore,
+        accidentalScore,
         isLoading,
         isHydrated,
         isDemo,

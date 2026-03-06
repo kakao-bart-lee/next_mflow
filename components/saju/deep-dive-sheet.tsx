@@ -33,6 +33,11 @@ import type {
   FutureDayInsight,
   TodayInsight,
 } from "@/lib/astrology/static/types"
+import type {
+  AccidentalScoreResponse,
+  AspectsResponse,
+  EssentialScoreResponse,
+} from "@/lib/astrology/types"
 import type { DecisionFortune } from "@/lib/use-cases/interpret-saju"
 import type { HyungchungResult } from "@/lib/saju-core/saju/hyungchung"
 import { PLANET_LABEL, PLANET_THEME } from "@/lib/astrology/static/constants"
@@ -115,6 +120,16 @@ interface PlanetSummary {
   sign: string
   score: number
   interpretation: string
+  essentialScore: number | null
+  accidentalScore: number | null
+  supportiveAspects: number
+  tenseAspects: number
+}
+
+interface AspectOverview {
+  supportive: number
+  tense: number
+  applying: number
 }
 
 interface SharedDeepDiveProps {
@@ -127,6 +142,7 @@ interface SharedDeepDiveProps {
   planetSummaries: PlanetSummary[]
   todayInsight: TodayInsight | null
   hyungchungItems: string[]
+  aspectOverview: AspectOverview
   onOpenChat?: () => void
 }
 
@@ -199,17 +215,63 @@ function extractStrength(sajuResult: FortuneResponse | null): string | null {
 
 /* ─── 새 헬퍼: 점성술 + 형충파해 데이터 추출 ─── */
 
-function buildPlanetSummaries(astrologyResult: AstrologyStaticResult | null, count = 4): PlanetSummary[] {
+function getPlanetAspectSummary(
+  aspects: AspectsResponse | null,
+  planetId: PlanetId,
+): { supportiveAspects: number; tenseAspects: number } {
+  if (!aspects?.aspects?.length) {
+    return { supportiveAspects: 0, tenseAspects: 0 }
+  }
+  const related = aspects.aspects.filter(
+    (aspect) => aspect.planet1 === planetId || aspect.planet2 === planetId,
+  )
+  return {
+    supportiveAspects: related.filter(
+      (aspect) => aspect.type === "trine" || aspect.type === "sextile" || aspect.type === "conjunction",
+    ).length,
+    tenseAspects: related.filter(
+      (aspect) => aspect.type === "square" || aspect.type === "opposition",
+    ).length,
+  }
+}
+
+function extractAspectOverview(aspects: AspectsResponse | null): AspectOverview {
+  if (!aspects?.aspects?.length) {
+    return { supportive: 0, tense: 0, applying: 0 }
+  }
+  return {
+    supportive: aspects.aspects.filter(
+      (aspect) => aspect.type === "trine" || aspect.type === "sextile" || aspect.type === "conjunction",
+    ).length,
+    tense: aspects.aspects.filter(
+      (aspect) => aspect.type === "square" || aspect.type === "opposition",
+    ).length,
+    applying: aspects.aspects.filter((aspect) => aspect.applying).length,
+  }
+}
+
+function buildPlanetSummaries(
+  astrologyResult: AstrologyStaticResult | null,
+  essentialScore: EssentialScoreResponse | null,
+  accidentalScore: AccidentalScoreResponse | null,
+  aspects: AspectsResponse | null,
+  count = 4,
+): PlanetSummary[] {
   if (!astrologyResult) return []
   return astrologyResult.ranking.slice(0, count).map((planetId) => {
     const pos = astrologyResult.positions[planetId]
     const inf = astrologyResult.influences[planetId]
+    const aspectSummary = getPlanetAspectSummary(aspects, planetId)
     return {
       planet: planetId,
       label: PLANET_LABEL[planetId],
       sign: pos.signLabel,
       score: Math.round(inf.finalScore),
       interpretation: inf.interpretation,
+      essentialScore: essentialScore?.scores[planetId]?.score ?? null,
+      accidentalScore: accidentalScore?.scores[planetId]?.score ?? null,
+      supportiveAspects: aspectSummary.supportiveAspects,
+      tenseAspects: aspectSummary.tenseAspects,
     }
   })
 }
@@ -349,6 +411,7 @@ function TodayDeepDive({
   planetSummaries,
   todayInsight,
   hyungchungItems,
+  aspectOverview,
   onOpenChat,
 }: SharedDeepDiveProps) {
   const dayPillar = sajuResult?.sajuData?.pillars?.일
@@ -444,16 +507,25 @@ function TodayDeepDive({
               <div className="mt-3 space-y-2">
                 {planetSummaries.map((ps) => (
                   <div key={ps.planet} className="flex items-center gap-3 rounded-lg bg-secondary/50 px-3 py-2">
-                    <span className={`w-8 text-xs font-bold ${PLANET_COLOR[ps.planet]}`}>{ps.label}</span>
+                    <span className={`w-10 text-xs font-bold ${PLANET_COLOR[ps.planet]}`}>{ps.label}</span>
                     <span className="w-16 text-xs text-muted-foreground">{ps.sign}</span>
                     <div className="flex-1">
                       <InfluenceBar score={ps.score} />
+                      <p className="mt-1 text-[10px] text-muted-foreground">
+                        E {ps.essentialScore !== null ? Math.round(ps.essentialScore * 10) / 10 : "-"} ·
+                        A {ps.accidentalScore !== null ? Math.round(ps.accidentalScore * 10) / 10 : "-"} ·
+                        조화 {ps.supportiveAspects} / 긴장 {ps.tenseAspects}
+                      </p>
                     </div>
                     <span className="w-8 text-right text-[11px] font-medium text-foreground">{ps.score}</span>
                   </div>
                 ))}
               </div>
             )}
+
+            <div className="mt-3 rounded-lg border border-border/40 bg-secondary/30 px-3 py-2 text-xs text-muted-foreground">
+              출생 애스펙트: 조화 {aspectOverview.supportive} · 긴장 {aspectOverview.tense} · applying {aspectOverview.applying}
+            </div>
 
             {/* actions / caution */}
             {todayInsight.actions.length > 0 && (
@@ -542,6 +614,7 @@ function WeeklyDeepDive({
   onOpenChat,
   dayDate,
   futureDays,
+  aspectOverview,
 }: Omit<SharedDeepDiveProps, "todayInsight" | "keyTerms" | "planetSummaries"> & { dayDate?: string; futureDays: FutureDayInsight[] }) {
   const dominant = fiveElements.reduce((a, b) => (a.value > b.value ? a : b))
   const selectedDay = dayDate ? futureDays.find((d) => d.date === dayDate) : null
@@ -643,6 +716,9 @@ function WeeklyDeepDive({
               </div>
             )}
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            출생 애스펙트 조화 {aspectOverview.supportive} · 긴장 {aspectOverview.tense}
+          </p>
         </div>
       </section>
 
@@ -828,7 +904,13 @@ function DeepDiveContent({
   contextData?: DeepDiveSheetProps["contextData"]
   onActionsGenerated?: (actions: string[]) => void
 }) {
-  const { sajuResult, astrologyResult } = useFortune()
+  const {
+    sajuResult,
+    astrologyResult,
+    aspects,
+    essentialScore,
+    accidentalScore,
+  } = useFortune()
   const [chatOpen, setChatOpen] = useState(false)
 
   // Map DeepDiveContext → ChatInterface context
@@ -842,9 +924,15 @@ function DeepDiveContent({
     keyTerms: extractKeyTerms(sajuResult),
     greatFortune: extractGreatFortune(sajuResult),
     strengthType: extractStrength(sajuResult),
-    planetSummaries: buildPlanetSummaries(astrologyResult),
+    planetSummaries: buildPlanetSummaries(
+      astrologyResult,
+      essentialScore,
+      accidentalScore,
+      aspects,
+    ),
     todayInsight: extractTodayInsight(astrologyResult),
     hyungchungItems: extractHyungchungItems(sajuResult),
+    aspectOverview: extractAspectOverview(aspects),
     onOpenChat: () => setChatOpen(true),
   }
 

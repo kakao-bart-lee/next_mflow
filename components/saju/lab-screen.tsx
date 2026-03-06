@@ -44,6 +44,30 @@ interface RequestDebugState {
   status: number
 }
 
+interface ApiCatalogField {
+  field: string
+  description: string
+  dataNature: string
+}
+
+interface ApiCatalogEntry {
+  id: string
+  endpoint: string
+  method: string | null
+  path: string | null
+  responseType: string | null
+  topic: string | null
+  feature: string | null
+  fields: ApiCatalogField[]
+}
+
+interface ApiCatalogDocument {
+  version: number
+  generatedAt: string
+  source: { markdownPath: string }
+  apis: ApiCatalogEntry[]
+}
+
 const sectionState = <T,>(): SectionState<T> => ({
   status: "idle",
   data: null,
@@ -197,6 +221,17 @@ function getCurrentGreatFortuneLabel(greatFortune: unknown): string {
   return tokens.length > 0 ? tokens.join(" · ") : "-"
 }
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object") return null
+  return value as Record<string, unknown>
+}
+
+function countInterpretationItems(value: unknown): number {
+  const rec = asRecord(value)
+  if (!rec) return 0
+  return Object.keys(rec).length
+}
+
 function formatErrorMessage(payload: unknown, fallback: string): string {
   if (!payload || typeof payload !== "object") return fallback
   const err = (payload as { error?: unknown }).error
@@ -212,6 +247,24 @@ function mapLabError(message: string, inputTier: string | null): string {
     return "Vimshottari 응답 필드가 일부 누락되었습니다. 외부 API 스키마 변형 가능성이 있어 raw JSON을 확인해 주세요."
   }
   return message
+}
+
+function buildCatalogKey(method: string, path: string): string {
+  return `${method.toUpperCase()} ${path}`
+}
+
+function truncateText(text: string, max = 86): string {
+  const normalized = text.trim().replace(/\s+/g, " ")
+  if (normalized.length <= max) return normalized
+  return `${normalized.slice(0, max).trimEnd()}…`
+}
+
+function buildCatalogDetail(entry: ApiCatalogEntry | null, fallback: string): string {
+  const preferred =
+    entry?.feature?.trim() ||
+    entry?.topic?.trim() ||
+    fallback
+  return truncateText(preferred)
 }
 
 async function postJson<T>(url: string, body: unknown): Promise<T> {
@@ -260,8 +313,12 @@ function SectionCard({
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-          <p className="mt-1 text-xs text-muted-foreground">{description}</p>
-          {detail && <p className="mt-1 text-[11px] text-muted-foreground/80">{detail}</p>}
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{description}</p>
+          {detail && (
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground/80">
+              {detail}
+            </p>
+          )}
         </div>
         <StatusBadge status={status} />
       </div>
@@ -566,10 +623,36 @@ export function LabScreen() {
   const [ziweiOverlay, setZiweiOverlay] = useState<
     SectionState<ZiweiRuntimeOverlayResponse>
   >(sectionState())
+  const [apiCatalog, setApiCatalog] = useState<ApiCatalogDocument | null>(null)
   const inputTier = useMemo(
     () => (birthInfo ? inferInputTier(birthInfo) : null),
     [birthInfo],
   )
+  const apiCatalogMap = useMemo(() => {
+    const map = new Map<string, ApiCatalogEntry>()
+    for (const entry of apiCatalog?.apis ?? []) {
+      if (!entry.method || !entry.path) continue
+      map.set(buildCatalogKey(entry.method, entry.path), entry)
+    }
+    return map
+  }, [apiCatalog])
+
+  useEffect(() => {
+    let cancelled = false
+    void fetch("/api/explore/api-catalog", { cache: "no-store" })
+      .then(async (res) => {
+        if (!res.ok) return
+        const payload = (await res.json()) as ApiCatalogDocument
+        if (!cancelled) setApiCatalog(payload)
+      })
+      .catch(() => {
+        // catalog fetch failure should not block lab
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const setNoBirthInfoError = useCallback(
     <T,>(setter: (next: SectionState<T>) => void) => {
@@ -905,6 +988,19 @@ export function LabScreen() {
   const currentGreatFortuneLabel = getCurrentGreatFortuneLabel(
     sajuConnectedData?.greatFortune,
   )
+  const sajuInputData = asRecord(sajuConnectedData?.inputData)
+  const themeInterpretation = asRecord(sajuInputData?.theme_interpretation)
+  const fortuneInterpretations = asRecord(sajuInputData?.fortune_interpretations)
+  const fortuneType =
+    typeof sajuInputData?.fortune_type === "string"
+      ? sajuInputData.fortune_type
+      : "-"
+  const fortuneTypeDescription =
+    typeof sajuInputData?.fortune_type_description === "string"
+      ? sajuInputData.fortune_type_description
+      : "-"
+  const interpretationCount = countInterpretationItems(fortuneInterpretations)
+  const interpretationSampleKeys = Object.keys(fortuneInterpretations ?? {}).slice(0, 3)
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 pb-8 pt-6">
@@ -980,6 +1076,10 @@ export function LabScreen() {
           <SectionCard
             title="사주 분석 (/api/saju/analyze)"
             description="fortune-context 기본 데이터"
+            detail={buildCatalogDetail(
+              apiCatalogMap.get(buildCatalogKey("POST", "/api/saju/analyze")) ?? null,
+              "사주 원국/십신/용희신/대운 등 사주 핵심 해석 데이터입니다.",
+            )}
             status={
               sajuManual.status !== "idle"
                 ? sajuManual.status
@@ -1024,8 +1124,67 @@ export function LabScreen() {
           />
 
           <SectionCard
+            title="사주 계산 해설 (내부)"
+            description="saju-core 내부 해설(theme_interpretation / fortune_interpretations)"
+            detail={buildCatalogDetail(
+              apiCatalogMap.get(buildCatalogKey("POST", "/api/saju/analyze")) ?? null,
+              "LLM 없이 계산 로직에서 생성된 사주 해설 데이터입니다.",
+            )}
+            status={
+              sajuManual.status !== "idle"
+                ? sajuManual.status
+                : sajuConnectedData
+                  ? "success"
+                  : fortuneError
+                    ? "error"
+                    : isLoading
+                      ? "loading"
+                      : "idle"
+            }
+            summary={
+              sajuConnectedData ? (
+                <ul className="space-y-1 text-xs">
+                  <li>해설 타입: {fortuneType}</li>
+                  <li>타입 설명: {fortuneTypeDescription}</li>
+                  <li>테마 해설 존재: {themeInterpretation ? "Y" : "N"}</li>
+                  <li>해설 항목 수: {interpretationCount}</li>
+                  <li>대표 항목: {interpretationSampleKeys.length > 0 ? interpretationSampleKeys.join(", ") : "-"}</li>
+                </ul>
+              ) : (
+                <p className="text-xs text-muted-foreground">아직 결과가 없습니다.</p>
+              )
+            }
+            error={sajuManual.error ?? fortuneError}
+            jsonData={
+              sajuConnectedData
+                ? {
+                    fortune_type: fortuneType,
+                    fortune_type_description: fortuneTypeDescription,
+                    theme_interpretation: themeInterpretation,
+                    fortune_interpretations: fortuneInterpretations,
+                  }
+                : undefined
+            }
+            action={
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={fetchSajuConnected}
+                disabled={sajuManual.status === "loading"}
+              >
+                호출
+              </Button>
+            }
+          />
+
+          <SectionCard
             title="정적 점성술 (/api/astrology/static)"
             description="오늘/7일 예보 + 출생 차트 랭킹"
+            detail={buildCatalogDetail(
+              apiCatalogMap.get(buildCatalogKey("POST", "/api/astrology/static")) ?? null,
+              "오늘/주간 운세와 행성 기반 랭킹을 제공합니다.",
+            )}
             status={
               astrologyManual.status !== "idle"
                 ? astrologyManual.status
@@ -1064,6 +1223,10 @@ export function LabScreen() {
           <SectionCard
             title="차트 코어 (/api/astrology/chart-core)"
             description="ASC/MC/하우스/행성 배치"
+            detail={buildCatalogDetail(
+              apiCatalogMap.get(buildCatalogKey("POST", "/api/astrology/chart-core")) ?? null,
+              "출생 차트의 축(ASC/MC), 하우스, 행성 배치를 제공합니다.",
+            )}
             status={
               chartCoreManual.status !== "idle"
                 ? chartCoreManual.status
@@ -1112,6 +1275,10 @@ export function LabScreen() {
           <SectionCard
             title="애스펙트 (/api/astrology/aspects)"
             description="행성 간 각도 관계"
+            detail={buildCatalogDetail(
+              apiCatalogMap.get(buildCatalogKey("POST", "/api/astrology/aspects")) ?? null,
+              "행성 간 애스펙트(합/충/삼분 등) 관계를 제공합니다.",
+            )}
             status={
               aspectsManual.status !== "idle"
                 ? aspectsManual.status
@@ -1152,6 +1319,10 @@ export function LabScreen() {
           <SectionCard
             title="베다 코어 (/api/astrology/vedic-core)"
             description="낙샤트라 중심 사이드리얼 결과"
+            detail={buildCatalogDetail(
+              apiCatalogMap.get(buildCatalogKey("POST", "/api/astrology/vedic-core")) ?? null,
+              "사이드리얼 좌표와 낙샤트라 중심 베다 기초 데이터를 제공합니다.",
+            )}
             status={
               vedicCoreManual.status !== "idle"
                 ? vedicCoreManual.status
@@ -1199,7 +1370,10 @@ export function LabScreen() {
           <SectionCard
             title="Essential Score"
             description="POST /api/astrology/essential-score"
-            detail="행성이 본래 위치에서 얼마나 강한지(품위: domicile/exaltation 등) 점수화합니다."
+            detail={buildCatalogDetail(
+              apiCatalogMap.get(buildCatalogKey("POST", "/api/astrology/essential-score")) ?? null,
+              "행성이 본래 위치에서 얼마나 강한지(품위: domicile/exaltation 등) 점수화합니다.",
+            )}
             status={essential.status}
             summary={
               essential.data ? (
@@ -1226,7 +1400,10 @@ export function LabScreen() {
           <SectionCard
             title="Accidental Score"
             description="POST /api/astrology/accidental-score"
-            detail="행성의 상황적 상태(하우스, 역행, 연소 등)가 현재 표현력에 주는 영향을 점수화합니다."
+            detail={buildCatalogDetail(
+              apiCatalogMap.get(buildCatalogKey("POST", "/api/astrology/accidental-score")) ?? null,
+              "행성의 상황적 상태(하우스, 역행, 연소 등)가 현재 표현력에 주는 영향을 점수화합니다.",
+            )}
             status={accidental.status}
             summary={
               accidental.data ? (
@@ -1253,7 +1430,10 @@ export function LabScreen() {
           <SectionCard
             title="Hellenistic Core"
             description="POST /api/astrology/hellenistic-core"
-            detail="주간/야간 차트(sector), Lot of Fortune/Spirit, ASC/MC 등 헬레니즘 핵심 지표를 제공합니다."
+            detail={buildCatalogDetail(
+              apiCatalogMap.get(buildCatalogKey("POST", "/api/astrology/hellenistic-core")) ?? null,
+              "주간/야간 차트(sector), Lot of Fortune/Spirit, ASC/MC 등 헬레니즘 핵심 지표를 제공합니다.",
+            )}
             status={hellenistic.status}
             summary={
               hellenistic.data ? (
@@ -1283,7 +1463,10 @@ export function LabScreen() {
           <SectionCard
             title="Vimshottari Dasha"
             description="POST /api/astrology/vimshottari"
-            detail="베다 점성술의 대주기/소주기 타이밍(마하다샤/안타르다샤/프라티안타르다샤)을 제공합니다."
+            detail={buildCatalogDetail(
+              apiCatalogMap.get(buildCatalogKey("POST", "/api/astrology/vimshottari")) ?? null,
+              "베다 점성술의 대주기/소주기 타이밍(마하다샤/안타르다샤/프라티안타르다샤)을 제공합니다.",
+            )}
             status={vimshottari.status}
             summary={
               vimshottari.data ? (
@@ -1330,7 +1513,10 @@ export function LabScreen() {
           <SectionCard
             title="Ziwei Board"
             description="POST /api/ziwei/board"
-            detail="자미두수 명반(12궁/주성/보조성/사화/대한 등) 고정 구조를 제공합니다."
+            detail={buildCatalogDetail(
+              apiCatalogMap.get(buildCatalogKey("POST", "/api/ziwei/board")) ?? null,
+              "자미두수 명반(12궁/주성/보조성/사화/대한 등) 고정 구조를 제공합니다.",
+            )}
             status={ziweiBoard.status}
             summary={
               ziweiBoard.data ? (
@@ -1360,7 +1546,10 @@ export function LabScreen() {
           <SectionCard
             title="Ziwei Runtime Overlay"
             description="POST /api/ziwei/runtime-overlay"
-            detail="명반 위에 대한/유년/월운/일운/시운을 겹쳐 현재 활성 궁과 흐름을 보여줍니다."
+            detail={buildCatalogDetail(
+              apiCatalogMap.get(buildCatalogKey("POST", "/api/ziwei/runtime-overlay")) ?? null,
+              "명반 위에 대한/유년/월운/일운/시운을 겹쳐 현재 활성 궁과 흐름을 보여줍니다.",
+            )}
             status={ziweiOverlay.status}
             summary={
               ziweiOverlay.data ? (

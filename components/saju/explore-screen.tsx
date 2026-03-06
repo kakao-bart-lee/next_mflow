@@ -14,21 +14,14 @@ import {
   ChevronDown,
   ChevronUp,
   BookOpen,
-  HelpCircle,
   BarChart3,
   Radar as RadarIcon,
 } from "lucide-react"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { useFortune } from "@/lib/contexts/fortune-context"
 import type { FortuneResponse } from "@/lib/saju-core"
-import { PLANET_ORDER, SIGN_LABEL_KO } from "@/lib/astrology/static/constants"
+import { PLANET_LABEL, PLANET_ORDER, SIGN_LABEL_KO } from "@/lib/astrology/static/constants"
 import { computeTransits, type TransitAspect } from "@/lib/astrology/static/transits"
-import type { PlanetId } from "@/lib/astrology/static/types"
+import type { FutureDayInsight, PlanetId } from "@/lib/astrology/static/types"
 import { ELEMENT_HEX, ELEMENT_LABEL as ELEMENT_LABEL_SHARED } from "@/lib/constants/element-colors"
 
 /* ─── 타입 정의 ─── */
@@ -58,6 +51,17 @@ interface PlanetDisplay {
   sajuMap: string
   description: string
   finalScore: number
+}
+
+interface PlanetStrengthRow {
+  id: PlanetId
+  label: string
+  sign: string
+  finalScore: number
+  essentialScore: number | null
+  accidentalScore: number | null
+  supportiveAspects: number
+  tenseAspects: number
 }
 
 /* ─── 상수 ─── */
@@ -132,24 +136,6 @@ function filterTransitsByPeriod(transits: TransitAspect[], period: SelectedPerio
 
 /* ─── 유틸 컴포넌트 ─── */
 
-function TermTooltip({ term, definition }: { term: string; definition: string }) {
-  return (
-    <TooltipProvider delayDuration={0}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button className="inline-flex items-center gap-0.5 border-b border-dashed border-primary/40 font-medium text-primary" type="button">
-            {term}
-            <HelpCircle className="h-3 w-3" />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent className="max-w-[260px] rounded-lg bg-foreground px-3 py-2 text-xs leading-relaxed text-background">
-          <p>{definition}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  )
-}
-
 function getSignificanceDot(sig: "high" | "medium" | "low") {
   if (sig === "high") return "bg-accent"
   if (sig === "medium") return "bg-primary"
@@ -162,10 +148,67 @@ function getTransitTypeLabel(type: "daily" | "weekly" | "special") {
   return "특별"
 }
 
+function formatForecastDate(dateStr: string): string {
+  const date = new Date(`${dateStr}T00:00:00`)
+  if (Number.isNaN(date.getTime())) return dateStr
+  return new Intl.DateTimeFormat("ko-KR", {
+    month: "numeric",
+    day: "numeric",
+    weekday: "short",
+  }).format(date)
+}
+
+function getIntensityLabel(intensity: FutureDayInsight["intensity"]): string {
+  if (intensity === "high") return "높음"
+  if (intensity === "medium") return "보통"
+  return "낮음"
+}
+
+function getTopWeeklyPlanet(days: FutureDayInsight[]): PlanetId | null {
+  if (days.length === 0) return null
+  const counts = new Map<PlanetId, number>()
+  for (const day of days) {
+    counts.set(day.dominantPlanet, (counts.get(day.dominantPlanet) ?? 0) + 1)
+  }
+  let topPlanet: PlanetId | null = null
+  let topCount = -1
+  for (const [planet, count] of counts.entries()) {
+    if (count > topCount) {
+      topPlanet = planet
+      topCount = count
+    }
+  }
+  return topPlanet
+}
+
+function getPlanetAspectsSummary(
+  aspects: Array<{ planet1: PlanetId; planet2: PlanetId; type: string }>,
+  planetId: PlanetId,
+): { supportive: number; tense: number } {
+  const related = aspects.filter(
+    (aspect) => aspect.planet1 === planetId || aspect.planet2 === planetId,
+  )
+  const supportive = related.filter(
+    (aspect) => aspect.type === "trine" || aspect.type === "sextile" || aspect.type === "conjunction",
+  ).length
+  const tense = related.filter(
+    (aspect) => aspect.type === "square" || aspect.type === "opposition",
+  ).length
+  return { supportive, tense }
+}
+
 /* ─── 메인 컴포넌트 ─── */
 
 export function ExploreScreen() {
-  const { sajuResult, astrologyResult, chartCore, vedicCore, isLoading } = useFortune()
+  const {
+    sajuResult,
+    astrologyResult,
+    chartCore,
+    aspects,
+    essentialScore,
+    accidentalScore,
+    isLoading,
+  } = useFortune()
 
   const [chatOpen, setChatOpen] = useState(false)
   const [selectedPeriod, setSelectedPeriod] = useState<SelectedPeriod>("today")
@@ -182,6 +225,7 @@ export function ExploreScreen() {
     [sajuResult],
   )
   const greatFortune = sajuResult?.greatFortune as Record<string, Record<string, string>> | undefined
+  const currentGreatFortune = greatFortune?.current_period
   const sinyakSingangData = sajuResult?.sinyakSingang as Record<string, string> | undefined
 
   const planetPositions = useMemo<PlanetDisplay[]>(() => {
@@ -214,10 +258,74 @@ export function ExploreScreen() {
     [allTransits, selectedPeriod],
   )
 
-  const headlineTitle = astrologyResult?.today.headline ?? "감성의 물결 속에서 직관을 따라가는 시기"
-  const headlineBody =
-    astrologyResult?.today.summary ??
-    "사주의 식신 기운과 태양의 물고기자리 에너지가 함께 흐르고 있습니다."
+  const periodInsight = useMemo(() => {
+    if (!astrologyResult) {
+      return {
+        title: "감성의 물결 속에서 직관을 따라가는 시기",
+        body: "사주의 식신 기운과 태양의 물고기자리 에너지가 함께 흐르고 있습니다.",
+        tags: [] as string[],
+        actions: [] as string[],
+        caution: null as string | null,
+      }
+    }
+
+    if (selectedPeriod === "today") {
+      return {
+        title: astrologyResult.today.headline,
+        body: astrologyResult.today.summary,
+        tags: astrologyResult.today.tags.slice(0, 4),
+        actions: astrologyResult.today.actions.slice(0, 2),
+        caution: astrologyResult.today.caution || null,
+      }
+    }
+
+    if (selectedPeriod === "tomorrow") {
+      const tomorrow = astrologyResult.future.days[0]
+      if (!tomorrow) {
+        return {
+          title: astrologyResult.today.headline,
+          body: astrologyResult.today.summary,
+          tags: astrologyResult.today.tags.slice(0, 3),
+          actions: [] as string[],
+          caution: null as string | null,
+        }
+      }
+      return {
+        title: `${formatForecastDate(tomorrow.date)} · ${tomorrow.theme}`,
+        body: tomorrow.focus,
+        tags: [
+          `지배 행성 ${PLANET_LABEL[tomorrow.dominantPlanet]}`,
+          `강도 ${getIntensityLabel(tomorrow.intensity)}`,
+        ],
+        actions: [`내일 포커스: ${tomorrow.focus}`],
+        caution: null as string | null,
+      }
+    }
+
+    const weekDays = astrologyResult.future.days
+    const highDays = weekDays.filter((day) => day.intensity === "high")
+    const topPlanet = getTopWeeklyPlanet(weekDays)
+
+    return {
+      title: `${astrologyResult.future.rangeLabel} 흐름`,
+      body: `강한 에너지 구간 ${highDays.length}일${topPlanet ? ` · ${PLANET_LABEL[topPlanet]} 중심` : ""}`,
+      tags: [
+        `강한 날 ${highDays.length}`,
+        ...(topPlanet ? [`반복 행성 ${PLANET_LABEL[topPlanet]}`] : []),
+      ],
+      actions:
+        astrologyResult.today.actions.length > 0
+          ? [astrologyResult.today.actions[0]]
+          : ([] as string[]),
+      caution:
+        highDays.length >= 3
+          ? "강한 날이 많아 중요한 일정은 분산하는 편이 좋습니다."
+          : astrologyResult.today.caution || null,
+    }
+  }, [astrologyResult, selectedPeriod])
+
+  const headlineTitle = periodInsight.title
+  const headlineBody = periodInsight.body
 
   const activePlanet = activePlanetId ? (planetPositions.find((p) => p.id === activePlanetId) ?? null) : null
 
@@ -242,6 +350,24 @@ export function ExploreScreen() {
     () => Math.max(...planetPositions.map((p) => p.finalScore), 1),
     [planetPositions],
   )
+
+  const planetStrengthRows = useMemo<PlanetStrengthRow[]>(() => {
+    if (!astrologyResult) return []
+    return PLANET_ORDER.map((planetId) => {
+      const planetInfo = planetPositions.find((planet) => planet.id === planetId)
+      const aspectSummary = getPlanetAspectsSummary(aspects?.aspects ?? [], planetId)
+      return {
+        id: planetId,
+        label: PLANET_LABEL[planetId],
+        sign: planetInfo?.sign ?? "-",
+        finalScore: Math.round(planetInfo?.finalScore ?? 0),
+        essentialScore: essentialScore?.scores[planetId]?.score ?? null,
+        accidentalScore: accidentalScore?.scores[planetId]?.score ?? null,
+        supportiveAspects: aspectSummary.supportive,
+        tenseAspects: aspectSummary.tense,
+      }
+    }).sort((a, b) => b.finalScore - a.finalScore)
+  }, [astrologyResult, planetPositions, aspects, essentialScore, accidentalScore])
 
   const PERIODS: { id: SelectedPeriod; label: string }[] = [
     { id: "today",    label: "오늘" },
@@ -327,15 +453,35 @@ export function ExploreScreen() {
                 {periodLabel}
               </span>
               <h2 className="font-serif text-lg font-semibold text-foreground mb-2">{headlineTitle}</h2>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                {astrologyResult ? headlineBody : (
-                  <>
-                    사주의{" "}
-                    <TermTooltip term="식신" definition="일간이 생(生)하는 오행 중 음양이 같은 것. 표현, 재능, 식복을 의미합니다." />
-                    {" "}기운과 태양의 물고기자리 에너지가 함께 흐르고 있습니다.
-                  </>
-                )}
-              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-3">{headlineBody}</p>
+              {periodInsight.tags.length > 0 && (
+                <div className="mb-3 flex flex-wrap gap-1.5">
+                  {periodInsight.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {(currentGreatFortune || periodInsight.actions.length > 0 || periodInsight.caution) && (
+                <div className="mb-4 space-y-1.5 text-xs text-muted-foreground">
+                  {currentGreatFortune && (
+                    <p>
+                      현재 대운: {currentGreatFortune.heavenly_stem}{currentGreatFortune.earthly_branch}
+                      {currentGreatFortune.sipsin ? ` · ${currentGreatFortune.sipsin}` : ""}
+                    </p>
+                  )}
+                  {periodInsight.actions.map((action) => (
+                    <p key={action}>실천: {action}</p>
+                  ))}
+                  {periodInsight.caution && (
+                    <p className="text-amber-600 dark:text-amber-400">주의: {periodInsight.caution}</p>
+                  )}
+                </div>
+              )}
               <button
                 onClick={() => setChatOpen(true)}
                 className="inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent/80 transition-colors"
@@ -506,6 +652,74 @@ export function ExploreScreen() {
               행성을 탭하면 사주 십신과 오행 연결을 볼 수 있습니다
             </p>
           )}
+
+          <div className="mt-4 rounded-2xl border border-border/40 bg-card/60 p-4 backdrop-blur-sm">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-foreground">행성 상태 보드</h3>
+              <span className="text-[10px] text-muted-foreground">
+                Final + Essential + Accidental + Aspects
+              </span>
+            </div>
+            {!astrologyResult ? (
+              <p className="text-sm text-muted-foreground">
+                점성술 데이터가 준비되면 정밀 행성 상태를 표시합니다.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {planetStrengthRows.map((row) => {
+                  const scoreWidth = `${Math.max(Math.min((row.finalScore / maxPlanetScore) * 100, 100), 0)}%`
+                  return (
+                    <div
+                      key={row.id}
+                      className="rounded-xl border border-border/40 bg-background/40 px-3 py-2"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground">
+                            {row.label}
+                          </p>
+                          <p className="truncate text-[11px] text-muted-foreground">
+                            {row.sign}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[11px]">
+                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-primary">
+                            F {row.finalScore}
+                          </span>
+                          <span className="rounded-full bg-secondary px-2 py-0.5 text-secondary-foreground">
+                            E {row.essentialScore !== null ? Math.round(row.essentialScore * 10) / 10 : "-"}
+                          </span>
+                          <span className="rounded-full bg-secondary px-2 py-0.5 text-secondary-foreground">
+                            A {row.accidentalScore !== null ? Math.round(row.accidentalScore * 10) / 10 : "-"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                        <div
+                          className="h-full rounded-full bg-primary"
+                          style={{ width: scoreWidth }}
+                        />
+                      </div>
+                      <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
+                        <span>조화 {row.supportiveAspects}</span>
+                        <span>긴장 {row.tenseAspects}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+                {!essentialScore && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Essential score를 불러오는 중이거나 아직 사용할 수 없습니다.
+                  </p>
+                )}
+                {!accidentalScore && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Accidental score는 입력 티어/위치 정보에 따라 제공이 제한될 수 있습니다.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         </section>
         {/* ══════════════════════════════════════════
             LAYER 1 — 지금 나는 어떤 에너지인가?
