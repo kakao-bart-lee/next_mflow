@@ -14,6 +14,11 @@ export {
   PillarsSchema,
   SajuDataSchema,
   SajuFortuneRequestSchema,
+  FortuneProfileInfoSchema,
+  FortuneProfileEntrySchema,
+  FortuneProfileSectionSchema,
+  ThemeInterpretationSummarySchema,
+  FortuneProfileResultSchema,
   FortuneResponseSchema,
   // Types
   type FortuneRequest,
@@ -24,6 +29,11 @@ export {
   type Pillars,
   type SajuData,
   type SajuFortuneRequest,
+  type FortuneProfileInfo,
+  type FortuneProfileEntry,
+  type FortuneProfileSection,
+  type ThemeInterpretationSummary,
+  type FortuneProfileResult,
   type FortuneResponse,
   // Validation functions
   validateFortuneRequest,

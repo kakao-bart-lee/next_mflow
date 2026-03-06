@@ -102,8 +102,58 @@ export const SajuFortuneRequestSchema = z.object({
     .transform((v) => v.toUpperCase()),
   /** 운세 타입 (예: saju_4, saju_5, basic) */
   fortuneType: z.string(),
+  /** 구조화 프로필 ID (예: life_overview, daily_fortune) */
+  profileId: z.string().optional(),
   /** 타임존 */
   timezone: z.string().default('Asia/Seoul'),
+});
+
+/** 운세 프로필 메타데이터 스키마 */
+export const FortuneProfileInfoSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+});
+
+/** 구조화 해설 엔트리 스키마 */
+export const FortuneProfileEntrySchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  fullText: z.string(),
+  briefText: z.string(),
+  oneLineSummary: z.string(),
+  score: z.number().nullable().optional(),
+});
+
+/** 구조화 해설 섹션 스키마 */
+export const FortuneProfileSectionSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  entries: z.array(FortuneProfileEntrySchema).default([]),
+});
+
+/** 테마 요약 스키마 */
+export const ThemeInterpretationSummarySchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  summary: z.string(),
+  oneLineSummary: z.string(),
+  briefAnalysis: z.string(),
+  detailedAnalysis: z.string(),
+  strengths: z.array(z.string()).default([]),
+  weaknesses: z.array(z.string()).default([]),
+  advice: z.array(z.string()).default([]),
+  luckyElements: z.array(z.string()).default([]),
+  unluckyElements: z.array(z.string()).default([]),
+  score: z.number(),
+  grade: z.string(),
+});
+
+/** 구조화 운세 프로필 응답 스키마 */
+export const FortuneProfileResultSchema = z.object({
+  profile: FortuneProfileInfoSchema,
+  sections: z.array(FortuneProfileSectionSchema).default([]),
+  theme: ThemeInterpretationSummarySchema.optional(),
 });
 
 /** FortuneResponse 스키마 */
@@ -120,6 +170,8 @@ export const FortuneResponseSchema = z.object({
   greatFortune: z.record(z.unknown()).optional(),
   /** 형충파해 분석 결과 */
   hyungchung: z.record(z.unknown()).optional(),
+  /** 구조화 운세 프로필 결과 */
+  fortuneProfileResult: FortuneProfileResultSchema.optional(),
   /** 계산 시간 */
   timestamp: z.string().or(z.date()).default(() => new Date().toISOString()),
   /** 입력 데이터 */
@@ -154,6 +206,21 @@ export type SajuData = z.infer<typeof SajuDataSchema>;
 /** SajuFortuneRequest 타입 */
 export type SajuFortuneRequest = z.infer<typeof SajuFortuneRequestSchema>;
 
+/** FortuneProfileInfo 타입 */
+export type FortuneProfileInfo = z.infer<typeof FortuneProfileInfoSchema>;
+
+/** FortuneProfileEntry 타입 */
+export type FortuneProfileEntry = z.infer<typeof FortuneProfileEntrySchema>;
+
+/** FortuneProfileSection 타입 */
+export type FortuneProfileSection = z.infer<typeof FortuneProfileSectionSchema>;
+
+/** ThemeInterpretationSummary 타입 */
+export type ThemeInterpretationSummary = z.infer<typeof ThemeInterpretationSummarySchema>;
+
+/** FortuneProfileResult 타입 */
+export type FortuneProfileResult = z.infer<typeof FortuneProfileResultSchema>;
+
 /** FortuneResponse 타입 */
 export interface FortuneResponse {
   success: boolean;
@@ -162,6 +229,7 @@ export interface FortuneResponse {
   sinyakSingang?: Record<string, unknown> | undefined;
   greatFortune?: Record<string, unknown> | undefined;
   hyungchung?: HyungchungResult | undefined;
+  fortuneProfileResult?: FortuneProfileResult | undefined;
   timestamp: string | Date;
   inputData: Record<string, unknown>;
 }

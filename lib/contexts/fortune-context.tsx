@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react"
 import type { BirthInfo } from "@/lib/schemas/birth-info"
+import { VERSION as SAJU_CORE_VERSION } from "@/lib/saju-core/version"
 import type { FortuneResponse } from "@/lib/saju-core"
 import type { AstrologyStaticResult } from "@/lib/astrology/static/types"
 import type {
@@ -71,7 +72,12 @@ export const DEMO_DAILY_FORTUNE: DailyFortune = {
 const FortuneContext = createContext<FortuneContextValue | null>(null)
 
 const STORAGE_KEY = "saju_birth_info"
-const SAJU_CACHE_KEY = "saju_analysis_cache"
+const LEGACY_SAJU_CACHE_KEYS = [
+  "saju_analysis_cache",
+  `saju_analysis_cache_v${SAJU_CORE_VERSION}`,
+] as const
+const SAJU_CACHE_SCHEMA_VERSION = "structured-profile-v1"
+const SAJU_CACHE_KEY = `saju_analysis_cache_v${SAJU_CORE_VERSION}_${SAJU_CACHE_SCHEMA_VERSION}`
 const ASTRO_CACHE_KEY = "astro_analysis_cache"
 
 // 사주 캐시: birthInfo fingerprint가 같으면 무한 유효 (결정적 계산)
@@ -277,6 +283,14 @@ export function FortuneProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function hydrate() {
       try {
+        for (const legacyKey of LEGACY_SAJU_CACHE_KEYS) {
+          try {
+            localStorage.removeItem(legacyKey)
+          } catch {
+            // ignore storage errors
+          }
+        }
+
         const stored = localStorage.getItem(STORAGE_KEY)
         if (stored) {
           const parsed = JSON.parse(stored) as BirthInfo
@@ -346,6 +360,10 @@ export function FortuneProvider({ children }: { children: ReactNode }) {
     setTargetDate(null)
     try {
       localStorage.removeItem(STORAGE_KEY)
+      localStorage.removeItem(SAJU_CACHE_KEY)
+      for (const legacyKey of LEGACY_SAJU_CACHE_KEYS) {
+        localStorage.removeItem(legacyKey)
+      }
     } catch {
       // ignore
     }

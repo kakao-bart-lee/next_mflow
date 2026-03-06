@@ -232,6 +232,15 @@ function countInterpretationItems(value: unknown): number {
   return Object.keys(rec).length
 }
 
+function normalizeInterpretationKeys(value: unknown): Record<string, unknown> | null {
+  const rec = asRecord(value)
+  if (!rec) return null
+
+  return Object.fromEntries(
+    Object.entries(rec).map(([key, entry]) => [key.replace(/^[A-Z]\d{3}_/, ""), entry]),
+  )
+}
+
 function formatErrorMessage(payload: unknown, fallback: string): string {
   if (!payload || typeof payload !== "object") return fallback
   const err = (payload as { error?: unknown }).error
@@ -991,16 +1000,35 @@ export function LabScreen() {
   const sajuInputData = asRecord(sajuConnectedData?.inputData)
   const themeInterpretation = asRecord(sajuInputData?.theme_interpretation)
   const fortuneInterpretations = asRecord(sajuInputData?.fortune_interpretations)
+  const normalizedFortuneInterpretations = normalizeInterpretationKeys(fortuneInterpretations)
+  const fortuneProfileResult = sajuConnectedData?.fortuneProfileResult
   const fortuneType =
     typeof sajuInputData?.fortune_type === "string"
       ? sajuInputData.fortune_type
       : "-"
+  const profileId =
+    fortuneProfileResult?.profile.id ??
+    (typeof sajuInputData?.profile_id === "string" ? sajuInputData.profile_id : "-")
+  const profileTitle = fortuneProfileResult?.profile.title ?? "-"
   const fortuneTypeDescription =
     typeof sajuInputData?.fortune_type_description === "string"
       ? sajuInputData.fortune_type_description
       : "-"
-  const interpretationCount = countInterpretationItems(fortuneInterpretations)
-  const interpretationSampleKeys = Object.keys(fortuneInterpretations ?? {}).slice(0, 3)
+  const profileEntries =
+    fortuneProfileResult?.sections.flatMap((section) => section.entries) ?? []
+  const interpretationCount = fortuneProfileResult
+    ? profileEntries.length
+    : countInterpretationItems(normalizedFortuneInterpretations)
+  const interpretationSampleKeys = fortuneProfileResult
+    ? profileEntries.map((entry) => entry.title).filter(Boolean).slice(0, 3)
+    : Object.keys(normalizedFortuneInterpretations ?? {}).slice(0, 3)
+  const themeSummary =
+    fortuneProfileResult?.theme?.oneLineSummary ??
+    (typeof themeInterpretation?.one_line_summary === "string"
+      ? themeInterpretation.one_line_summary
+      : typeof themeInterpretation?.summary === "string"
+        ? themeInterpretation.summary
+        : "-")
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 pb-8 pt-6">
@@ -1125,7 +1153,7 @@ export function LabScreen() {
 
           <SectionCard
             title="사주 계산 해설 (내부)"
-            description="saju-core 내부 해설(theme_interpretation / fortune_interpretations)"
+            description="saju-core 내부 해설(fortuneProfileResult + compatibility inputData)"
             detail={buildCatalogDetail(
               apiCatalogMap.get(buildCatalogKey("POST", "/api/saju/analyze")) ?? null,
               "LLM 없이 계산 로직에서 생성된 사주 해설 데이터입니다.",
@@ -1144,9 +1172,11 @@ export function LabScreen() {
             summary={
               sajuConnectedData ? (
                 <ul className="space-y-1 text-xs">
+                  <li>프로필: {profileTitle} ({profileId})</li>
                   <li>해설 타입: {fortuneType}</li>
                   <li>타입 설명: {fortuneTypeDescription}</li>
                   <li>테마 해설 존재: {themeInterpretation ? "Y" : "N"}</li>
+                  <li>테마 한줄 요약: {themeSummary}</li>
                   <li>해설 항목 수: {interpretationCount}</li>
                   <li>대표 항목: {interpretationSampleKeys.length > 0 ? interpretationSampleKeys.join(", ") : "-"}</li>
                 </ul>
@@ -1157,11 +1187,11 @@ export function LabScreen() {
             error={sajuManual.error ?? fortuneError}
             jsonData={
               sajuConnectedData
-                ? {
+                ? fortuneProfileResult ?? {
                     fortune_type: fortuneType,
                     fortune_type_description: fortuneTypeDescription,
                     theme_interpretation: themeInterpretation,
-                    fortune_interpretations: fortuneInterpretations,
+                    fortune_interpretations: normalizedFortuneInterpretations,
                   }
                 : undefined
             }

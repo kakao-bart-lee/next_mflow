@@ -13,4 +13,4 @@ export * from './models';
 export * from './facade';
 
 // Version
-export const VERSION = '3.0.0';
+export { VERSION } from './version';
