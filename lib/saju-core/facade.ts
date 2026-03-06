@@ -436,10 +436,22 @@ export class FortuneTellerService {
     currentAge?: number
   ): FortuneResponse {
     const fr = this.calculateSaju(request, currentAge);
+    const normalizedFortuneType = fortuneType.trim().toLowerCase();
 
     try {
+      if (normalizedFortuneType === 'basic') {
+        const interpretations = this.fortuneInterpreter.getCategoryInterpretations(
+          request,
+          fr,
+          'basic'
+        );
+        fr.inputData.fortune_interpretations = interpretations;
+        fr.inputData.fortune_type = 'basic';
+        return fr;
+      }
+
       // Enum 기반 fortune type 처리
-      const parsedFortuneType = getFortuneTypeFromString(fortuneType);
+      const parsedFortuneType = getFortuneTypeFromString(normalizedFortuneType);
       const combinationName = parsedFortuneType;
 
       // 새로운 해석기 시스템 사용
