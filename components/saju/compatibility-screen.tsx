@@ -34,6 +34,14 @@ interface CompatibilityResult {
     text: string
     score: number | null
   } | null
+  legacy_bedroom?: {
+    sourceTable: "G020"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    score: number | null
+  } | null
   legacy_love_style?: {
     sourceTable: "Y003"
     title: string
@@ -269,6 +277,27 @@ export function CompatibilityScreen() {
                     </div>
                     <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                       {result.legacy_intimacy.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_bedroom ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_bedroom.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_bedroom.sourceTable} · key {result.legacy_bedroom.lookupKey}
+                        </p>
+                      </div>
+                      {typeof result.legacy_bedroom.score === "number" ? (
+                        <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                          {result.legacy_bedroom.scoreLabel} {result.legacy_bedroom.score}
+                        </div>
+                      ) : null}
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_bedroom.text}
                     </p>
                   </div>
                 ) : null}

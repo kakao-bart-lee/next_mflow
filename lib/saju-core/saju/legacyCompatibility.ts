@@ -48,6 +48,15 @@ export interface LegacyLoveStyleInsight {
   readonly score: number | null
 }
 
+export interface LegacyBedroomInsight {
+  readonly sourceTable: "G020"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+  readonly score: number | null
+}
+
 function toCalculationInput(fortune: FortuneResponse, gender: "M" | "F"): LegacyCompatibilityCalculationInput {
   const pillars = fortune.sajuData.pillars
   return {
@@ -77,6 +86,15 @@ function adjustPartnerLifecycleStage(baseStage: string, primaryGender: "M" | "F"
 function readLegacyG016Record(lookupKey: string): { readonly data?: string; readonly numerical?: number | string | null } | null {
   const gTables = getDataLoader().loadGTables() as Record<string, Record<string, Record<string, unknown>>>
   const record = gTables.G016?.[lookupKey]
+  if (!record || typeof record !== "object") {
+    return null
+  }
+  return record as { readonly data?: string; readonly numerical?: number | string | null }
+}
+
+function readLegacyG020Record(lookupKey: string): { readonly data?: string; readonly numerical?: number | string | null } | null {
+  const gTables = getDataLoader().loadGTables() as Record<string, Record<string, Record<string, unknown>>>
+  const record = gTables.G020?.[lookupKey]
   if (!record || typeof record !== "object") {
     return null
   }
@@ -153,6 +171,35 @@ export function buildLegacyLoveStyleInsight(
     scoreLabel: "러브스타일",
     lookupKey,
     text,
+    score: Number.isFinite(numericalValue) ? numericalValue : null,
+  }
+}
+
+export function buildLegacyBedroomInsight(
+  primaryFortune: FortuneResponse,
+): LegacyBedroomInsight | null {
+  const lookupKey = String(
+    ["갑", "을", "병", "정", "무", "기", "경", "신", "임", "계"].indexOf(extractKorean(primaryFortune.sajuData.pillars.일.천간)) + 1
+  ).padStart(2, "0")
+  const record = readLegacyG020Record(lookupKey)
+
+  if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {
+    return null
+  }
+
+  const numericalValue =
+    typeof record.numerical === "number"
+      ? record.numerical
+      : typeof record.numerical === "string"
+        ? Number.parseInt(record.numerical, 10)
+        : null
+
+  return {
+    sourceTable: "G020",
+    title: "침실 섹스궁합",
+    scoreLabel: "침실섹스궁합",
+    lookupKey,
+    text: record.data,
     score: Number.isFinite(numericalValue) ? numericalValue : null,
   }
 }

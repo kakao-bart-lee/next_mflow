@@ -8,7 +8,7 @@ import {
   CompatibilityType,
   type SajuData,
 } from "@/lib/saju-core/saju/gunghap"
-import { buildLegacyIntimacyInsight, buildLegacyLoveStyleInsight } from "@/lib/saju-core/saju/legacyCompatibility"
+import { buildLegacyBedroomInsight, buildLegacyIntimacyInsight, buildLegacyLoveStyleInsight } from "@/lib/saju-core/saju/legacyCompatibility"
 import type { FortuneResponse } from "@/lib/saju-core"
 
 const CompatibilityRequestSchema = z.object({
@@ -83,6 +83,7 @@ export async function POST(req: NextRequest) {
     const compatType = TYPE_MAP[type] ?? CompatibilityType.GENERAL
 
     const result = gunghap.analyzeCompatibility(sajuA, sajuB, compatType)
+    const legacyBedroom = buildLegacyBedroomInsight(fortuneA)
     const legacyIntimacy = buildLegacyIntimacyInsight(personA, fortuneA, personB, fortuneB)
     const legacyLoveStyle = buildLegacyLoveStyleInsight(personB, fortuneB)
 
@@ -94,6 +95,7 @@ export async function POST(req: NextRequest) {
         health_match: result.health_match,
         wealth_match: result.wealth_match,
         career_match: result.career_match,
+        legacy_bedroom: legacyBedroom,
         legacy_intimacy: legacyIntimacy,
         legacy_love_style: legacyLoveStyle,
         overall_interpretation: result.overall_interpretation,

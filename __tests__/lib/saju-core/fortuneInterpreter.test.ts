@@ -24,7 +24,7 @@ import {
 } from "@/lib/saju-core/saju/juyeokTrigrams"
 import { advanceLegacyCycle, getFiveElementGroup } from "@/lib/saju-core/saju/legacyCycles"
 import { DatabaseResultRetriever } from "@/lib/saju-core/saju/fortuneInterpreter"
-import { buildLegacyIntimacyInsight, buildLegacyLoveStyleInsight } from "@/lib/saju-core/saju/legacyCompatibility"
+import { buildLegacyBedroomInsight, buildLegacyIntimacyInsight, buildLegacyLoveStyleInsight } from "@/lib/saju-core/saju/legacyCompatibility"
 import {
   CalculatorType,
   GenderBasedCalculator,
@@ -469,6 +469,25 @@ describe("legacyCompatibility", () => {
     expect(legacyIntimacy?.sourceTable).toBe("G016")
     expect(legacyIntimacy?.lookupKey).toMatch(/^\d{2}-\d{2}$/)
     expect(legacyIntimacy?.text.trim().length).toBeGreaterThan(0)
+  })
+
+  it("builds the legacy G020 bedroom detail from the primary day stem", () => {
+    const service = new FortuneTellerService()
+    const primaryInfo = {
+      birthDate: "1990-01-15",
+      birthTime: "14:30",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "M" as const,
+    }
+
+    const primaryFortune = service.calculateSaju(primaryInfo)
+    const legacyBedroom = buildLegacyBedroomInsight(primaryFortune)
+
+    expect(legacyBedroom).toBeDefined()
+    expect(legacyBedroom?.sourceTable).toBe("G020")
+    expect(legacyBedroom?.lookupKey).toMatch(/^\d{2}$/)
+    expect(legacyBedroom?.text.trim().length).toBeGreaterThan(0)
   })
 
   it("builds the legacy Y003 love-style detail from the partner day branch", () => {
