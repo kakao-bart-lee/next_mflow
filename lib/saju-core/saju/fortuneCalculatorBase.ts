@@ -26,7 +26,7 @@ import {
   calculateNewYearSignalWithHourExpression,
 } from './newYearSignals';
 import { calculateTojeongTrigramCompositeKey } from './tojeongTrigrams';
-import { calculateYongToSipsin } from './yongsinFlows';
+import { calculateWoon12Daygi, calculateYongChungan, calculateYongToSipsin } from './yongsinFlows';
 import { createLifecycleStageCalculator } from './lifecycleStage';
 import { calculateSinsal } from './twelveSinsal/utils';
 
@@ -1558,6 +1558,9 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
         role_profile_primary: context.elementRoleProfile.primary,
         current_year_stem_role: context.currentYearStemRole,
         current_year_branch_role: context.currentYearBranchRole,
+        yong_to_sipsin: context.yongToSipsin,
+        yong_chungan: context.yongChungan,
+        woon12_daygi: context.woon12Daygi,
       },
     };
   }
@@ -1570,6 +1573,9 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     readonly elementRoleProfile: import('./elementRoleProfiles').ElementRoleProfile;
     readonly currentYearStemRole: import('./elementRoleProfiles').ElementRoleLabel;
     readonly currentYearBranchRole: import('./elementRoleProfiles').ElementRoleLabel;
+    readonly yongToSipsin: string;
+    readonly yongChungan: string;
+    readonly woon12Daygi: string;
   } {
     const currentDate = this.getCurrentDateContext(inputData);
     if (!currentDate) {
@@ -1604,6 +1610,9 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     let woonZ = classifyCurrentFortuneElement(currentBranchRule.oh, elementRoleProfile);
     const currentYearStemRole = classifyStemRoleLabel(STEM_CODE_TO_HANJA[currentYearStem] ?? '', elementRoleProfile);
     const currentYearBranchRole = classifyBranchRoleLabel(currentYearBranchHanja ?? '', elementRoleProfile);
+    const yongToSipsin = calculateYongToSipsin(inputData);
+    const yongChungan = calculateYongChungan(inputData, yongToSipsin);
+    const woon12Daygi = calculateWoon12Daygi(inputData);
 
     if (inputData.gender !== 'M') {
       woonY = this.incrementWoonCode(woonY);
@@ -1622,6 +1631,9 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
       elementRoleProfile,
       currentYearStemRole,
       currentYearBranchRole,
+      yongToSipsin,
+      yongChungan,
+      woon12Daygi,
     };
   }
 

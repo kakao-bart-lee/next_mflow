@@ -7,7 +7,7 @@ import {
   getElementRoleProfile,
   summarizePillarRoleLabels,
 } from "@/lib/saju-core/saju/elementRoleProfiles"
-import { calculateYongToSipsin } from "@/lib/saju-core/saju/yongsinFlows"
+import { calculateWoon12Daygi, calculateYongChungan, calculateYongToSipsin } from "@/lib/saju-core/saju/yongsinFlows"
 import {
   getFortuneYearMarkerFullText,
   getFortuneYearMarkerInsight,
@@ -421,6 +421,24 @@ describe("yongsinFlows", () => {
         gender: "M",
       })
     ).toBe("03")
+  })
+
+  it("derives yong_chungan and woon12_daygi from the same find_yong tail flow", () => {
+    const inputData = {
+      yearStem: "갑(甲)",
+      yearBranch: "오(午)",
+      monthStem: "병(丙)",
+      monthBranch: "자(子)",
+      dayStem: "갑(甲)",
+      dayBranch: "인(寅)",
+      hourStem: "정(丁)",
+      hourBranch: "오(午)",
+      gender: "M",
+    }
+
+    expect(calculateYongToSipsin(inputData)).toBe("03")
+    expect(calculateYongChungan(inputData)).toBe("03")
+    expect(calculateWoon12Daygi(inputData)).toBe("04")
   })
 })
 
