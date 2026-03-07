@@ -59,6 +59,29 @@
 
 - `4f8788c` `fix ts fortune interpreter compatibility`
 
+### 5. synthetic `ten_year_fortune_cycle` 및 marker 해설층 추가
+
+- `greatFortune` 원데이터를 그대로 노출하는 대신, `ten_year_fortune_cycle` profile을 synthetic section으로 재구성
+- `GF_TIMELINE`
+  - 현재 연도 기준 10년 창을 생성
+  - 각 연도별 `천간/지지`, `십성`, `십이신살`, `양인`, `공망`, `fortune year marker`를 함께 표시
+- `GF_PERIODS`
+  - 대운 구간을 `start_age~end_age`, 간지, 십성 기준으로 다시 조립
+- `fortuneYearMarkers.ts`
+  - `천덕귀인`, `월덕귀인`, `천덕합`, `월덕합`, `생기`, `천의`를 shared helper로 분리
+  - marker별 `briefText`와 `fullText`를 같이 관리하도록 확장
+- `GF_TIMELINE.oneLineSummary`
+  - 현재 연도 marker의 짧은 해설을 붙이도록 보강
+- `GF_TIMELINE.fullText`
+  - 단순 연도 목록만 출력하던 형태에서, 10년 창 안에 실제 marker가 뜨는 연도들을 모아 `연도별 표식 해설` 섹션을 추가
+
+관련 커밋:
+
+- `c37b95c` `feat synthesize ten year fortune profile`
+- `aa23dfd` `feat add fortune year marker helper`
+- `a240782` `feat extend fortune year markers`
+- 이번 라운드 커밋 예정: marker `fullText` 해설층 추가
+
 ## Verified
 
 반복적으로 수행한 검증:
@@ -92,6 +115,7 @@
 - `midlife_fortune`: `14/14`
 - `later_life_fortune`: `11/11`
 - `misfortune_relief`: `2/2`
+- `ten_year_fortune_cycle`: `2/2`
 
 현재 `next_mflow` 기준 남은 대형 기능 blocker는 없다. 남은 일은 결과 정합성을 해치지 않으면서 `temp_03`, `cut_tot`, `serial_no`, `choie_data` 같은 레거시 중간값을 의미 있는 구조로 바꾸는 유지보수성 작업이다.
 
@@ -121,6 +145,12 @@
   - `F011`, `T039`, `J004`, `J005`, `J009`, `J010` 공통 흐름을 `juyeokTrigrams.ts` helper 경계로 분리
 - `legacy cycle` family
   - `F_woonday`, `F_ohengSearch` 계열을 `legacyCycles.ts` helper로 분리
+- `fortune year marker` family
+  - `fortuneYearMarkers.ts`로 `천덕귀인`, `월덕귀인`, `천덕합`, `월덕합`, `생기`, `천의` 규칙 분리
+  - compact insight와 full text explanation을 같이 제공하도록 구조 확장
+- synthetic profile assembly
+  - `greatFortuneProfiles.ts`에서 `ten_year_fortune_cycle`을 synthetic profile로 조립
+  - marker 규칙과 marker 설명을 `oneLineSummary`/`fullText`에 연결
 
 즉 현재는 profile 결과 복구가 아니라 “family별 key builder와 lookup 단계 분리”가 실제 코드 구조에 반영되는 단계다.
 

@@ -1,6 +1,10 @@
 import type { FortuneProfileEntry, FortuneProfileSection, FortuneRequest, FortuneResponse } from '../models/fortuneTeller'
 import { extractHanja, extractKorean } from '../utils'
-import { resolveFortuneYearMarkers } from './fortuneYearMarkers'
+import {
+  getFortuneYearMarkerFullText,
+  getFortuneYearMarkerInsight,
+  resolveFortuneYearMarkers,
+} from './fortuneYearMarkers'
 import { getSipsinForBranch, getSipsinForStem } from './constants'
 import type { ProfileSectionDefinition } from './fortuneProfiles'
 import { GONGMANG_MAPPING, YANGINSAL_MAPPING } from './twelveSinsal/mappings'
@@ -124,6 +128,27 @@ function buildMarkerSummary(row: YearWindowRow): string {
   return markers.length > 0 ? markers.join(', ') : '특이 표식 없음'
 }
 
+function buildMarkerInsightSummary(row: YearWindowRow): string {
+  const insights = row.yearMarkers
+    .map((marker) => getFortuneYearMarkerInsight(marker))
+    .filter((value): value is string => Boolean(value))
+
+  return insights.length > 0 ? insights.join(' ') : ''
+}
+
+function buildMarkerFullText(rows: readonly YearWindowRow[]): string {
+  const details = rows
+    .flatMap((row) =>
+      row.yearMarkers.map((marker) => {
+        const fullText = getFortuneYearMarkerFullText(marker)
+        return fullText ? `- ${row.year}년 ${marker}: ${fullText}` : null
+      })
+    )
+    .filter((value): value is string => Boolean(value))
+
+  return details.length > 0 ? `연도별 표식 해설\n${details.join('\n')}` : ''
+}
+
 function buildYearWindowRows(
   request: FortuneRequest,
   fortuneResponse: FortuneResponse
@@ -185,6 +210,7 @@ function buildYearWindowEntry(
       return `${row.year}년 (${ageText}) ${row.stem}${row.branch} | 천간 십성 ${row.stemSipsin || '미상'} | 지지 십성 ${row.branchSipsin || '미상'} | 표식 ${buildMarkerSummary(row)} | ${currentFlag}`
     })
     .join('\n')
+  const markerFullText = buildMarkerFullText(rows)
 
   const briefRows = rows
     .filter((row) => row.isCurrentYear || row.year === currentRow.year + 1 || row.year === currentRow.year + 2)
@@ -197,14 +223,18 @@ function buildYearWindowEntry(
     currentRow && buildMarkerSummary(currentRow) !== '특이 표식 없음'
       ? ` 주요 표식은 ${buildMarkerSummary(currentRow)}입니다.`
       : ''
+  const markerInsightSuffix =
+    currentRow && buildMarkerInsightSummary(currentRow)
+      ? ` ${buildMarkerInsightSummary(currentRow)}`
+      : ''
 
   return {
     id: `${sectionId}_timeline`,
     tableCode: 'GF_TIMELINE',
     title,
-    fullText,
+    fullText: markerFullText ? `${fullText}\n\n${markerFullText}` : fullText,
     briefText,
-    oneLineSummary: `${currentSummary}${markerSuffix}`,
+    oneLineSummary: `${currentSummary}${markerSuffix}${markerInsightSuffix}`,
     score: null,
     status: 'resolved',
     lookupKey: String(currentRow?.year ?? ''),

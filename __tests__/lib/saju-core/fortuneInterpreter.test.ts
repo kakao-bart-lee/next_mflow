@@ -4,7 +4,11 @@ import {
   classifyCurrentFortuneElement,
   getElementRoleProfile,
 } from "@/lib/saju-core/saju/elementRoleProfiles"
-import { resolveFortuneYearMarkers } from "@/lib/saju-core/saju/fortuneYearMarkers"
+import {
+  getFortuneYearMarkerFullText,
+  getFortuneYearMarkerInsight,
+  resolveFortuneYearMarkers,
+} from "@/lib/saju-core/saju/fortuneYearMarkers"
 import {
   calculateJuyeokGanSerial,
   calculateJuyeokJiSerial,
@@ -430,6 +434,18 @@ describe("fortuneYearMarkers", () => {
       })
     ).toEqual(["월덕귀인", "천의"])
   })
+
+  it("provides compact explanatory insights for known markers", () => {
+    expect(getFortuneYearMarkerInsight("천덕귀인")).toContain("도움")
+    expect(getFortuneYearMarkerInsight("생기")).toContain("확장")
+    expect(getFortuneYearMarkerInsight("없는표식")).toBeNull()
+  })
+
+  it("provides full explanatory text for known markers", () => {
+    expect(getFortuneYearMarkerFullText("천덕귀인")).toContain("회복의 발판")
+    expect(getFortuneYearMarkerFullText("천의")).toContain("생활 리듬")
+    expect(getFortuneYearMarkerFullText("없는표식")).toBeNull()
+  })
 })
 
 // ──────────────────────────────────────────────
@@ -561,9 +577,11 @@ describe("FortuneTellerService.getSajuFortune()", () => {
     expect(timelineEntry?.status).toBe("resolved")
     expect(timelineEntry?.fullText).toContain("현재 기준")
     expect(timelineEntry?.fullText).toContain("천간 십성")
+    expect(timelineEntry?.fullText).toContain("연도별 표식 해설")
     expect(periodsEntry?.status).toBe("resolved")
     expect(periodsEntry?.fullText).toContain("진행 방향")
     expect(periodsEntry?.fullText).toContain("현재 대운")
+    expect(timelineEntry?.oneLineSummary.length ?? 0).toBeGreaterThan(0)
   })
 
   it("birth_season_fortune profile returns a result with sections", () => {

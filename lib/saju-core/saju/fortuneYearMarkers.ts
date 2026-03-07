@@ -9,6 +9,44 @@ type FortuneYearMarkerInput = {
   readonly targetYearBranch: string
 }
 
+type FortuneYearMarkerText = {
+  readonly briefText: string
+  readonly fullText: string
+}
+
+const MARKER_TEXTS: Readonly<Record<string, FortuneYearMarkerText>> = {
+  천덕귀인: {
+    briefText: '흉한 기운을 누그러뜨리고 뜻밖의 도움과 보호를 기대할 수 있는 길한 표식입니다.',
+    fullText:
+      '천덕귀인은 연운에서 거친 흐름을 완충해 주는 보호 표식으로 봅니다. 일이 꼬이더라도 사람의 도움이나 환경의 완충 작용이 붙기 쉬워 손실을 줄이고 회복의 발판을 만들 가능성이 커집니다.',
+  },
+  월덕귀인: {
+    briefText: '명예와 재물 쪽의 도움을 받아 일을 부드럽게 풀기 쉬운 길한 표식입니다.',
+    fullText:
+      '월덕귀인은 사회적 평판과 대인 협력에서 순풍이 붙는 표식입니다. 혼자 밀어붙이기보다 주변과 호흡을 맞출수록 실무와 재물 흐름이 부드럽게 이어지고, 막히던 일도 설득과 조율로 풀리기 쉬워집니다.',
+  },
+  천덕합: {
+    briefText: '기대한 것보다 나은 성과를 얻고 흉한 일도 완화되기 쉬운 호운의 표식입니다.',
+    fullText:
+      '천덕합은 흉한 일을 정면 돌파하기보다 좋은 쪽으로 봉합하고 전환하는 힘이 붙는 표식입니다. 기대보다 결과가 안정적으로 수습되거나, 불리한 조건에서도 실익을 챙길 여지가 커집니다.',
+  },
+  월덕합: {
+    briefText: '대인운과 실행력이 부드럽게 이어져 좋은 기회를 현실 성과로 연결하기 쉬운 표식입니다.',
+    fullText:
+      '월덕합은 사람과 기회가 실제 결과로 이어지는 연결력이 강해지는 표식입니다. 인연, 협업, 제안이 실무 성과로 이어질 가능성이 높아지고, 추진 과정의 마찰을 줄이며 자연스럽게 판을 만들어 갑니다.',
+  },
+  생기: {
+    briefText: '새로운 일의 기운이 살아나 움직임과 확장에 힘이 붙는 표식입니다.',
+    fullText:
+      '생기는 정체된 흐름을 깨고 새 판을 열기 좋은 표식입니다. 시작, 확장, 이동, 관계의 재가동처럼 앞으로 뻗어 나가는 일에 힘이 붙고, 멈춰 있던 분위기를 다시 살려내는 작용을 기대할 수 있습니다.',
+  },
+  천의: {
+    briefText: '몸과 생활의 균형을 회복하고 회복력과 보호를 기대할 수 있는 표식입니다.',
+    fullText:
+      '천의는 몸과 생활 리듬을 추스르고 보호를 받기 쉬운 표식입니다. 과로와 소모를 줄이고 건강, 생활 안정, 회복 과정에 신경을 쓰면 손상된 흐름을 다시 정리하는 데 도움이 됩니다.',
+  },
+}
+
 const CHEONDEOK_RULES: Readonly<Record<string, MixedMarkerRule>> = {
   子: { branch: '巳' },
   丑: { stem: '庚' },
@@ -133,4 +171,12 @@ export function resolveFortuneYearMarkers(input: FortuneYearMarkerInput): string
   }
 
   return markers
+}
+
+export function getFortuneYearMarkerInsight(marker: string): string | null {
+  return MARKER_TEXTS[marker]?.briefText ?? null
+}
+
+export function getFortuneYearMarkerFullText(marker: string): string | null {
+  return MARKER_TEXTS[marker]?.fullText ?? null
 }

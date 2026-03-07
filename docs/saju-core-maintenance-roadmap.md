@@ -14,8 +14,10 @@
   - `Tojeong trigram tables` helper 분리 완료
 - `Priority 3`
   - `S014` semantic role profile 경계 분리 완료
-  - `F_Juyeok_trigram` helper 분리 및 family 연결 진행 중
+  - `F_Juyeok_trigram` helper 분리 및 family 연결 완료
   - `F_woonday/F_ohengSearch` helper 분리 완료
+  - `fortune year marker` rules 및 explanation helper 분리 완료
+  - `ten_year_fortune_cycle` synthetic profile 조립 완료
 
 ## Goal
 
@@ -130,6 +132,8 @@
 - `F_ohengSearch`
 - `yong/hee/kee/goo` pipeline
 
+여기서 앞의 세 family는 “hard case 연구”에서 “공통 helper로 승격 완료” 단계로 올라왔다. 현재 실질적인 잔여 hard case는 `yong/hee/kee/goo`의 deeper parity와, 필요시 장문 설명층의 추가 확장이다.
+
 이 그룹은 계산 로직 복원이 우선이며, 의미 있는 명칭 재배치는 그 다음 단계다.
 
 ### Current Research Notes
@@ -146,6 +150,22 @@
 - `F_woonday` / `F_ohengSearch`
   - `legacyCycles.ts`로 helper 분리 완료
   - 현재 `S007/S008` 계열에서 shared helper 사용 중
+- `fortune year markers`
+  - `fortuneYearMarkers.ts`로 helper 분리 완료
+  - 현재 `천덕귀인`, `월덕귀인`, `천덕합`, `월덕합`, `생기`, `천의` 지원
+  - marker별 `briefText`와 `fullText`를 제공
+  - `greatFortuneProfiles.ts`의 synthetic `ten_year_fortune_cycle` 경로와 연결 완료
+
+## Recent Improvement Slice
+
+이번 개선 라운드에서 정리된 내용:
+
+1. `greatFortune` raw summary를 그대로 보여주던 경로를 synthetic `ten_year_fortune_cycle` profile로 대체
+2. `fortune year marker` 규칙을 계산과 설명으로 나눠 helper화
+3. `oneLineSummary`에는 compact insight를 유지
+4. `fullText`에는 `연도별 표식 해설`을 붙여 실제 marker가 뜨는 연도와 장문 해설을 연결
+
+즉 이제 `ten_year_fortune_cycle`은 “계산 결과를 나열하는 표”가 아니라 “10년 창의 흐름과 표식 의미를 함께 설명하는 profile”로 바뀌었다.
 
 ## First Execution Slice
 
