@@ -28,6 +28,7 @@ import {
   buildLegacyBedroomInsight,
   buildLegacyIntimacyInsight,
   buildLegacyLoveStyleInsight,
+  buildLegacyLoveWeakPointInsight,
   buildLegacyYearlyLoveCycleInsight,
 } from "@/lib/saju-core/saju/legacyCompatibility"
 import {
@@ -534,6 +535,25 @@ describe("legacyCompatibility", () => {
     expect(legacyYearlyLoveCycle?.months).toHaveLength(12)
     expect(legacyYearlyLoveCycle?.months[0]?.month).toBe(1)
     expect(legacyYearlyLoveCycle?.months[0]?.text.trim().length).toBeGreaterThan(0)
+  })
+
+  it("builds the legacy Y001 weak-point detail from the primary year branch index", () => {
+    const service = new FortuneTellerService()
+    const primaryInfo = {
+      birthDate: "1990-01-15",
+      birthTime: "14:30",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "M" as const,
+    }
+
+    const primaryFortune = service.calculateSaju(primaryInfo)
+    const legacyLoveWeakPoint = buildLegacyLoveWeakPointInsight(primaryFortune)
+
+    expect(legacyLoveWeakPoint).toBeDefined()
+    expect(legacyLoveWeakPoint?.sourceTable).toBe("Y001")
+    expect(legacyLoveWeakPoint?.lookupKey).toMatch(/^\d{2}$/)
+    expect(legacyLoveWeakPoint?.text.trim().length).toBeGreaterThan(0)
   })
 })
 

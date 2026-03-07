@@ -69,6 +69,16 @@ export interface LegacyYearlyLoveCycleInsight {
   }[]
 }
 
+export interface LegacyLoveWeakPointInsight {
+  readonly sourceTable: "Y001"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+}
+
+const BRANCH_INDEX = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
+
 function toCalculationInput(fortune: FortuneResponse, gender: "M" | "F"): LegacyCompatibilityCalculationInput {
   const pillars = fortune.sajuData.pillars
   return {
@@ -136,6 +146,21 @@ function readLegacyY004Record(
   return record as {
     readonly data?: string
     readonly [key: `DB_data_${number}`]: string | undefined
+  }
+}
+
+function readLegacyY001Record(
+  lookupKey: string,
+): {
+  readonly data?: string
+} | null {
+  const yTables = getDataLoader().loadYTables() as Record<string, Record<string, Record<string, unknown>>>
+  const record = yTables.Y001?.[lookupKey]
+  if (!record || typeof record !== "object") {
+    return null
+  }
+  return record as {
+    readonly data?: string
   }
 }
 
@@ -237,7 +262,7 @@ export function buildLegacyYearlyLoveCycleInsight(
   primaryFortune: FortuneResponse,
 ): LegacyYearlyLoveCycleInsight | null {
   const lookupKey = String(
-    ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"].indexOf(extractKorean(primaryFortune.sajuData.pillars.일.지지)) + 1
+    BRANCH_INDEX.indexOf(extractKorean(primaryFortune.sajuData.pillars.일.지지)) + 1
   ).padStart(2, "0")
   const record = readLegacyY004Record(lookupKey)
 
@@ -265,5 +290,26 @@ export function buildLegacyYearlyLoveCycleInsight(
     lookupKey,
     intro: record.data,
     months,
+  }
+}
+
+export function buildLegacyLoveWeakPointInsight(
+  primaryFortune: FortuneResponse,
+): LegacyLoveWeakPointInsight | null {
+  const lookupKey = String(
+    BRANCH_INDEX.indexOf(extractKorean(primaryFortune.sajuData.pillars.년.지지)) + 1
+  ).padStart(2, "0")
+  const record = readLegacyY001Record(lookupKey)
+
+  if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {
+    return null
+  }
+
+  return {
+    sourceTable: "Y001",
+    title: "연애 취약점과 요령",
+    scoreLabel: "연애 가이드",
+    lookupKey,
+    text: record.data,
   }
 }

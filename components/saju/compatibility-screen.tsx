@@ -58,6 +58,13 @@ interface CompatibilityResult {
     intro: string
     months: { month: number; text: string }[]
   } | null
+  legacy_love_weak_point?: {
+    sourceTable: "Y001"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
   overall_interpretation: string
   recommendations: string[]
 }
@@ -359,6 +366,25 @@ export function CompatibilityScreen() {
                         </div>
                       ))}
                     </div>
+                  </div>
+                ) : null}
+
+                {result.legacy_love_weak_point ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_love_weak_point.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_love_weak_point.sourceTable} · key {result.legacy_love_weak_point.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_love_weak_point.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_love_weak_point.text}
+                    </p>
                   </div>
                 ) : null}
 

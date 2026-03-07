@@ -12,6 +12,7 @@ import {
   buildLegacyBedroomInsight,
   buildLegacyIntimacyInsight,
   buildLegacyLoveStyleInsight,
+  buildLegacyLoveWeakPointInsight,
   buildLegacyYearlyLoveCycleInsight,
 } from "@/lib/saju-core/saju/legacyCompatibility"
 import type { FortuneResponse } from "@/lib/saju-core"
@@ -91,6 +92,7 @@ export async function POST(req: NextRequest) {
     const legacyBedroom = buildLegacyBedroomInsight(fortuneA)
     const legacyIntimacy = buildLegacyIntimacyInsight(personA, fortuneA, personB, fortuneB)
     const legacyLoveStyle = buildLegacyLoveStyleInsight(personB, fortuneB)
+    const legacyLoveWeakPoint = buildLegacyLoveWeakPointInsight(fortuneA)
     const legacyYearlyLoveCycle = buildLegacyYearlyLoveCycleInsight(fortuneA)
 
     return NextResponse.json({
@@ -104,6 +106,7 @@ export async function POST(req: NextRequest) {
         legacy_bedroom: legacyBedroom,
         legacy_intimacy: legacyIntimacy,
         legacy_love_style: legacyLoveStyle,
+        legacy_love_weak_point: legacyLoveWeakPoint,
         legacy_yearly_love_cycle: legacyYearlyLoveCycle,
         overall_interpretation: result.overall_interpretation,
         recommendations: result.recommendations,
