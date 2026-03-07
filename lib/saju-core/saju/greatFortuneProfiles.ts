@@ -1,11 +1,11 @@
 import type { FortuneProfileEntry, FortuneProfileSection, FortuneRequest, FortuneResponse } from '../models/fortuneTeller'
 import { extractHanja, extractKorean } from '../utils'
-import {
-  getFortuneYearMarkerFullText,
-  getFortuneYearMarkerInsight,
-  resolveFortuneYearMarkers,
-} from './fortuneYearMarkers'
 import { getSipsinForBranch, getSipsinForStem } from './constants'
+import {
+  getFortuneTimelineAnnotationFullText,
+  getFortuneTimelineAnnotationInsight,
+} from './fortuneTimelineAnnotations'
+import { resolveFortuneYearMarkers } from './fortuneYearMarkers'
 import type { ProfileSectionDefinition } from './fortuneProfiles'
 import { GONGMANG_MAPPING, YANGINSAL_MAPPING } from './twelveSinsal/mappings'
 import { calculateSinsal } from './twelveSinsal/utils'
@@ -112,35 +112,40 @@ function getSexagenaryYearPillar(year: number): { stem: string; branch: string }
 }
 
 function buildMarkerSummary(row: YearWindowRow): string {
-  const markers: string[] = []
-
-  if (row.sinsal) {
-    markers.push(row.sinsal)
-  }
-  markers.push(...row.yearMarkers)
-  if (row.hasYangin) {
-    markers.push('양인')
-  }
-  if (row.hasGongmang) {
-    markers.push('공망')
-  }
-
+  const markers = getTimelineLabels(row)
   return markers.length > 0 ? markers.join(', ') : '특이 표식 없음'
 }
 
 function buildMarkerInsightSummary(row: YearWindowRow): string {
-  const insights = row.yearMarkers
-    .map((marker) => getFortuneYearMarkerInsight(marker))
+  const insights = getTimelineLabels(row)
+    .map((marker) => getFortuneTimelineAnnotationInsight(marker))
     .filter((value): value is string => Boolean(value))
 
   return insights.length > 0 ? insights.join(' ') : ''
 }
 
+function getTimelineLabels(row: YearWindowRow): string[] {
+  const labels: string[] = []
+
+  if (row.sinsal) {
+    labels.push(row.sinsal)
+  }
+  labels.push(...row.yearMarkers)
+  if (row.hasYangin) {
+    labels.push('양인')
+  }
+  if (row.hasGongmang) {
+    labels.push('공망')
+  }
+
+  return labels
+}
+
 function buildMarkerFullText(rows: readonly YearWindowRow[]): string {
   const details = rows
     .flatMap((row) =>
-      row.yearMarkers.map((marker) => {
-        const fullText = getFortuneYearMarkerFullText(marker)
+      getTimelineLabels(row).map((marker) => {
+        const fullText = getFortuneTimelineAnnotationFullText(marker)
         return fullText ? `- ${row.year}년 ${marker}: ${fullText}` : null
       })
     )

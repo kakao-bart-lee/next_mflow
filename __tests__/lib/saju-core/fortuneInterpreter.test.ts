@@ -10,6 +10,10 @@ import {
   resolveFortuneYearMarkers,
 } from "@/lib/saju-core/saju/fortuneYearMarkers"
 import {
+  getFortuneTimelineAnnotationFullText,
+  getFortuneTimelineAnnotationInsight,
+} from "@/lib/saju-core/saju/fortuneTimelineAnnotations"
+import {
   calculateJuyeokGanSerial,
   calculateJuyeokJiSerial,
   calculateJuyeokPairSerial,
@@ -364,6 +368,9 @@ describe("elementRoleProfiles", () => {
 
     expect(neutralCode).toBeDefined()
     expect(classifyCurrentFortuneElement(neutralCode ?? "1", profile)).toBe("03")
+    expect(profile.sourceTitleKey).toBe("甲子")
+    expect(profile.primary.usefulElement).toBeTruthy()
+    expect(profile.secondary.favorableElement).toBeTruthy()
   })
 })
 
@@ -448,6 +455,15 @@ describe("fortuneYearMarkers", () => {
   })
 })
 
+describe("fortuneTimelineAnnotations", () => {
+  it("covers extra timeline labels beyond year markers", () => {
+    expect(getFortuneTimelineAnnotationInsight("양인")).toContain("충돌")
+    expect(getFortuneTimelineAnnotationFullText("공망")).toContain("기대와 결과 사이")
+    expect(getFortuneTimelineAnnotationFullText("역마살(驛馬殺)")).toContain("이동")
+    expect(getFortuneTimelineAnnotationFullText("없는표식")).toBeNull()
+  })
+})
+
 // ──────────────────────────────────────────────
 // isSupportedProfileId
 // ──────────────────────────────────────────────
@@ -517,6 +533,7 @@ describe("FortuneTellerService.getSajuFortune()", () => {
     expect(s014Entry).toBeDefined()
     expect(s014Entry?.fullText.trim().length).toBeGreaterThan(0)
     expect(s014Entry?.status).toBe("resolved")
+    expect(s014Entry?.lookupKey).toBeTruthy()
   })
 
   it("new_year_fortune populates restored S095~S101 entries", () => {

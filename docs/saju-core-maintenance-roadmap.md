@@ -155,6 +155,7 @@
   - 현재 `천덕귀인`, `월덕귀인`, `천덕합`, `월덕합`, `생기`, `천의` 지원
   - marker별 `briefText`와 `fullText`를 제공
   - `greatFortuneProfiles.ts`의 synthetic `ten_year_fortune_cycle` 경로와 연결 완료
+  - `fortuneTimelineAnnotations.ts`로 `양인`, `공망`, `십이신살` 설명층까지 확장
 
 ## Recent Improvement Slice
 
@@ -164,6 +165,8 @@
 2. `fortune year marker` 규칙을 계산과 설명으로 나눠 helper화
 3. `oneLineSummary`에는 compact insight를 유지
 4. `fullText`에는 `연도별 표식 해설`을 붙여 실제 marker가 뜨는 연도와 장문 해설을 연결
+5. timeline에 함께 노출되는 `양인`, `공망`, `십이신살`도 같은 explanation layer로 흡수
+6. `S014`는 source row provenance를 남겨, 현재 남은 잔여 hard case가 role derivation인지 role consumption인지 구분 가능하게 정리
 
 즉 이제 `ten_year_fortune_cycle`은 “계산 결과를 나열하는 표”가 아니라 “10년 창의 흐름과 표식 의미를 함께 설명하는 profile”로 바뀌었다.
 

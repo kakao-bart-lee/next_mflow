@@ -1546,6 +1546,9 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
         ...this.getMetadata(inputData),
         first_lookup: firstLookup,
         second_lookup: secondLookup,
+        role_profile_source: context.elementRoleProfile.sourceTitleKey,
+        role_profile_number: context.elementRoleProfile.sourceNumber,
+        role_profile_primary: context.elementRoleProfile.primary,
       },
     };
   }
@@ -1555,6 +1558,7 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     readonly toYGSibsin: string;
     readonly woonY: string;
     readonly woonZ: string;
+    readonly elementRoleProfile: import('./elementRoleProfiles').ElementRoleProfile;
   } {
     const currentDate = this.getCurrentDateContext(inputData);
     if (!currentDate) {
@@ -1602,6 +1606,7 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
       toYGSibsin,
       woonY,
       woonZ,
+      elementRoleProfile,
     };
   }
 

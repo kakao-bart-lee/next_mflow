@@ -148,9 +148,15 @@
 - `fortune year marker` family
   - `fortuneYearMarkers.ts`로 `천덕귀인`, `월덕귀인`, `천덕합`, `월덕합`, `생기`, `천의` 규칙 분리
   - compact insight와 full text explanation을 같이 제공하도록 구조 확장
+- `fortune timeline annotation` family
+  - `fortuneTimelineAnnotations.ts`로 `fortune year marker` 외에 `양인`, `공망`, `십이신살` 설명까지 같은 계층으로 확장
+  - `ten_year_fortune_cycle`의 `oneLineSummary`와 `fullText`가 이제 marker뿐 아니라 timeline에 실제 표시되는 표식 전체를 설명
 - synthetic profile assembly
   - `greatFortuneProfiles.ts`에서 `ten_year_fortune_cycle`을 synthetic profile로 조립
   - marker 규칙과 marker 설명을 `oneLineSummary`/`fullText`에 연결
+- `S014` provenance
+  - `elementRoleProfiles.ts`가 이제 `toC_yongsin_01`의 source title/number와 primary-secondary-tertiary role snapshot을 같이 반환
+  - 현재 남은 hard case가 `S014 result assembly`가 아니라 `yong/hee/kee/goo role derivation`임을 코드에서 추적 가능하게 정리
 
 즉 현재는 profile 결과 복구가 아니라 “family별 key builder와 lookup 단계 분리”가 실제 코드 구조에 반영되는 단계다.
 
