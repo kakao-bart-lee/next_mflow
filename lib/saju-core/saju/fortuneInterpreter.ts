@@ -4,6 +4,7 @@
  */
 
 import type { FortuneRequest, FortuneResponse } from '../models/fortuneTeller';
+import type { DataRetrievalOptions } from './fortuneCalculatorBase';
 import { extractKorean } from '../utils';
 import { TEN_STEMS, TWELVE_BRANCHES_FROM_JA, STEM_TO_ALPHA } from './constants';
 
@@ -166,24 +167,28 @@ export class DatabaseResultRetriever {
    * @param dbExpress - 검색 키 (예: 'A01')
    * @returns [text, numerical] 튜플
    */
-  getResult(table: string, dbExpress: string): readonly [string, string] {
+  getResult(table: string, dbExpress: string, options?: DataRetrievalOptions): readonly [string, string] {
     if (!(table in this.sData)) {
       return ['', ''];
     }
 
     const tableData = this.sData[table];
-    return this.extractFromTableData(tableData, dbExpress);
+    return this.extractFromTableData(tableData, dbExpress, options);
   }
 
   /**
    * 테이블 데이터에서 값 추출
    */
-  private extractFromTableData(tableData: any, dbExpress: string): readonly [string, string] {
+  private extractFromTableData(
+    tableData: any,
+    dbExpress: string,
+    options?: DataRetrievalOptions
+  ): readonly [string, string] {
     if (typeof tableData === 'object' && tableData !== null) {
       if (Array.isArray(tableData)) {
-        return this.extractFromListStructure(tableData, dbExpress);
+        return this.extractFromListStructure(tableData, dbExpress, options);
       } else {
-        return this.extractFromDictStructure(tableData, dbExpress);
+        return this.extractFromDictStructure(tableData, dbExpress, options);
       }
     }
 
@@ -193,28 +198,127 @@ export class DatabaseResultRetriever {
   /**
    * 딕셔너리 구조에서 데이터 추출
    */
-  private extractFromDictStructure(tableData: Record<string, any>, dbExpress: string): readonly [string, string] {
-    if (dbExpress in tableData) {
-      const record = tableData[dbExpress];
-      const text = record?.data ?? '';
-      const numerical = String(record?.numerical ?? '');
-      return [text, numerical];
+  private extractFromDictStructure(
+    tableData: Record<string, any>,
+    dbExpress: string,
+    options?: DataRetrievalOptions
+  ): readonly [string, string] {
+    const expression = String(dbExpress ?? '').trim();
+    const candidates = new Set(this.buildLookupCandidates(dbExpress));
+
+    for (const candidate of candidates) {
+      if (candidate in tableData) {
+        return this.readRecord(tableData[candidate], options);
+      }
+    }
+
+    const suffixFallbackRecord = this.findSuffixedNumericRecord(tableData, expression);
+    if (suffixFallbackRecord) {
+      return this.readRecord(suffixFallbackRecord, options);
+    }
+
+    if (this.canUseMetadataFallback(dbExpress, Object.keys(tableData))) {
+      for (const record of Object.values(tableData)) {
+        if (
+          typeof record === 'object' &&
+          record !== null &&
+          (candidates.has(String(record.num ?? '')) || candidates.has(String(record.DB_num ?? '')))
+        ) {
+          return this.readRecord(record, options);
+        }
+      }
     }
     return ['', ''];
+  }
+
+  private findSuffixedNumericRecord(
+    tableData: Record<string, any>,
+    dbExpress: string
+  ): Record<string, unknown> | null {
+    if (!/^\d+$/.test(dbExpress)) {
+      return null;
+    }
+
+    const suffix = String(Number.parseInt(dbExpress, 10)).padStart(2, '0');
+    if (suffix === 'NaN') {
+      return null;
+    }
+
+    const matchedKey = Object.keys(tableData).find((key) => key.endsWith(suffix));
+    if (!matchedKey) {
+      return null;
+    }
+
+    const record = tableData[matchedKey];
+    return typeof record === 'object' && record !== null ? record : null;
   }
 
   /**
    * 리스트 구조에서 데이터 추출
    */
-  private extractFromListStructure(tableData: any[], dbExpress: string): readonly [string, string] {
+  private extractFromListStructure(
+    tableData: any[],
+    dbExpress: string,
+    options?: DataRetrievalOptions
+  ): readonly [string, string] {
+    const candidates = new Set(this.buildLookupCandidates(dbExpress));
     for (const record of tableData) {
-      if (typeof record === 'object' && record !== null && record.DB_express === dbExpress) {
-        const text = record.DB_data ?? '';
-        const numerical = record.DB_numerical ?? '';
-        return [text, numerical];
+      if (
+        typeof record === 'object' &&
+        record !== null &&
+        candidates.has(String(record.DB_express ?? ''))
+      ) {
+        return this.readRecord(record, options);
       }
     }
     return ['', ''];
+  }
+
+  private buildLookupCandidates(dbExpress: string): string[] {
+    const raw = String(dbExpress ?? '');
+    const trimmed = raw.trim();
+    const candidates = new Set<string>([raw, trimmed]);
+
+    if (/^\d+$/.test(trimmed)) {
+      const normalizedNumber = String(Number.parseInt(trimmed, 10));
+      if (normalizedNumber && normalizedNumber !== 'NaN') {
+        candidates.add(normalizedNumber);
+        candidates.add(normalizedNumber.padStart(2, '0'));
+        candidates.add(normalizedNumber.padStart(3, '0'));
+        candidates.add(normalizedNumber.padStart(4, '0'));
+        candidates.add(`${normalizedNumber} `);
+      }
+    }
+
+    return [...candidates];
+  }
+
+  private readRecord(record: Record<string, unknown>, options?: DataRetrievalOptions): readonly [string, string] {
+    const text = this.readText(record, options);
+    const numerical = String(record.numerical ?? record.DB_numerical ?? '');
+    return [text, numerical];
+  }
+
+  private readText(record: Record<string, unknown>, options?: DataRetrievalOptions): string {
+    for (const column of options?.preferredColumns ?? []) {
+      const value = record[column];
+      if (typeof value === 'string' && value.trim()) {
+        return value;
+      }
+      if (typeof value === 'number') {
+        return String(value);
+      }
+    }
+
+    return String(record.data ?? record.DB_data ?? '');
+  }
+
+  private canUseMetadataFallback(dbExpress: string, keys: string[]): boolean {
+    if (/^\d+$/.test(String(dbExpress ?? '').trim())) {
+      return true;
+    }
+
+    return keys.length > 0 && keys.every((key) => !/[\d-]/.test(key));
   }
 }
 
