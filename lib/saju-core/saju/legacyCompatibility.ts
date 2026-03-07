@@ -111,6 +111,14 @@ export interface LegacyTraditionalCompatibilityInsight {
   readonly text: string
 }
 
+export interface LegacyDestinyCoreInsight {
+  readonly sourceTable: "G024"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+}
+
 const BRANCH_INDEX = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
 const STEM_CODE_BY_KOREAN: Record<string, string> = {
   갑: "A",
@@ -212,6 +220,17 @@ function readLegacyG022Record(lookupKey: string): { readonly data?: string } | n
   return null
 }
 
+function readLegacyG024Record(
+  lookupKey: string,
+): { readonly DB_data_m?: string; readonly DB_data_w?: string; readonly DB_express_1?: string } | null {
+  const gTables = getDataLoader().loadGTables() as Record<string, Record<string, Record<string, unknown>>>
+  const record = gTables.G024?.[lookupKey]
+  if (!record || typeof record !== "object") {
+    return null
+  }
+  return record as { readonly DB_data_m?: string; readonly DB_data_w?: string; readonly DB_express_1?: string }
+}
+
 function readLegacyT010Record(lookupKey: string): { readonly data?: string } | null {
   const tTables = getDataLoader().loadTTables() as Record<string, Record<string, Record<string, unknown>>>
   const record = tTables.T010?.[lookupKey]
@@ -303,6 +322,14 @@ function getYearBranchCategory(fortune: FortuneResponse): number | null {
     default:
       return null
   }
+}
+
+function rotateBranchForSamePair(branch: string): string {
+  const currentIndex = BRANCH_INDEX.indexOf(branch)
+  if (currentIndex < 0) {
+    return "해"
+  }
+  return BRANCH_INDEX[(currentIndex + 11) % 12] ?? "해"
 }
 
 function resolveYearCodePair(fortune: FortuneResponse): string | null {
@@ -567,6 +594,40 @@ export function buildLegacyTraditionalCompatibilityInsight(
     scoreLabel: "정통궁합",
     lookupKey,
     text: record.data,
+  }
+}
+
+export function buildLegacyDestinyCoreInsight(
+  primaryInfo: LegacyCompatibilityBirthInfo,
+  primaryFortune: FortuneResponse,
+  partnerFortune: FortuneResponse,
+): LegacyDestinyCoreInsight | null {
+  const primarySexLabel = primaryInfo.gender === "M" ? "남" : "여"
+  const partnerSexLabel = primaryInfo.gender === "M" ? "여" : "남"
+  const primaryDayBranch = extractKorean(primaryFortune.sajuData.pillars.일.지지)
+  const partnerDayBranchRaw = extractKorean(partnerFortune.sajuData.pillars.일.지지)
+  const partnerDayBranch = primaryDayBranch === partnerDayBranchRaw ? rotateBranchForSamePair(partnerDayBranchRaw) : partnerDayBranchRaw
+
+  const primaryLookupKey = `${primaryDayBranch}${primarySexLabel}`
+  const partnerLookupKey = `${partnerDayBranch}${partnerSexLabel}`
+  const primaryRecord = readLegacyG024Record(primaryLookupKey)
+  const partnerRecord = readLegacyG024Record(partnerLookupKey)
+
+  const text =
+    primaryInfo.gender === "M"
+      ? primaryRecord?.DB_data_m ?? ""
+      : partnerRecord?.DB_data_m ?? ""
+
+  if (!text.trim()) {
+    return null
+  }
+
+  return {
+    sourceTable: "G024",
+    title: "운명 핵심 포인트",
+    scoreLabel: "운명궁합",
+    lookupKey: `${primaryLookupKey}|${partnerLookupKey}`,
+    text,
   }
 }
 

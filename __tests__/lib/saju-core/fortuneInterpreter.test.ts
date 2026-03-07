@@ -30,6 +30,7 @@ import {
   buildLegacyMarriageFlowInsight,
   buildLegacyLoveStyleInsight,
   buildLegacyLoveWeakPointInsight,
+  buildLegacyDestinyCoreInsight,
   buildLegacyOuterCompatibilityInsight,
   buildLegacyTraditionalCompatibilityInsight,
   buildLegacyTypeProfileInsight,
@@ -652,6 +653,33 @@ describe("legacyCompatibility", () => {
     expect(legacyTraditionalCompatibility?.sourceTable).toBe("G022")
     expect(legacyTraditionalCompatibility?.lookupKey).toMatch(/^\d+$/)
     expect(legacyTraditionalCompatibility?.text.trim().length).toBeGreaterThan(0)
+  })
+
+  it("builds the legacy G024 destiny-core detail from day-branch gender routing", () => {
+    const service = new FortuneTellerService()
+    const primaryInfo = {
+      birthDate: "1990-01-15",
+      birthTime: "14:30",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "M" as const,
+    }
+    const partnerInfo = {
+      birthDate: "1992-08-03",
+      birthTime: "09:10",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "F" as const,
+    }
+
+    const primaryFortune = service.calculateSaju(primaryInfo)
+    const partnerFortune = service.calculateSaju(partnerInfo)
+    const legacyDestinyCore = buildLegacyDestinyCoreInsight(primaryInfo, primaryFortune, partnerFortune)
+
+    expect(legacyDestinyCore).toBeDefined()
+    expect(legacyDestinyCore?.sourceTable).toBe("G024")
+    expect(legacyDestinyCore?.lookupKey).toContain("|")
+    expect(legacyDestinyCore?.text.trim().length).toBeGreaterThan(0)
   })
 })
 
