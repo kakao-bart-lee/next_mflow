@@ -271,6 +271,38 @@ describe("FortuneTellerService.getSajuFortune()", () => {
     expect(s126Entry?.fullText.trim().length).toBeGreaterThan(0)
   })
 
+  it("new_year_fortune populates restored S095~S101 entries", () => {
+    const service = new FortuneTellerService()
+    const result = service.getSajuFortune(BASE_REQUEST, "new_year_fortune")
+
+    const entries = result.fortuneProfileResult?.sections.flatMap((section) => section.entries) ?? []
+    const targetEntries = entries.filter((entry) =>
+      ["S095", "S097", "S098", "S099", "S100", "S101"].includes(entry.tableCode)
+    )
+    const s101Entry = targetEntries.find((entry) => entry.tableCode === "S101")
+
+    expect(targetEntries).toHaveLength(6)
+    expect(targetEntries.every((entry) => entry.fullText.trim().length > 0)).toBe(true)
+    expect(s101Entry?.fullText).toContain("1월")
+    expect(s101Entry?.fullText).toContain("12월")
+  })
+
+  it("tojeong_yearly_fortune populates restored S106~S110 entries", () => {
+    const service = new FortuneTellerService()
+    const result = service.getSajuFortune(BASE_REQUEST, "tojeong_yearly_fortune")
+
+    const entries = result.fortuneProfileResult?.sections.flatMap((section) => section.entries) ?? []
+    const targetEntries = entries.filter((entry) =>
+      ["S106", "S107", "S108", "S109", "S110"].includes(entry.tableCode)
+    )
+    const s110Entry = targetEntries.find((entry) => entry.tableCode === "S110")
+
+    expect(targetEntries).toHaveLength(5)
+    expect(targetEntries.every((entry) => entry.fullText.trim().length > 0)).toBe(true)
+    expect(s110Entry?.fullText).toContain("1월")
+    expect(s110Entry?.fullText).toContain("12월")
+  })
+
   it("birth_season_fortune profile returns a result with sections", () => {
     // isSupportedProfileId 경로 → 프로필 ID로 직접 조회
     const service = new FortuneTellerService()

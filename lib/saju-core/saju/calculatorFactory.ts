@@ -244,6 +244,84 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
     calculation_method: 's008_calculation',
     description: '미래운세',
   },
+  S095: {
+    calculator_type: CalculatorType.COMPLEX_CALCULATION,
+    expression_fields: ['new_year_signal'],
+    calculation_method: 's095_new_year_signal',
+    description: '새해신수 1',
+  },
+  S097: {
+    calculator_type: CalculatorType.COMPLEX_CALCULATION,
+    expression_fields: ['new_year_signal_with_hour'],
+    calculation_method: 's097_new_year_signal',
+    description: '새해신수 2',
+  },
+  S098: {
+    calculator_type: CalculatorType.COMPLEX_CALCULATION,
+    expression_fields: ['new_year_signal'],
+    calculation_method: 's098_new_year_signal',
+    description: '새해신수 3',
+  },
+  S099: {
+    calculator_type: CalculatorType.COMPLEX_CALCULATION,
+    expression_fields: ['new_year_signal'],
+    calculation_method: 's099_new_year_signal',
+    description: '새해신수 4',
+  },
+  S100: {
+    calculator_type: CalculatorType.COMPLEX_CALCULATION,
+    expression_fields: ['new_year_signal'],
+    calculation_method: 's100_new_year_signal',
+    description: '새해신수 5',
+  },
+  S101: {
+    calculator_type: CalculatorType.COMPLEX_CALCULATION,
+    expression_fields: ['new_year_monthly_signal'],
+    calculation_method: 's101_monthly_new_year_signal',
+    description: '새해 월별신수',
+  },
+  S103: {
+    calculator_type: CalculatorType.COMPLEX_CALCULATION,
+    expression_fields: ['tojung_cut_tot'],
+    calculation_method: 's103_tojeong_cut_tot',
+    description: '새해신수 총론',
+  },
+  S104: {
+    calculator_type: CalculatorType.COMPLEX_CALCULATION,
+    expression_fields: ['tojung_cut_tot'],
+    calculation_method: 's104_tojeong_cut_tot',
+    description: '새해신수 해설',
+  },
+  S106: {
+    calculator_type: CalculatorType.COMPLEX_CALCULATION,
+    expression_fields: ['tojung_cut_tot'],
+    calculation_method: 's106_tojeong_cut_tot',
+    description: '토정비결 1',
+  },
+  S107: {
+    calculator_type: CalculatorType.COMPLEX_CALCULATION,
+    expression_fields: ['tojung_cut_tot'],
+    calculation_method: 's107_tojeong_cut_tot',
+    description: '토정비결 2',
+  },
+  S108: {
+    calculator_type: CalculatorType.COMPLEX_CALCULATION,
+    expression_fields: ['tojung_cut_tot'],
+    calculation_method: 's108_tojeong_cut_tot',
+    description: '토정비결 3',
+  },
+  S109: {
+    calculator_type: CalculatorType.COMPLEX_CALCULATION,
+    expression_fields: ['tojung_cut_tot'],
+    calculation_method: 's109_tojeong_cut_tot',
+    description: '토정비결 4',
+  },
+  S110: {
+    calculator_type: CalculatorType.COMPLEX_CALCULATION,
+    expression_fields: ['tojung_cut_tot_monthly'],
+    calculation_method: 's110_tojeong_cut_tot_monthly',
+    description: '토정비결 월별',
+  },
 
   // === F 테이블 (운세/점괘) ===
   F011: {
