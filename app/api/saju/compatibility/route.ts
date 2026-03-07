@@ -25,6 +25,11 @@ import {
   buildLegacyTraditionalCompatibilityInsight,
   buildLegacyTypeProfileInsight,
   buildLegacyYearlyLoveCycleInsight,
+  buildLegacyBasicCompatibilityInsight,
+  buildLegacyDetailedCompatibilityInsight,
+  buildLegacyZodiacCompatibilityInsight,
+  buildLegacyAnimalCompatibilityInsight,
+  buildLegacySasangCompatibilityInsight,
 } from "@/lib/saju-core/saju/legacyCompatibility"
 import type { FortuneResponse } from "@/lib/saju-core"
 
@@ -117,10 +122,18 @@ export async function POST(req: NextRequest) {
     const legacyOuterCompatibility = buildLegacyOuterCompatibilityInsight(personA, fortuneA, fortuneB)
     const legacyPartnerPersonality = buildLegacyPartnerPersonalityInsight(personA, fortuneA, fortuneB)
     const legacyTraditionalCompatibility = buildLegacyTraditionalCompatibilityInsight(personA, fortuneA, fortuneB)
-    const legacyTypeProfile = buildLegacyTypeProfileInsight(fortuneA)
-    const legacyYearlyLoveCycle = buildLegacyYearlyLoveCycleInsight(fortuneA)
+     const legacyTypeProfile = buildLegacyTypeProfileInsight(fortuneA)
+     const legacyYearlyLoveCycle = buildLegacyYearlyLoveCycleInsight(fortuneA)
+     const legacyBasicCompat = buildLegacyBasicCompatibilityInsight(personA, fortuneA)
+     const legacyDetailedCompat = buildLegacyDetailedCompatibilityInsight(fortuneA)
+     const legacyZodiacCompat = buildLegacyZodiacCompatibilityInsight(personA)
+     const legacyAnimalCompat = buildLegacyAnimalCompatibilityInsight(fortuneA, fortuneB)
+     const legacySasangCompat = 
+       personA.sasangConstitution && personB.sasangConstitution
+         ? buildLegacySasangCompatibilityInsight(personA.sasangConstitution, personB.sasangConstitution)
+         : null
 
-    return NextResponse.json({
+     return NextResponse.json({
       data: {
         total_score: result.total_score,
         personality_match: result.personality_match,
@@ -145,10 +158,15 @@ export async function POST(req: NextRequest) {
         legacy_outer_compatibility: legacyOuterCompatibility,
         legacy_partner_personality: legacyPartnerPersonality,
         legacy_traditional_compatibility: legacyTraditionalCompatibility,
-        legacy_type_profile: legacyTypeProfile,
-        legacy_yearly_love_cycle: legacyYearlyLoveCycle,
-        overall_interpretation: result.overall_interpretation,
-        recommendations: result.recommendations,
+         legacy_type_profile: legacyTypeProfile,
+         legacy_yearly_love_cycle: legacyYearlyLoveCycle,
+         legacy_basic_compat: legacyBasicCompat,
+         legacy_detailed_compat: legacyDetailedCompat,
+         legacy_zodiac_compat: legacyZodiacCompat,
+         legacy_animal_compat: legacyAnimalCompat,
+         legacy_sasang_compat: legacySasangCompat,
+         overall_interpretation: result.overall_interpretation,
+         recommendations: result.recommendations,
       },
       userId: session?.user?.id,
     })

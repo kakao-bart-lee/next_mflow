@@ -190,6 +190,42 @@ interface CompatibilityResult {
     lookupKey: string
     text: string
   } | null
+  legacy_basic_compat?: {
+    sourceTable: "G003"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
+  legacy_detailed_compat?: {
+    sourceTable: "G012"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
+  legacy_zodiac_compat?: {
+    sourceTable: "G019"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
+  legacy_animal_compat?: {
+    sourceTable: "G026"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    score: number | null
+  } | null
+  legacy_sasang_compat?: {
+    sourceTable: "G028"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
   overall_interpretation: string
   recommendations: string[]
 }
@@ -202,6 +238,8 @@ export function CompatibilityScreen() {
   const [partnerDate, setPartnerDate] = useState("")
   const [partnerTime, setPartnerTime] = useState("")
   const [partnerGender, setPartnerGender] = useState<"M" | "F">("F")
+  const [mySasang, setMySasang] = useState<string>("")
+  const [partnerSasang, setPartnerSasang] = useState<string>("")
   const [compatType, setCompatType] = useState<CompatibilityType>("love")
   const [result, setResult] = useState<CompatibilityResult | null>(null)
   const [loading, setLoading] = useState(false)
@@ -222,13 +260,17 @@ export function CompatibilityScreen() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          personA: birthInfo,
+          personA: {
+            ...birthInfo,
+            sasangConstitution: mySasang || undefined,
+          },
           personB: {
             birthDate: partnerDate,
             birthTime: partnerTime || null,
             isTimeUnknown: !partnerTime,
             timezone: birthInfo.timezone,
             gender: partnerGender,
+            sasangConstitution: partnerSasang || undefined,
           },
           type: compatType,
         }),
@@ -326,6 +368,42 @@ export function CompatibilityScreen() {
                     </button>
                   ))}
                 </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground">
+                  나의 사상체질 <span className="text-muted-foreground">(선택)</span>
+                </Label>
+                <select
+                  value={mySasang}
+                  onChange={(e) => setMySasang(e.target.value)}
+                  className="flex h-12 w-full items-center justify-between rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">선택안함</option>
+                  <option value="ty">태양인(太陽人)</option>
+                  <option value="sy">소양인(少陽人)</option>
+                  <option value="tu">태음인(太陰人)</option>
+                  <option value="su">소음인(少陰人)</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground">
+                  상대방 사상체질 <span className="text-muted-foreground">(선택)</span>
+                </Label>
+                <select
+                  value={partnerSasang}
+                  onChange={(e) => setPartnerSasang(e.target.value)}
+                  className="flex h-12 w-full items-center justify-between rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">선택안함</option>
+                  <option value="ty">태양인(太陽人)</option>
+                  <option value="sy">소양인(少陽人)</option>
+                  <option value="tu">태음인(太陰人)</option>
+                  <option value="su">소음인(少陰人)</option>
+                </select>
               </div>
             </div>
 
@@ -766,6 +844,107 @@ export function CompatibilityScreen() {
                     </div>
                     <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                       {result.legacy_partner_personality.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_basic_compat ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_basic_compat.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_basic_compat.sourceTable} · key {result.legacy_basic_compat.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_basic_compat.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_basic_compat.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_detailed_compat ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_detailed_compat.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_detailed_compat.sourceTable} · key {result.legacy_detailed_compat.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_detailed_compat.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_detailed_compat.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_zodiac_compat ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_zodiac_compat.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_zodiac_compat.sourceTable} · key {result.legacy_zodiac_compat.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_zodiac_compat.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_zodiac_compat.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_animal_compat ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_animal_compat.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_animal_compat.sourceTable} · key {result.legacy_animal_compat.lookupKey}
+                        </p>
+                      </div>
+                      {typeof result.legacy_animal_compat.score === "number" ? (
+                        <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                          {result.legacy_animal_compat.scoreLabel} {result.legacy_animal_compat.score}점
+                        </div>
+                      ) : (
+                        <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                          {result.legacy_animal_compat.scoreLabel}
+                        </div>
+                      )}
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_animal_compat.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_sasang_compat ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_sasang_compat.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_sasang_compat.sourceTable} · key {result.legacy_sasang_compat.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_sasang_compat.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_sasang_compat.text}
                     </p>
                   </div>
                 ) : null}
