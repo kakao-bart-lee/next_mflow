@@ -9,6 +9,7 @@ import {
   calculateJuyeokJiSerial,
   calculateJuyeokPairSerial,
 } from "@/lib/saju-core/saju/juyeokTrigrams"
+import { advanceLegacyCycle, getFiveElementGroup } from "@/lib/saju-core/saju/legacyCycles"
 import { DatabaseResultRetriever } from "@/lib/saju-core/saju/fortuneInterpreter"
 import {
   CalculatorType,
@@ -366,6 +367,19 @@ describe("juyeokTrigrams", () => {
     expect(calculateJuyeokGanSerial("갑", "오")).toBe("1")
     expect(calculateJuyeokJiSerial("오", "오")).toBe("1")
     expect(calculateJuyeokPairSerial("갑", "오", "오")).toBe("11")
+  })
+})
+
+describe("legacyCycles", () => {
+  it("keeps the legacy five-element grouping and cycle advance behavior", () => {
+    expect(getFiveElementGroup("03")).toBe(1)
+    expect(getFiveElementGroup("06")).toBe(2)
+    expect(getFiveElementGroup("11")).toBe(3)
+    expect(getFiveElementGroup("09")).toBe(4)
+    expect(getFiveElementGroup("12")).toBe(5)
+
+    expect(advanceLegacyCycle(15, 5, 10)).toBe(1)
+    expect(advanceLegacyCycle(14, 10, 12)).toBe(1)
   })
 })
 

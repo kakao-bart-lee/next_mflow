@@ -11,10 +11,11 @@
 - `Priority 2`
   - `Gendered narrative tables` helper 분리 완료
   - `New year signal tables` helper 분리 완료
-  - `Tojeong trigram tables` helper 분리 진행 중
+  - `Tojeong trigram tables` helper 분리 완료
 - `Priority 3`
-  - 아직 구현 착수 전
-  - 현재는 hard case의 경계와 provenance를 분리 조사 중
+  - `S014` semantic role profile 경계 분리 완료
+  - `F_Juyeok_trigram` helper 분리 및 family 연결 진행 중
+  - `F_woonday/F_ohengSearch` helper 분리 완료
 
 ## Goal
 
@@ -115,8 +116,8 @@
 - `New year signal tables`
   - `newYearSignals.ts`로 분리 완료
 - `Tojeong trigram tables`
-  - `tojeongTrigrams.ts`로 분리 진행 중
-  - `fortuneCalculatorBase`의 `calculateTojeongCutTotExpression` 본문 제거 후 helper 호출 형태로 전환 중
+  - `tojeongTrigrams.ts`로 분리 완료
+  - `fortuneCalculatorBase`의 `calculateTojeongCutTotExpression` 본문 제거 후 helper 호출 형태로 전환 완료
 
 ## Priority 3
 
@@ -140,8 +141,11 @@
     - `/Users/bclaw/workspace/moonlit/db/www/UNSE_DATA/solve/f_Saju.php`
     - `/Users/bclaw/workspace/moonlit/db/www/_db2/toC_yongsin_01.sql`
 - `F_Juyeok_trigram`
-  - 별도 helper 경계 조사 중
+  - `juyeokTrigrams.ts`로 helper 분리 완료
   - 관련 family는 `F011`, `T039`, `J004`, `J005`, `J009`, `J010`
+- `F_woonday` / `F_ohengSearch`
+  - `legacyCycles.ts`로 helper 분리 완료
+  - 현재 `S007/S008` 계열에서 shared helper 사용 중
 
 ## First Execution Slice
 

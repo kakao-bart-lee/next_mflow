@@ -14,6 +14,7 @@ import {
   resolveGenderedNarrativeExpressionKind,
 } from './genderedNarratives';
 import { calculateJuyeokGanSerial, calculateJuyeokJiSerial, calculateJuyeokPairSerial } from './juyeokTrigrams';
+import { advanceLegacyCycle, getFiveElementGroup } from './legacyCycles';
 import {
   calculateNewYearMonthlyExpression,
   calculateNewYearSignalExpression,
@@ -514,16 +515,8 @@ export class SimpleQueryCalculator extends AbstractFortuneCalculator {
 
     const currentYearBranchNumber = this.parseNumberField(currentManse?.year_e) ?? 1;
     const baseValue = Number.parseInt(`1${todayStemGroup}`, 10);
-    const resolved = this.applyWoonday(baseValue, currentYearBranchNumber, 12);
+    const resolved = advanceLegacyCycle(baseValue, currentYearBranchNumber, 12);
     return resolved.toString().padStart(2, '0');
-  }
-
-  private applyWoonday(baseValue: number, currentYearBranchNumber: number, modulo: number): number {
-    let value = (baseValue + currentYearBranchNumber) % modulo;
-    if (value === 0) {
-      value = 1;
-    }
-    return value;
   }
 
   private getCurrentManseRow(inputData: CalculationInput): Record<string, unknown> | null {
@@ -1235,10 +1228,10 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
 
     const currentYearBranchNumber = this.parseNumberField(manse.year_e) ?? 1;
     const birthDayBranchNumber = this.getBranchOrgNumber(inputData.dayBranch);
-    const birthOheng = this.ohengSearch(birthDayBranchNumber.toString().padStart(2, '0'));
-    const currentOheng = this.ohengSearch(currentDayBranchNumber.toString().padStart(2, '0'));
+    const birthOheng = getFiveElementGroup(birthDayBranchNumber.toString().padStart(2, '0'));
+    const currentOheng = getFiveElementGroup(currentDayBranchNumber.toString().padStart(2, '0'));
     const baseValue = birthOheng * currentOheng;
-    const resolved = this.applyWoonday(baseValue, currentYearBranchNumber, 10);
+    const resolved = advanceLegacyCycle(baseValue, currentYearBranchNumber, 10);
     return resolved.toString().padStart(2, '0');
   }
 
@@ -1758,37 +1751,6 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     const codes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
     const index = codes.indexOf(stemCode);
     return index >= 0 ? index + 1 : 1;
-  }
-
-  private ohengSearch(value: string): number {
-    switch (value) {
-      case '03':
-      case '04':
-        return 1;
-      case '06':
-      case '07':
-        return 2;
-      case '05':
-      case '11':
-      case '08':
-      case '02':
-        return 3;
-      case '09':
-      case '10':
-        return 4;
-      case '12':
-      case '01':
-      default:
-        return 5;
-    }
-  }
-
-  private applyWoonday(baseValue: number, currentYearBranchNumber: number, modulo: number): number {
-    let value = (baseValue + currentYearBranchNumber) % modulo;
-    if (value === 0) {
-      value = 1;
-    }
-    return value;
   }
 
   private branchOrgCodeToKorean(value: number): string {

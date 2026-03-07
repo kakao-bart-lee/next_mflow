@@ -115,8 +115,12 @@
   - `S095`~`S101` 공통 흐름을 `newYearSignals.ts`로 분리
   - `temp_03` 의미를 `current year stem` 기준의 계산 단계로 치환
 - `Tojeong trigram` family
-  - `S103`~`S110` 공통 흐름을 `tojeongTrigrams.ts`로 분리하는 작업 진행 중
-  - 기존 `cut_tot`는 `tojeong trigram composite key`라는 의미 있는 내부 개념으로 교체 중
+  - `S103`~`S110` 공통 흐름을 `tojeongTrigrams.ts`로 분리 완료
+  - 기존 `cut_tot`는 `tojeong trigram composite key`라는 의미 있는 내부 개념으로 교체 완료
+- `Juyeok` family
+  - `F011`, `T039`, `J004`, `J005`, `J009`, `J010` 공통 흐름을 `juyeokTrigrams.ts` helper 경계로 분리
+- `legacy cycle` family
+  - `F_woonday`, `F_ohengSearch` 계열을 `legacyCycles.ts` helper로 분리
 
 즉 현재는 profile 결과 복구가 아니라 “family별 key builder와 lookup 단계 분리”가 실제 코드 구조에 반영되는 단계다.
 
