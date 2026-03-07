@@ -1,3 +1,26 @@
+/**
+ * @module yongsinDecisionTree
+ * @description
+ * PHP find_yong 결정 트리 포팅 모듈 (보조용 용신 결정 로직).
+ * 
+ * **입력**: 8개 pillar (yearStem, yearBranch, monthStem, monthBranch, dayStem, dayBranch, hourStem, hourBranch)
+ * 
+ * **출력**: 
+ * - 5개 role codes (usefulCode, favorableCode, harmfulCode, adverseCode, reserveCode)
+ * - 5개 element labels (usefulElement, favorableElement, harmfulElement, adverseElement, reserveElement)
+ * - yongToSipsin (용신→십신 매핑)
+ * - yongChungan (용신 천간)
+ * 
+ * **정본(source of truth)**: elementRoleProfiles 모듈을 통해 로드되는 toC_yongsin_01 테이블
+ * 이 모듈은 보조용(auxiliary) 결정 로직을 제공합니다.
+ * 
+ * **Cross-validation**: 5개 샘플 중 1개 일치, 원인 미규명.
+ * 불일치 시 보고하되 수정하지 않습니다(검증 목적).
+ * 
+ * @see elementRoleProfiles - 정본 용신 역할 프로필 로더 (toC_yongsin_01)
+ * @see yongsinFlows - 용신→십신/천간/십이운성 매핑
+ */
+
 import {
   KOREAN_BRANCH_TO_DISPLAY,
   KOREAN_STEM_TO_DISPLAY,

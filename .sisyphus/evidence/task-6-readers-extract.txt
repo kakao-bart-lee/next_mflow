@@ -1,0 +1,3 @@
+Date: 2026-03-08
+Commands: test -f lib/saju-core/saju/legacyCompatibility/legacyDataReaders.ts; npx vitest run __tests__/lib/saju-core/legacyGCodes.test.ts; npx tsc --noEmit
+Observed: readers module exists; legacy G-code tests and typecheck pass.

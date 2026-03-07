@@ -1,0 +1,3 @@
+Date: 2026-03-08
+Commands: test -f docs/compatibility-coverage-matrix.md; grep -c "^|" docs/compatibility-coverage-matrix.md; grep -c "남길 것\|접을 것\|보류" docs/compatibility-coverage-matrix.md
+Observed: coverage matrix exists with required breadth and judgment labels.

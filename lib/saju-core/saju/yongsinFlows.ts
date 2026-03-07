@@ -1,3 +1,22 @@
+/**
+ * @module yongsinFlows
+ * @description
+ * 용신(Yongsin) → 십신(Sipsin)/천간(Heavenly Stem)/십이운성(Lifecycle Stage) 매핑 모듈.
+ * 
+ * 책임:
+ * - 용신 코드(1-5)를 십신 쌍(main/secondary)으로 변환
+ * - 십신을 천간 시퀀스로 매핑
+ * - 십이운성 인덱스 계산
+ * 
+ * 소비자:
+ * - yongsinDecisionTree: 보조 결정 트리 로직
+ * - elementRoleProfiles: 정본 역할 프로필 로더
+ * - fortuneCalculatorBase: 사주 계산 기반
+ * 
+ * @see elementRoleProfiles - 정본 용신 역할 프로필
+ * @see yongsinDecisionTree - 보조 용신 결정 트리
+ */
+
 import { extractHanja } from "../utils"
 import { getSipsinForBranch, getSipsinForStem } from "./constants"
 import type { CalculationInput } from "./fortuneCalculatorBase"

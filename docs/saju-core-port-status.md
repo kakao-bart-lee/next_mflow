@@ -116,7 +116,7 @@
 
 ## Current Sweep Snapshot
 
-2026-03-07 기준 profile sweep 요약:
+2026-03-08 기준 profile sweep 요약:
 
 - `basic`: `4/4`
 - `daily_fortune`: `6/6`
@@ -144,7 +144,10 @@
 - 3.0.0 응답 구조 포팅은 완료됐다.
 - SQL 기반 원문 데이터와 주요 PHP 계산 흐름은 `next_mflow`와 `saju-core-lib` 양쪽에 반영됐다.
 - profile sweep 기준 사용자 노출 경로는 모두 복구됐다.
-- 다음 단계의 핵심은 “정답을 맞히는 것”이 아니라 “정답을 유지보수 가능하게 설명하는 것”이다.
+- legacyCompatibility 모듈이 21개 builder를 4개 family module로 분해되어 유지보수성이 크게 개선됐다.
+- S014 메타데이터가 findYong auxiliary + secondary/tertiary profile로 확장되어 향후 분석 확장이 용이해졌다.
+- 호환성 커버리지 매트릭스 문서로 PHP/TS 구현 현황이 명확히 정리됐다.
+- 다음 단계의 핵심은 "정답을 맞히는 것"이 아니라 "정답을 유지보수 가능하게 설명하는 것"이다.
 
 ## Maintenance Refactor Progress
 
@@ -177,6 +180,57 @@
   - 현재 남은 hard case가 `S014 result assembly`가 아니라 `yong/hee/kee/goo role derivation`임을 코드에서 추적 가능하게 정리
 
 즉 현재는 profile 결과 복구가 아니라 “family별 key builder와 lookup 단계 분리”가 실제 코드 구조에 반영되는 단계다.
+
+## 7. legacyCompatibility 폴더 구조 분해 및 family module 추출
+
+2026-03-08 기준 legacyCompatibility 모듈 재구성 완료:
+
+- **T4**: legacyCompatibility 폴더 구조 생성 (`_legacy.ts` + `index.ts` barrel)
+- **T5**: legacyUtilities.ts 추출 (39개 상수/헬퍼)
+- **T6**: legacyDataReaders.ts 추출 (18개 reader 함수)
+- **T8**: legacyBasicCompatibility.ts 추출 (5개 builder: G003, G012, T010, G023, G022)
+- **T9**: legacyTimingInsights.ts 추출 (6개 builder: G001, G033, G004-G007, G034, Y004, Y001)
+- **T10**: legacyZodiacInsights.ts 추출 (3개 builder: G019, G026, G028)
+- **T11**: legacySpouseInsights.ts 추출 (7개 builder: G030, G031, G024, G032, G016, G020, Y003)
+- **T12**: barrel 완전성 확인 + `_legacy.ts` 제거
+
+결과:
+- 21개 legacy compatibility builder를 4개 family module로 분해
+- 모든 builder가 의미 있는 family 경계로 정리됨
+- 기존 import path (`@/lib/saju-core/saju/legacyCompatibility`) 유지 (barrel 호환성)
+- 테스트 275개 통과, TypeScript clean
+
+관련 커밋:
+- `docs(saju): update handoff, port-status, and roadmap for decision tree and G-codes`
+
+## 8. S014 metadata enrichment: findYong auxiliary + secondary/tertiary profile exposure
+
+2026-03-08 기준 S014 메타데이터 확장 완료:
+
+- **T4**: `fortuneCalculatorBase.ts`에서 S014 컨텍스트 구성 시 `findYong()` auxiliary 결과를 메타데이터로 노출
+  - `findYong_codes`: 5개 코드 (auxiliary)
+  - `findYong_elements`: 5개 요소 (auxiliary)
+  - `findYong_source: "auxiliary"` — primary/auxiliary provenance 명시
+- **elementRoleProfiles.ts**: `getElementRoleProfile()` 호출 시 primary/secondary/tertiary snapshot 함께 반환
+  - `role_profile_primary`: 현재 production 사용 (usefulCode, favorableCode 등)
+  - `role_profile_secondary`: 메타데이터 확장용 (T13/T14에서 참조 가능)
+  - `role_profile_tertiary`: 추가 분석용 (향후 확장)
+- **source-of-truth 정책 유지**: toC_yongsin_01 primary, findYong auxiliary로 명시적 분리
+
+## 9. 호환성 커버리지 매트릭스 문서 생성
+
+2026-03-08 기준 `docs/compatibility-coverage-matrix.md` 생성 완료:
+
+- **목적**: PHP 원본 ↔ TS 구현 커버리지 현황 및 유지/폐기/보류 판단
+- **범위**: 6개 패밀리(G/Y/T/S/F/J) 전체, 238개 테이블 행
+- **판단 기준**: 남길 것 / 보류 / 접을 것 3분류
+- **핵심 발견**:
+  - `combinations.ts` 참조 ≠ 계산 로직 완료 (구분 필수)
+  - G/Y 패밀리: legacyCompatibility에서 완전 구현 → 전량 남길 것 (23개)
+  - S 패밀리: tableCatalog 등록(~43개)은 남길 것, combinations 참조만(~37개)은 보류
+  - F 패밀리: F011만 활성, 나머지 10개 접을 것
+  - J 패밀리: 9개 보류, 28개 접을 것 (대부분 TS 미참조)
+  - 전체: 남길 것 ~70 / 보류 ~55 / 접을 것 ~64 (총 ~189개)
 
 ## Recommended Next Steps
 

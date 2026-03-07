@@ -12,6 +12,7 @@ import {
   classifyStemRoleLabel,
   getElementRoleProfile,
 } from './elementRoleProfiles';
+import { findYong } from './yongsinDecisionTree';
 import {
   calculateGenderedNarrativeExpression,
   getWesternZodiacName,
@@ -1556,11 +1557,24 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
         role_profile_source: context.elementRoleProfile.sourceTitleKey,
         role_profile_number: context.elementRoleProfile.sourceNumber,
         role_profile_primary: context.elementRoleProfile.primary,
+        role_profile_secondary: context.elementRoleProfile.secondary,
+        role_profile_tertiary: context.elementRoleProfile.tertiary,
         current_year_stem_role: context.currentYearStemRole,
         current_year_branch_role: context.currentYearBranchRole,
         yong_to_sipsin: context.yongToSipsin,
         yong_chungan: context.yongChungan,
         woon12_daygi: context.woon12Daygi,
+        findYong_source: 'auxiliary',
+        findYong_usefulCode: context.findYongAuxiliary.usefulCode,
+        findYong_favorableCode: context.findYongAuxiliary.favorableCode,
+        findYong_harmfulCode: context.findYongAuxiliary.harmfulCode,
+        findYong_adverseCode: context.findYongAuxiliary.adverseCode,
+        findYong_reserveCode: context.findYongAuxiliary.reserveCode,
+        findYong_usefulElement: context.findYongAuxiliary.usefulElement,
+        findYong_favorableElement: context.findYongAuxiliary.favorableElement,
+        findYong_harmfulElement: context.findYongAuxiliary.harmfulElement,
+        findYong_adverseElement: context.findYongAuxiliary.adverseElement,
+        findYong_reserveElement: context.findYongAuxiliary.reserveElement,
       },
     };
   }
@@ -1576,6 +1590,7 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     readonly yongToSipsin: string;
     readonly yongChungan: string;
     readonly woon12Daygi: string;
+    readonly findYongAuxiliary: import('./yongsinDecisionTree').YongsinDecisionResult;
   } {
     const currentDate = this.getCurrentDateContext(inputData);
     if (!currentDate) {
@@ -1613,6 +1628,7 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     const yongToSipsin = calculateYongToSipsin(inputData);
     const yongChungan = calculateYongChungan(inputData, yongToSipsin);
     const woon12Daygi = calculateWoon12Daygi(inputData);
+    const findYongAuxiliary = findYong(inputData);
 
     if (inputData.gender !== 'M') {
       woonY = this.incrementWoonCode(woonY);
@@ -1634,6 +1650,7 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
       yongToSipsin,
       yongChungan,
       woon12Daygi,
+      findYongAuxiliary,
     };
   }
 

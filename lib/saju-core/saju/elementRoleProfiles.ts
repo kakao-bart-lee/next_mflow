@@ -1,3 +1,20 @@
+/**
+ * @module elementRoleProfiles
+ * @description
+ * 용신 역할 프로필 로더 모듈 (정본/Source of Truth).
+ * 
+ * 책임:
+ * - toC_yongsin_01 테이블에서 primary/secondary/tertiary 역할 프로필 로드
+ * - 용신 코드(1-5)를 오행 요소(목화토금수)로 매핑
+ * - 팔자 각 주(年月日時)의 역할 판정(용신/희신/기신/구신/한신)
+ * 
+ * 이 모듈이 정본(source of truth)입니다.
+ * yongsinDecisionTree는 보조용 검증 모듈입니다.
+ * 
+ * @see yongsinDecisionTree - 보조 용신 결정 트리 (cross-validation용)
+ * @see yongsinFlows - 용신→십신/천간/십이운성 매핑
+ */
+
 import { getDataLoader } from "./dataLoader"
 
 const ELEMENT_CODE_BY_HANJA: Record<string, string> = {

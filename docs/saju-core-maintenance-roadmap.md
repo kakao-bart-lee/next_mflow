@@ -193,3 +193,37 @@
 - profile output은 기존과 동일하거나 더 설명 가능해야 한다.
 - intermediate key는 계산 근거를 코드에서 추적할 수 있어야 한다.
 - 가능한 경우 PHP reference와 JSON payload provenance를 함께 남긴다.
+
+## Post-Priority: 현대화 준비 정리
+
+Priority 1-3 완료 후 추가 정리 작업 상태:
+
+### 완료 항목 (5개)
+
+1. **findYong metadata auxiliary 노출 완료**
+   - `yongsinDecisionTree.ts`에 @module JSDoc 추가
+   - S014 컨텍스트에서 `findYong_*` 보조 필드 연결
+   - source-of-truth 경계 명시 (primary: toC_yongsin_01, auxiliary: findYong)
+
+2. **role_profile_secondary/tertiary metadata 확장 완료**
+   - `elementRoleProfiles.ts`에서 3단계 스냅샷 생성 (primary/secondary/tertiary)
+   - S014 metadata에 secondary/tertiary 노출
+   - 후속 단계(T13/T14)에서 직접 참조 가능
+
+3. **legacyCompatibility 분해 완료**
+   - `_legacy.ts` 제거, 4개 패밀리 모듈로 완전 분해
+   - legacySpouseInsights.ts (7 builders)
+   - legacyTimingInsights.ts (6 builders)
+   - legacyZodiacInsights.ts (3 builders)
+   - legacyBasicCompatibility.ts (5 builders)
+   - 지원 모듈: legacyDataReaders.ts (18 readers), legacyUtilities.ts (39 constants + helpers)
+
+4. **compatibility-coverage-matrix.md 작성 완료**
+   - 6개 패밀리(G/Y/T/S/F/J) 전체 커버, 238개 테이블 행
+   - 판단 키워드: 남길 것 / 보류 / 접을 것 3분류
+   - `combinations.ts` 참조 ≠ 계산 로직 완료 구분 명시
+
+5. **cross-validation 불일치 보고-only 상태 명시**
+   - yongsinDecisionTree.ts: 5 샘플 중 1 일치, 원인 미파악
+   - 수정 미진행 (report-only, 향후 조사 대상)
+   - 문서화: `.sisyphus/notepads/yong-coverage-decomposition/learnings.md`

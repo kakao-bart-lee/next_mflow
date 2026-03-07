@@ -1,0 +1,15 @@
+QA: G028 null input handling
+Date: 2026-03-08
+Worktree: .claude/worktrees/saju-continuation
+
+Command:
+npx tsx -e "
+import { buildLegacySasangCompatibilityInsight } from './lib/saju-core/saju/legacyCompatibility';
+const r = buildLegacySasangCompatibilityInsight(null, 'ty');
+console.log('null input result:', r);
+"
+
+Output:
+null input result: null
+
+Result: PASS

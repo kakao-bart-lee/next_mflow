@@ -1,0 +1,3 @@
+Date: 2026-03-08
+Commands: test -f docs/compatibility-coverage-matrix.md; grep -c "^|" docs/compatibility-coverage-matrix.md
+Observed: Inventory was consumed into coverage matrix and draft cleanup completed in T14 path.
