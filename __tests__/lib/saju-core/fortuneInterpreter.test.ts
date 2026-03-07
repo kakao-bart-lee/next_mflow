@@ -32,6 +32,7 @@ import {
   buildLegacyLoveWeakPointInsight,
   buildLegacyDestinyCoreInsight,
   buildLegacyOuterCompatibilityInsight,
+  buildLegacyPartnerPersonalityInsight,
   buildLegacyTraditionalCompatibilityInsight,
   buildLegacyTypeProfileInsight,
   buildLegacyYearlyLoveCycleInsight,
@@ -680,6 +681,33 @@ describe("legacyCompatibility", () => {
     expect(legacyDestinyCore?.sourceTable).toBe("G024")
     expect(legacyDestinyCore?.lookupKey).toContain("|")
     expect(legacyDestinyCore?.text.trim().length).toBeGreaterThan(0)
+  })
+
+  it("builds the legacy G032 partner-personality detail from year stem elements", () => {
+    const service = new FortuneTellerService()
+    const primaryInfo = {
+      birthDate: "1990-01-15",
+      birthTime: "14:30",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "M" as const,
+    }
+    const partnerInfo = {
+      birthDate: "1992-08-03",
+      birthTime: "09:10",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "F" as const,
+    }
+
+    const primaryFortune = service.calculateSaju(primaryInfo)
+    const partnerFortune = service.calculateSaju(partnerInfo)
+    const legacyPartnerPersonality = buildLegacyPartnerPersonalityInsight(primaryInfo, primaryFortune, partnerFortune)
+
+    expect(legacyPartnerPersonality).toBeDefined()
+    expect(legacyPartnerPersonality?.sourceTable).toBe("G032")
+    expect(legacyPartnerPersonality?.lookupKey).toMatch(/^[가-힣]{2}$/)
+    expect(legacyPartnerPersonality?.text.trim().length).toBeGreaterThan(0)
   })
 })
 

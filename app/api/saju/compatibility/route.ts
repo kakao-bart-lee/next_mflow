@@ -16,6 +16,7 @@ import {
   buildLegacyLoveWeakPointInsight,
   buildLegacyDestinyCoreInsight,
   buildLegacyOuterCompatibilityInsight,
+  buildLegacyPartnerPersonalityInsight,
   buildLegacyTraditionalCompatibilityInsight,
   buildLegacyTypeProfileInsight,
   buildLegacyYearlyLoveCycleInsight,
@@ -101,6 +102,7 @@ export async function POST(req: NextRequest) {
     const legacyLoveWeakPoint = buildLegacyLoveWeakPointInsight(fortuneA)
     const legacyDestinyCore = buildLegacyDestinyCoreInsight(personA, fortuneA, fortuneB)
     const legacyOuterCompatibility = buildLegacyOuterCompatibilityInsight(personA, fortuneA, fortuneB)
+    const legacyPartnerPersonality = buildLegacyPartnerPersonalityInsight(personA, fortuneA, fortuneB)
     const legacyTraditionalCompatibility = buildLegacyTraditionalCompatibilityInsight(personA, fortuneA, fortuneB)
     const legacyTypeProfile = buildLegacyTypeProfileInsight(fortuneA)
     const legacyYearlyLoveCycle = buildLegacyYearlyLoveCycleInsight(fortuneA)
@@ -120,6 +122,7 @@ export async function POST(req: NextRequest) {
         legacy_love_weak_point: legacyLoveWeakPoint,
         legacy_destiny_core: legacyDestinyCore,
         legacy_outer_compatibility: legacyOuterCompatibility,
+        legacy_partner_personality: legacyPartnerPersonality,
         legacy_traditional_compatibility: legacyTraditionalCompatibility,
         legacy_type_profile: legacyTypeProfile,
         legacy_yearly_love_cycle: legacyYearlyLoveCycle,

@@ -102,6 +102,13 @@ interface CompatibilityResult {
     lookupKey: string
     text: string
   } | null
+  legacy_partner_personality?: {
+    sourceTable: "G032"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
   overall_interpretation: string
   recommendations: string[]
 }
@@ -518,6 +525,25 @@ export function CompatibilityScreen() {
                     </div>
                     <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                       {result.legacy_destiny_core.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_partner_personality ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_partner_personality.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_partner_personality.sourceTable} · key {result.legacy_partner_personality.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_partner_personality.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_partner_personality.text}
                     </p>
                   </div>
                 ) : null}

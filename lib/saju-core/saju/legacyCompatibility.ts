@@ -119,6 +119,14 @@ export interface LegacyDestinyCoreInsight {
   readonly text: string
 }
 
+export interface LegacyPartnerPersonalityInsight {
+  readonly sourceTable: "G032"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+}
+
 const BRANCH_INDEX = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
 const STEM_CODE_BY_KOREAN: Record<string, string> = {
   갑: "A",
@@ -231,6 +239,17 @@ function readLegacyG024Record(
   return record as { readonly DB_data_m?: string; readonly DB_data_w?: string; readonly DB_express_1?: string }
 }
 
+function readLegacyG032Record(
+  lookupKey: string,
+): { readonly data?: string; readonly DB_data_w?: string } | null {
+  const gTables = getDataLoader().loadGTables() as Record<string, Record<string, Record<string, unknown>>>
+  const record = gTables.G032?.[lookupKey]
+  if (!record || typeof record !== "object") {
+    return null
+  }
+  return record as { readonly data?: string; readonly DB_data_w?: string }
+}
+
 function readLegacyT010Record(lookupKey: string): { readonly data?: string } | null {
   const tTables = getDataLoader().loadTTables() as Record<string, Record<string, Record<string, unknown>>>
   const record = tTables.T010?.[lookupKey]
@@ -339,6 +358,28 @@ function resolveYearCodePair(fortune: FortuneResponse): string | null {
     return null
   }
   return `${yearStemCode}${String(yearBranchIndex).padStart(2, "0")}`
+}
+
+function resolveStemElement(stem: string): string | null {
+  switch (stem) {
+    case "갑":
+    case "을":
+      return "목"
+    case "병":
+    case "정":
+      return "화"
+    case "무":
+    case "기":
+      return "토"
+    case "경":
+    case "신":
+      return "금"
+    case "임":
+    case "계":
+      return "수"
+    default:
+      return null
+  }
 }
 
 function resolveFiveElementByYearCode(yearCodePair: string): string {
@@ -627,6 +668,33 @@ export function buildLegacyDestinyCoreInsight(
     title: "운명 핵심 포인트",
     scoreLabel: "운명궁합",
     lookupKey: `${primaryLookupKey}|${partnerLookupKey}`,
+    text,
+  }
+}
+
+export function buildLegacyPartnerPersonalityInsight(
+  primaryInfo: LegacyCompatibilityBirthInfo,
+  primaryFortune: FortuneResponse,
+  partnerFortune: FortuneResponse,
+): LegacyPartnerPersonalityInsight | null {
+  const primaryElement = resolveStemElement(extractKorean(primaryFortune.sajuData.pillars.년.천간))
+  const partnerElement = resolveStemElement(extractKorean(partnerFortune.sajuData.pillars.년.천간))
+  if (!primaryElement || !partnerElement) {
+    return null
+  }
+
+  const lookupKey = `${primaryElement}${partnerElement}`
+  const record = readLegacyG032Record(lookupKey)
+  const text = primaryInfo.gender === "M" ? record?.data ?? "" : record?.DB_data_w ?? ""
+  if (!text.trim()) {
+    return null
+  }
+
+  return {
+    sourceTable: "G032",
+    title: "이성의 성격",
+    scoreLabel: "성격궁합",
+    lookupKey,
     text,
   }
 }
