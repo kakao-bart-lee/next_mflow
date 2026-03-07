@@ -147,7 +147,7 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
   },
   S026: {
     calculator_type: CalculatorType.SIMPLE_QUERY,
-    expression_fields: ['day_stem_num'],
+    expression_fields: ['yong_to_sibsin'],
     description: '직업에 따른 길',
   },
   S029: {

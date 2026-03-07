@@ -7,6 +7,7 @@ import {
   getElementRoleProfile,
   summarizePillarRoleLabels,
 } from "@/lib/saju-core/saju/elementRoleProfiles"
+import { calculateYongToSipsin } from "@/lib/saju-core/saju/yongsinFlows"
 import {
   getFortuneYearMarkerFullText,
   getFortuneYearMarkerInsight,
@@ -405,6 +406,24 @@ describe("elementRoleProfiles", () => {
   })
 })
 
+describe("yongsinFlows", () => {
+  it("derives S026-compatible yong_to_sipsin keys from pillar sipsin composition", () => {
+    expect(
+      calculateYongToSipsin({
+        yearStem: "갑(甲)",
+        yearBranch: "오(午)",
+        monthStem: "병(丙)",
+        monthBranch: "자(子)",
+        dayStem: "갑(甲)",
+        dayBranch: "인(寅)",
+        hourStem: "정(丁)",
+        hourBranch: "오(午)",
+        gender: "M",
+      })
+    ).toBe("03")
+  })
+})
+
 describe("juyeokTrigrams", () => {
   it("builds gan/ji/pair serials from the shared trigram mapping", () => {
     expect(calculateJuyeokGanSerial("갑", "오")).toBe("1")
@@ -565,6 +584,19 @@ describe("FortuneTellerService.getSajuFortune()", () => {
     expect(s014Entry?.fullText.trim().length).toBeGreaterThan(0)
     expect(s014Entry?.status).toBe("resolved")
     expect(s014Entry?.lookupKey).toBeTruthy()
+  })
+
+  it("new_year_fortune populates the S026 yongsin-to-sipsin entry", () => {
+    const service = new FortuneTellerService()
+    const result = service.getSajuFortune(BASE_REQUEST, "new_year_fortune")
+
+    const entries = result.fortuneProfileResult?.sections.flatMap((section) => section.entries) ?? []
+    const s026Entry = entries.find((entry) => entry.tableCode === "S026")
+
+    expect(s026Entry).toBeDefined()
+    expect(s026Entry?.status).toBe("resolved")
+    expect(s026Entry?.lookupKey).toMatch(/^\d{2}$/)
+    expect(s026Entry?.fullText.trim().length).toBeGreaterThan(0)
   })
 
   it("new_year_fortune populates restored S095~S101 entries", () => {

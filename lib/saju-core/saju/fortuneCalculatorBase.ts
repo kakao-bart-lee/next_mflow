@@ -26,6 +26,7 @@ import {
   calculateNewYearSignalWithHourExpression,
 } from './newYearSignals';
 import { calculateTojeongTrigramCompositeKey } from './tojeongTrigrams';
+import { calculateYongToSipsin } from './yongsinFlows';
 import { createLifecycleStageCalculator } from './lifecycleStage';
 import { calculateSinsal } from './twelveSinsal/utils';
 
@@ -437,6 +438,7 @@ export class SimpleQueryCalculator extends AbstractFortuneCalculator {
       current_direction_serial: this.getCurrentDirectionSerial(inputData),
       current_direction_serial_plus_one: this.getCurrentDirectionSerialPlusOne(inputData),
       current_sinsal_key: this.getCurrentSinsalKey(inputData),
+      yong_to_sibsin: calculateYongToSipsin(inputData),
       dangsaju_lifetime_index: this.getDangsajuLifetimeIndex(inputData),
       dangsaju_early_life_index: this.getDangsajuEarlyLifeIndex(inputData),
       dangsaju_middle_life_index: this.getDangsajuMiddleLifeIndex(inputData),
