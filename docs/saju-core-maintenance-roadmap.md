@@ -2,6 +2,20 @@
 
 **Last Updated**: 2026-03-07
 
+## Current Progress
+
+- `Priority 1`
+  - semantic naming 정리 완료
+  - `temp_03 -> currentYearStemCode/new_year_signal` 흐름 반영 완료
+  - `cut_tot -> tojeongTrigramCompositeKey` 흐름 반영 완료
+- `Priority 2`
+  - `Gendered narrative tables` helper 분리 완료
+  - `New year signal tables` helper 분리 완료
+  - `Tojeong trigram tables` helper 분리 진행 중
+- `Priority 3`
+  - 아직 구현 착수 전
+  - 현재는 hard case의 경계와 provenance를 분리 조사 중
+
 ## Goal
 
 최종 목표는 `saju-core-lib` 내부의 opaque한 legacy 흐름을 유지보수 가능한 구조로 재배치하는 것이다.
@@ -94,6 +108,16 @@
 - family별 lookup adapter
 - calculator factory는 조립 역할만 담당
 
+### Progress Notes
+
+- `Gendered narrative tables`
+  - `genderedNarratives.ts`로 분리 완료
+- `New year signal tables`
+  - `newYearSignals.ts`로 분리 완료
+- `Tojeong trigram tables`
+  - `tojeongTrigrams.ts`로 분리 진행 중
+  - `fortuneCalculatorBase`의 `calculateTojeongCutTotExpression` 본문 제거 후 helper 호출 형태로 전환 중
+
 ## Priority 3
 
 ### Hard Case 분리
@@ -106,6 +130,18 @@
 - `yong/hee/kee/goo` pipeline
 
 이 그룹은 계산 로직 복원이 우선이며, 의미 있는 명칭 재배치는 그 다음 단계다.
+
+### Current Research Notes
+
+- `S014`
+  - 전체 `find_yong()`을 바로 포팅할 필요는 없다.
+  - 먼저 `용신/희신/기신/구신`을 semantic role profile로 분리하고, 현재 운세 분류는 `supportive/adverse/neutral` bucket으로 다루는 경계가 적절하다.
+  - 참조:
+    - `/Users/bclaw/workspace/moonlit/db/www/UNSE_DATA/solve/f_Saju.php`
+    - `/Users/bclaw/workspace/moonlit/db/www/_db2/toC_yongsin_01.sql`
+- `F_Juyeok_trigram`
+  - 별도 helper 경계 조사 중
+  - 관련 family는 `F011`, `T039`, `J004`, `J005`, `J009`, `J010`
 
 ## First Execution Slice
 

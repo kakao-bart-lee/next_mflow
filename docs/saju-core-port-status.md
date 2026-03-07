@@ -104,6 +104,22 @@
 - profile sweep 기준 사용자 노출 경로는 모두 복구됐다.
 - 다음 단계의 핵심은 “정답을 맞히는 것”이 아니라 “정답을 유지보수 가능하게 설명하는 것”이다.
 
+## Maintenance Refactor Progress
+
+2026-03-07 현재 유지보수성 개선 작업은 아래까지 진행됐다.
+
+- `Gendered narrative` family
+  - `S081`, `S085`, `T022` 공통 흐름을 `genderedNarratives.ts`로 분리
+  - `combined_value`, `day_stem_num` 같은 legacy field alias는 호환 유지
+- `New year signal` family
+  - `S095`~`S101` 공통 흐름을 `newYearSignals.ts`로 분리
+  - `temp_03` 의미를 `current year stem` 기준의 계산 단계로 치환
+- `Tojeong trigram` family
+  - `S103`~`S110` 공통 흐름을 `tojeongTrigrams.ts`로 분리하는 작업 진행 중
+  - 기존 `cut_tot`는 `tojeong trigram composite key`라는 의미 있는 내부 개념으로 교체 중
+
+즉 현재는 profile 결과 복구가 아니라 “family별 key builder와 lookup 단계 분리”가 실제 코드 구조에 반영되는 단계다.
+
 ## Recommended Next Steps
 
 실행 계획은 `docs/saju-core-maintenance-roadmap.md`에서 관리한다.

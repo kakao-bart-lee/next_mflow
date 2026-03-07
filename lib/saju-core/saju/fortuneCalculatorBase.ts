@@ -17,6 +17,7 @@ import {
   calculateNewYearSignalExpression,
   calculateNewYearSignalWithHourExpression,
 } from './newYearSignals';
+import { calculateTojeongTrigramCompositeKey } from './tojeongTrigrams';
 import { createLifecycleStageCalculator } from './lifecycleStage';
 import { calculateSinsal } from './twelveSinsal/utils';
 
@@ -1153,7 +1154,16 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
       methodName === 's109_tojeong_cut_tot' ||
       methodName === 's110_tojeong_cut_tot_monthly'
     ) {
-      return this.calculateTojeongCutTotExpression(inputData);
+      return calculateTojeongTrigramCompositeKey(
+        inputData,
+        {
+          getBirthDateParts: (value) => this.getBirthDateParts(value),
+          getBirthHourValue: (value) => this.getBirthHourValue(value),
+          getBirthLunarDateParts: (value) => this.getBirthLunarDateParts(value),
+          getCurrentDateContext: (value) => this.getCurrentDateContext(value),
+        },
+        this.config.tableName
+      );
     }
 
     if (methodName === 's014_current_fortune') {
@@ -1704,103 +1714,6 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     };
   }
 
-  private calculateTojeongCutTotExpression(inputData: CalculationInput): string {
-    const currentDate = this.getCurrentDateContext(inputData);
-    const birthDate = this.getBirthDateParts(inputData);
-    const birthLunarDate = this.getBirthLunarDateParts(inputData);
-    if (!currentDate || !birthDate || !birthLunarDate) {
-      throw new Error(`Birth or current date context is unavailable for ${this.config.tableName}`);
-    }
-
-    const baseYear = currentDate.month > 9 || (currentDate.month === 9 && currentDate.day > 1) ? currentDate.year + 1 : currentDate.year;
-    let currentYearDateCode = `${baseYear.toString().padStart(4, '0')}${birthDate.month.padStart(2, '0')}${birthDate.day.padStart(2, '0')}`;
-    if (birthDate.month === '02' && birthDate.day === '29') {
-      currentYearDateCode = this.resolveLeapSafeDateCode(baseYear, birthDate.month, birthDate.day);
-    }
-
-    const mansedata = getDataLoader().loadMansedata() as Record<string, Record<string, unknown>>;
-    const currentSolarBirthdayRow = mansedata[currentYearDateCode];
-    if (!currentSolarBirthdayRow || typeof currentSolarBirthdayRow !== 'object') {
-      throw new Error(`Current solar birthday mansedata row is unavailable for ${this.config.tableName}`);
-    }
-
-    const currentYearStemCode =
-      typeof currentSolarBirthdayRow.year_h === 'string' && currentSolarBirthdayRow.year_h
-        ? currentSolarBirthdayRow.year_h
-        : null;
-    const currentYearBranchCode =
-      typeof currentSolarBirthdayRow.year_e === 'string' && currentSolarBirthdayRow.year_e
-        ? currentSolarBirthdayRow.year_e.padStart(2, '0')
-        : null;
-    const currentUmdate =
-      typeof currentSolarBirthdayRow.lunar_date === 'string' && currentSolarBirthdayRow.lunar_date
-        ? currentSolarBirthdayRow.lunar_date
-        : typeof currentSolarBirthdayRow.umdate === 'string' && currentSolarBirthdayRow.umdate
-          ? currentSolarBirthdayRow.umdate
-          : null;
-    if (!currentYearStemCode || !currentYearBranchCode || !currentUmdate) {
-      throw new Error(`Current birthday mansedata fields are unavailable for ${this.config.tableName}`);
-    }
-
-    const currentLunarYear = currentUmdate.slice(0, 4);
-    const currentLunarDay = currentUmdate.slice(6, 8) === '30' ? '29' : currentUmdate.slice(6, 8);
-    const monthRow = this.findManseRowByUmdate(`${currentLunarYear}${birthLunarDate.month}${currentLunarDay}`);
-    if (!monthRow) {
-      throw new Error(`Current lunar month mansedata row is unavailable for ${this.config.tableName}`);
-    }
-
-    let dayRow = this.findManseRowByUmdate(`${currentLunarYear}${birthLunarDate.month}${birthLunarDate.day}`);
-    if (!dayRow && birthLunarDate.day === '30') {
-      dayRow = this.findManseRowByUmdate(`${currentLunarYear}${birthLunarDate.month}29`);
-    }
-    if (!dayRow) {
-      throw new Error(`Current lunar day mansedata row is unavailable for ${this.config.tableName}`);
-    }
-
-    const yearGabja = this.buildGabja(currentYearStemCode, currentYearBranchCode);
-    const monthGabja = this.buildMonthGabja(
-      typeof monthRow.month_h === 'string' ? monthRow.month_h : '',
-      typeof monthRow.month_e === 'string' ? monthRow.month_e : ''
-    );
-    const dayGabja = this.buildGabja(
-      typeof dayRow.day_h === 'string' ? dayRow.day_h : '',
-      typeof dayRow.day_e === 'string' ? dayRow.day_e : ''
-    );
-
-    const yearSu = this.getTojeongGabjaValue(yearGabja, 'tae');
-    const monthSu = this.getTojeongGabjaValue(monthGabja, 'wol');
-    const daySu = this.getTojeongGabjaValue(dayGabja, 'il');
-    const age = Number.parseInt(currentLunarYear, 10) - Number.parseInt(birthLunarDate.year, 10) + 1;
-    const monthHasThirtyDays = this.findManseRowByUmdate(`${currentLunarYear}${birthLunarDate.month}30`) ? 30 : 29;
-
-    let cut01 = (age + yearSu) % 8;
-    if (cut01 === 0) {
-      cut01 = 8;
-    }
-
-    let cut02 = (monthHasThirtyDays + monthSu) % 6;
-    if (inputData.gender !== 'M') {
-      cut02 -= 1;
-    }
-    cut02 -= Math.floor(this.getBirthHourValue(inputData) / 2) % 6;
-    if (cut02 < 1) {
-      cut02 = 6 + cut02;
-    }
-    if (cut02 === 0) {
-      cut02 = 3;
-    }
-
-    let cut03 = (Number.parseInt(birthLunarDate.day, 10) + daySu) % 3;
-    if (inputData.gender !== 'M') {
-      cut03 -= 1;
-    }
-    if (cut03 < 1) {
-      cut03 = 3 + cut03;
-    }
-
-    return `${cut01}${cut02}${cut03}`;
-  }
-
   private getBirthDateParts(inputData: CalculationInput): { year: string; month: string; day: string } | null {
     const birthDate = inputData.additionalData?.birth_date;
     if (typeof birthDate !== 'string') {
@@ -1847,61 +1760,6 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
       month: lunarDate.slice(4, 6),
       day: lunarDate.slice(6, 8),
     };
-  }
-
-  private resolveLeapSafeDateCode(year: number, month: string, day: string): string {
-    const candidate = new Date(Date.UTC(year, Number.parseInt(month, 10) - 1, Number.parseInt(day, 10)));
-    return `${candidate.getUTCFullYear().toString().padStart(4, '0')}${(candidate.getUTCMonth() + 1)
-      .toString()
-      .padStart(2, '0')}${candidate.getUTCDate().toString().padStart(2, '0')}`;
-  }
-
-  private findManseRowByUmdate(umdate: string): Record<string, unknown> | null {
-    const mansedata = getDataLoader().loadMansedata() as Record<string, Record<string, unknown>>;
-    for (const row of Object.values(mansedata)) {
-      if (typeof row?.lunar_date === 'string' && row.lunar_date === umdate) {
-        return row;
-      }
-      if (typeof row?.umdate === 'string' && row.umdate === umdate) {
-        return row;
-      }
-    }
-    return null;
-  }
-
-  private buildGabja(stemCode: string, branchCode: string): string {
-    const stem = STEM_CODE_TO_HANJA[stemCode];
-    const branch = BRANCH_NUMBER_TO_HANJA[String(branchCode).padStart(2, '0')];
-    if (!stem || !branch) {
-      throw new Error(`Unsupported gabja components for ${this.config.tableName}: ${stemCode}/${branchCode}`);
-    }
-    return `${stem}${branch}`;
-  }
-
-  private buildMonthGabja(stemCode: string, branchCode: string): string {
-    const stem = STEM_CODE_TO_HANJA[stemCode];
-    const branch = BRANCH_NUMBER_TO_HANJA[String(branchCode).padStart(2, '0')];
-    if (!stem || !branch) {
-      throw new Error(`Unsupported month gabja components for ${this.config.tableName}: ${stemCode}/${branchCode}`);
-    }
-    return `${stem}${branch}`;
-  }
-
-  private getTojeongGabjaValue(gabja: string, field: 'tae' | 'wol' | 'il'): number {
-    const etcTables = getDataLoader().loadEtcTables() as Record<string, unknown>;
-    const rows = Array.isArray(etcTables.tojung_gabja) ? etcTables.tojung_gabja : [];
-    const record = rows.find(
-      (row): row is Record<string, unknown> =>
-        typeof row === 'object' && row !== null && typeof row.gabja === 'string' && row.gabja === gabja
-    );
-    const value = record?.[field];
-    const parsed = typeof value === 'string' || typeof value === 'number' ? Number.parseInt(String(value), 10) : NaN;
-    if (!Number.isFinite(parsed)) {
-      // Legacy PHP leaves the intermediate variable empty when no row exists,
-      // and the later arithmetic effectively treats it as 0.
-      return 0;
-    }
-    return parsed;
   }
 
   private getYongsinElementCodes(titleKey: string): {
