@@ -1,6 +1,7 @@
 # Saju Core Migration Handoff
 
 **Last Updated**: 2026-03-08
+**Phase 3 Status**: ✅ 완료 (결정 트리 + G-code 궁합 5종)
 
 ## 목적
 
@@ -197,31 +198,77 @@
 
 또 `../saju-core-lib`의 unrelated 문서 수정은 건드리지 않았다.
 
+## Phase 3 완료 내역 (2026-03-08)
+
+### Track A: find_yong() 결정 트리 포팅
+
+PHP `f_Saju.php:849-2687`의 `find_yong()` 함수를 `yongsinDecisionTree.ts`(912줄)로 완전히 포팅했다.
+
+핵심 발견사항:
+- PHP 원본에 `switch($hyung)` fall-through 버그가 있었다 (25개 case에 break 없음)
+- TS 포팅 시 break를 추가하여 버그를 수정했다
+- `toC_yongsin_01` lookup 테이블과의 교차 검증에서 불일치가 발생하는데, 이는 PHP 버그로 인한 예상된 결과이다
+- 기존 `toC_yongsin_01` lookup 경로는 그대로 유지하고 병렬 경로로 추가했다
+
+산출물:
+- `lib/saju-core/saju/yongsinDecisionTree.ts` — 메인 결정 트리 (findYong 함수)
+- `__tests__/lib/saju-core/yongsinDecisionTree.test.ts` — 10개 테스트
+
+### Track B: 레거시 G-code 궁합 5종 포팅
+
+5개의 G-code 빌더를 `legacyCompatibility.ts`에 추가했다.
+
+| G-code | 함수 | 설명 | 키 형식 |
+|--------|------|------|---------|
+| G003 | `buildLegacyBasicCompatibilityInsight` | 십이운성 기반 기본 궁합 | "01"-"12" (패딩) |
+| G012 | `buildLegacyDetailedCompatibilityInsight` | 일지 기반 세부 궁합 | "51"-"512" ("5"+index) |
+| G019 | `buildLegacyZodiacCompatibilityInsight` | 서양 별자리 궁합 | 한글 별자리명 |
+| G026 | `buildLegacyAnimalCompatibilityInsight` | 12×12 띠 궁합 (역설계) | (primary-1)*12+partner |
+| G028 | `buildLegacySasangCompatibilityInsight` | 사상체질 궁합 | 10개 대칭 키 (ty,sy,tu,su) |
+
+추가 변경:
+- `lib/schemas/birth-info.ts`에 `sasangConstitution` 필드 추가 (ty/sy/tu/su)
+- `app/api/saju/compatibility/route.ts`에 5개 insight 엔드포인트 연결
+- `components/saju/compatibility-screen.tsx`에 사상체질 선택 UI + 5개 insight 카드 추가
+
+산출물:
+- `__tests__/lib/saju-core/legacyGCodes.test.ts` — 21개 테스트
+
+### 커밋 이력 (8 commits)
+
+| 커밋 | 메시지 |
+|------|--------|
+| `30a611b` | feat(saju): add legacy G003/G012/G019/G026 compatibility insights |
+| `42e7006` | feat(saju): add legacy G028 sasang compatibility insight with pair normalization |
+| `85aa784` | feat(saju): add sasangConstitution to BirthInfoSchema |
+| `e41adf5` | feat(saju): port find_yong decision tree from PHP |
+| `0518ce2` | feat(saju): wire all new G-code insights to compatibility API and add sasang UI |
+| `94271c1` | test(saju): add decision tree cross-validation and G-code builder tests |
+| `9a48cc2` | feat(saju): render new G-code insights in compatibility screen |
+| `8b87e74` | docs(saju): update handoff, port-status, and roadmap for decision tree and G-codes |
+
+### 검증 결과
+
+- TypeScript: `npx tsc --noEmit` → 0 errors
+- 테스트: 275 passed (32 test files), 0 failed
+- 금지 패턴 없음: `as any`, `@ts-ignore`, `@ts-expect-error` 사용하지 않음
+- 데이터 파일 미변경: `lib/saju-core/data/` 변경 없음
+- `yongsinFlows.ts` 미변경
+
 ## 남은 일
 
-### 1. `find_yong()` deeper parity
+이번 Phase 3에서 명시적으로 제외한 항목:
 
-PHP `find_yong()` 결정 트리를 `yongsinDecisionTree.ts`로 완전히 포팅했다.
+- T-code (T013~T063) 포팅
+- Secondary/tertiary snapshot 소비
+- Narrative explanation 생성
+- `LegacyInsightCard` 컴포넌트 추출 (기술 부채)
+- `readLegacyG0xxRecord` DRY 리팩터 (기술 부채)
 
-- `findYong(input: YongsinDecisionInput): YongsinDecisionResult` — 메인 함수
-- PHP fall-through 버그 수정 (break 추가)
-- `toC_yongsin_01`과 병렬 경로 유지
-
-이미 `S014` 경계와 `yongsinFlows` helper는 정리했지만, 이제 원본의 deeper role derivation을 완전히 domain model로 올린 상태다.
-
-### 2. 남은 legacy synthetic family 탐색
-
-이미 큰 축은 많이 흡수했지만, PHP gunghap 페이지 중 provenance가 분명한 synthetic summary가 더 있는지 계속 확인할 수 있다.
-
-### 3. 이후 단계
-
-이 작업이 어느 정도 닫히면 그 다음은 구조 개선 단계다.
-
+이후 단계는 구조 개선이다:
 - domain model 재명명
 - table code를 adapter 뒤로 숨기기
 - API/UI에서 레거시 코드 노출 축소
-
-하지만 지금은 아직 이 단계가 아니다.
 
 ## 다음 사람이 이어받는 방법
 
