@@ -136,6 +136,24 @@ describe("DatabaseResultRetriever", () => {
       "4",
     ])
   })
+
+  it("numeric expressions can resolve trailing-space keys for gendered tables", () => {
+    const retriever = new DatabaseResultRetriever({
+      S081: {
+        "7 ": {
+          data: "",
+          DB_data_m: "남성 오행 보완 포인트",
+          DB_data_w: "여성 오행 보완 포인트",
+          numerical: 2,
+        },
+      },
+    })
+
+    expect(retriever.getResult("S081", "07", { preferredColumns: ["DB_data_w"] })).toEqual([
+      "여성 오행 보완 포인트",
+      "2",
+    ])
+  })
 })
 
 describe("GenderBasedCalculator", () => {

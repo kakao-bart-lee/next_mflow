@@ -1028,6 +1028,10 @@ export class GenderBasedCalculator extends AbstractFortuneCalculator {
       return this.getWesternZodiacNumber(inputData).toString().padStart(2, '0');
     }
 
+    if (fieldName === 'day_stem_num') {
+      return this.getStemNumber(inputData.dayStem).toString().padStart(2, '0');
+    }
+
     if (fieldName === 'star_name') {
       return this.getWesternZodiacName(inputData);
     }
@@ -1122,6 +1126,13 @@ export class GenderBasedCalculator extends AbstractFortuneCalculator {
 
     const zodiacNumber = this.getWesternZodiacNumber(inputData);
     return zodiacNames[zodiacNumber - 1] ?? '물병자리';
+  }
+
+  private getStemNumber(stem: string): number {
+    const stemKr = extractKorean(stem);
+    const stems = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계'];
+    const index = stems.indexOf(stemKr);
+    return index >= 0 ? index + 1 : 1;
   }
 }
 

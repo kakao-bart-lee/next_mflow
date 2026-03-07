@@ -360,8 +360,9 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
     description: '신체 DNA',
   },
   S085: {
-    calculator_type: CalculatorType.SIMPLE_QUERY,
+    calculator_type: CalculatorType.GENDER_BASED,
     expression_fields: ['day_stem_num'],
+    gender_columns: { M: 'DB_data_m', F: 'DB_data_w' },
     description: '선천적기질운',
   },
   S073: {
@@ -390,8 +391,9 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
     description: '성격 리스크',
   },
   S081: {
-    calculator_type: CalculatorType.SIMPLE_QUERY,
+    calculator_type: CalculatorType.GENDER_BASED,
     expression_fields: ['day_stem_num'],
+    gender_columns: { M: 'DB_data_m', F: 'DB_data_w' },
     description: '오행 보완 포인트',
   },
   S084: {
