@@ -57,6 +57,18 @@ export interface LegacyBedroomInsight {
   readonly score: number | null
 }
 
+export interface LegacyYearlyLoveCycleInsight {
+  readonly sourceTable: "Y004"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly intro: string
+  readonly months: readonly {
+    readonly month: number
+    readonly text: string
+  }[]
+}
+
 function toCalculationInput(fortune: FortuneResponse, gender: "M" | "F"): LegacyCompatibilityCalculationInput {
   const pillars = fortune.sajuData.pillars
   return {
@@ -108,6 +120,23 @@ function readLegacyY003Record(lookupKey: string): { readonly DB_data_m?: string;
     return null
   }
   return record as { readonly DB_data_m?: string; readonly DB_data_w?: string; readonly numerical?: number | string | null }
+}
+
+function readLegacyY004Record(
+  lookupKey: string,
+): {
+  readonly data?: string
+  readonly [key: `DB_data_${number}`]: string | undefined
+} | null {
+  const yTables = getDataLoader().loadYTables() as Record<string, Record<string, Record<string, unknown>>>
+  const record = yTables.Y004?.[lookupKey]
+  if (!record || typeof record !== "object") {
+    return null
+  }
+  return record as {
+    readonly data?: string
+    readonly [key: `DB_data_${number}`]: string | undefined
+  }
 }
 
 export function buildLegacyIntimacyInsight(
@@ -201,5 +230,40 @@ export function buildLegacyBedroomInsight(
     lookupKey,
     text: record.data,
     score: Number.isFinite(numericalValue) ? numericalValue : null,
+  }
+}
+
+export function buildLegacyYearlyLoveCycleInsight(
+  primaryFortune: FortuneResponse,
+): LegacyYearlyLoveCycleInsight | null {
+  const lookupKey = String(
+    ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"].indexOf(extractKorean(primaryFortune.sajuData.pillars.일.지지)) + 1
+  ).padStart(2, "0")
+  const record = readLegacyY004Record(lookupKey)
+
+  if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {
+    return null
+  }
+
+  const months = Array.from({ length: 12 }, (_, index) => {
+    const month = index + 1
+    const text = record[`DB_data_${month}`]?.trim() ?? ""
+    return {
+      month,
+      text,
+    }
+  }).filter((entry) => entry.text.length > 0)
+
+  if (months.length === 0) {
+    return null
+  }
+
+  return {
+    sourceTable: "Y004",
+    title: "섹스 토정비결",
+    scoreLabel: "월별 섹스운",
+    lookupKey,
+    intro: record.data,
+    months,
   }
 }

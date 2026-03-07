@@ -24,7 +24,12 @@ import {
 } from "@/lib/saju-core/saju/juyeokTrigrams"
 import { advanceLegacyCycle, getFiveElementGroup } from "@/lib/saju-core/saju/legacyCycles"
 import { DatabaseResultRetriever } from "@/lib/saju-core/saju/fortuneInterpreter"
-import { buildLegacyBedroomInsight, buildLegacyIntimacyInsight, buildLegacyLoveStyleInsight } from "@/lib/saju-core/saju/legacyCompatibility"
+import {
+  buildLegacyBedroomInsight,
+  buildLegacyIntimacyInsight,
+  buildLegacyLoveStyleInsight,
+  buildLegacyYearlyLoveCycleInsight,
+} from "@/lib/saju-core/saju/legacyCompatibility"
 import {
   CalculatorType,
   GenderBasedCalculator,
@@ -507,6 +512,28 @@ describe("legacyCompatibility", () => {
     expect(legacyLoveStyle?.sourceTable).toBe("Y003")
     expect(legacyLoveStyle?.lookupKey).toMatch(/^[가-힣]+$/)
     expect(legacyLoveStyle?.text.trim().length).toBeGreaterThan(0)
+  })
+
+  it("builds the legacy Y004 monthly love-cycle detail from the primary day branch index", () => {
+    const service = new FortuneTellerService()
+    const primaryInfo = {
+      birthDate: "1990-01-15",
+      birthTime: "14:30",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "M" as const,
+    }
+
+    const primaryFortune = service.calculateSaju(primaryInfo)
+    const legacyYearlyLoveCycle = buildLegacyYearlyLoveCycleInsight(primaryFortune)
+
+    expect(legacyYearlyLoveCycle).toBeDefined()
+    expect(legacyYearlyLoveCycle?.sourceTable).toBe("Y004")
+    expect(legacyYearlyLoveCycle?.lookupKey).toMatch(/^\d{2}$/)
+    expect(legacyYearlyLoveCycle?.intro.trim().length).toBeGreaterThan(0)
+    expect(legacyYearlyLoveCycle?.months).toHaveLength(12)
+    expect(legacyYearlyLoveCycle?.months[0]?.month).toBe(1)
+    expect(legacyYearlyLoveCycle?.months[0]?.text.trim().length).toBeGreaterThan(0)
   })
 })
 

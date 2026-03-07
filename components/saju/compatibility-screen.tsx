@@ -50,6 +50,14 @@ interface CompatibilityResult {
     text: string
     score: number | null
   } | null
+  legacy_yearly_love_cycle?: {
+    sourceTable: "Y004"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    intro: string
+    months: { month: number; text: string }[]
+  } | null
   overall_interpretation: string
   recommendations: string[]
 }
@@ -320,6 +328,37 @@ export function CompatibilityScreen() {
                     <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                       {result.legacy_love_style.text}
                     </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_yearly_love_cycle ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_yearly_love_cycle.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 월별 해설 · {result.legacy_yearly_love_cycle.sourceTable} · key {result.legacy_yearly_love_cycle.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_yearly_love_cycle.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_yearly_love_cycle.intro}
+                    </p>
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                      {result.legacy_yearly_love_cycle.months.map((entry) => (
+                        <div key={entry.month} className="rounded-lg border border-border/80 bg-background/60 p-4">
+                          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            {entry.month}월
+                          </p>
+                          <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                            {entry.text}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ) : null}
 
