@@ -1417,3 +1417,263 @@ export function buildLegacyLoveWeakPointInsight(
     text: record.data,
   }
 }
+
+export interface LegacyBasicCompatibilityInsight {
+  readonly sourceTable: "G003"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+  readonly score: number | null
+}
+
+function readLegacyG003Record(lookupKey: string): { readonly data?: string; readonly numerical?: number | string | null } | null {
+  const gTables = getDataLoader().loadGTables() as Record<string, Record<string, Record<string, unknown>>>
+  const record = gTables.G003?.[lookupKey]
+  if (!record || typeof record !== "object") {
+    return null
+  }
+  return record as { readonly data?: string; readonly numerical?: number | string | null }
+}
+
+export function buildLegacyBasicCompatibilityInsight(
+  primaryInfo: LegacyCompatibilityBirthInfo,
+  primaryFortune: FortuneResponse,
+): LegacyBasicCompatibilityInsight | null {
+  // G003 PHP: F_woonsung(daygi, daygan) → serial_no 1-12
+  // g_tables.json G003 keys are "01"-"12" (all 12 records).
+  // PHP mod 7 was for old 7-record DB → TS uses all 12 directly.
+  const woonStage = calculateWoon12Daygi(toCalculationInput(primaryFortune, primaryInfo.gender))
+  const stageNumber = Number.parseInt(woonStage, 10)
+  if (!Number.isFinite(stageNumber) || stageNumber < 1 || stageNumber > 12) {
+    return null
+  }
+
+  const lookupKey = String(stageNumber).padStart(2, "0")
+  const record = readLegacyG003Record(lookupKey)
+
+  if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {
+    return null
+  }
+
+  const numericalValue =
+    typeof record.numerical === "number"
+      ? record.numerical
+      : typeof record.numerical === "string"
+        ? Number.parseInt(record.numerical, 10)
+        : null
+
+  return {
+    sourceTable: "G003",
+    title: "궁합 기본 성향",
+    scoreLabel: "기본 궁합",
+    lookupKey,
+    text: record.data,
+    score: Number.isFinite(numericalValue) ? numericalValue : null,
+  }
+}
+
+export interface LegacyDetailedCompatibilityInsight {
+  readonly sourceTable: "G012"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+  readonly score: number | null
+}
+
+function readLegacyG012Record(lookupKey: string): { readonly data?: string; readonly numerical?: number | string | null } | null {
+  const gTables = getDataLoader().loadGTables() as Record<string, Record<string, Record<string, unknown>>>
+  const record = gTables.G012?.[lookupKey]
+  if (!record || typeof record !== "object") {
+    return null
+  }
+  return record as { readonly data?: string; readonly numerical?: number | string | null }
+}
+
+export function buildLegacyDetailedCompatibilityInsight(
+  primaryFortune: FortuneResponse,
+): LegacyDetailedCompatibilityInsight | null {
+  const dayBranchIndex = getDayBranchIndex(primaryFortune)
+  if (dayBranchIndex < 1) {
+    return null
+  }
+
+  let plusVar: number
+  switch (dayBranchIndex) {
+    case 1:
+    case 2:
+    case 3:
+      plusVar = dayBranchIndex + 1
+      break
+    case 4:
+    case 5:
+    case 6:
+      plusVar = dayBranchIndex - 1
+      break
+    case 7:
+    case 8:
+    case 9:
+      plusVar = dayBranchIndex + 1
+      break
+    default:
+      plusVar = dayBranchIndex
+      break
+  }
+
+  if (plusVar === 0) {
+    plusVar = 12
+  }
+  if (plusVar === 13) {
+    plusVar = 1
+  }
+
+  const lookupKey = `5${plusVar}`
+  const record = readLegacyG012Record(lookupKey)
+
+  if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {
+    return null
+  }
+
+  const numericalValue =
+    typeof record.numerical === "number"
+      ? record.numerical
+      : typeof record.numerical === "string"
+        ? Number.parseInt(record.numerical, 10)
+        : null
+
+  return {
+    sourceTable: "G012",
+    title: "세부 궁합 분석",
+    scoreLabel: "세부 궁합",
+    lookupKey,
+    text: record.data,
+    score: Number.isFinite(numericalValue) ? numericalValue : null,
+  }
+}
+
+export interface LegacyZodiacCompatibilityInsight {
+  readonly sourceTable: "G019"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+}
+
+function readLegacyG019Record(lookupKey: string): { readonly data?: string } | null {
+  const gTables = getDataLoader().loadGTables() as Record<string, Record<string, Record<string, unknown>>>
+  const record = gTables.G019?.[lookupKey]
+  if (!record || typeof record !== "object") {
+    return null
+  }
+  return record as { readonly data?: string }
+}
+
+// 별자리 판별 (genderedNarratives.ts:43-84 로직과 동일, import 복잡성 회피를 위해 인라인)
+function determineWesternZodiacName(birthDate: string): string | null {
+  const parts = birthDate.split("-")
+  if (parts.length < 3) {
+    return null
+  }
+  const month = Number.parseInt(parts[1] ?? "0", 10)
+  const day = Number.parseInt(parts[2] ?? "0", 10)
+  if (!Number.isFinite(month) || !Number.isFinite(day) || month < 1 || month > 12 || day < 1 || day > 31) {
+    return null
+  }
+
+  if ((month === 12 && day > 23) || (month === 1 && day < 21)) return "염소자리"
+  if ((month === 1 && day > 20) || (month === 2 && day < 20)) return "물병자리"
+  if ((month === 2 && day > 19) || (month === 3 && day < 21)) return "물고기자리"
+  if ((month === 3 && day > 20) || (month === 4 && day < 21)) return "양자리"
+  if ((month === 4 && day > 20) || (month === 5 && day < 22)) return "황소자리"
+  if ((month === 5 && day > 21) || (month === 6 && day < 22)) return "쌍둥이자리"
+  if ((month === 6 && day > 21) || (month === 7 && day < 24)) return "게자리"
+  if ((month === 7 && day > 23) || (month === 8 && day < 24)) return "사자자리"
+  if ((month === 8 && day > 23) || (month === 9 && day < 24)) return "처녀자리"
+  if ((month === 9 && day > 23) || (month === 10 && day < 24)) return "천칭자리"
+  if ((month === 10 && day > 23) || (month === 11 && day < 23)) return "전갈자리"
+  return "사수자리"
+}
+
+export function buildLegacyZodiacCompatibilityInsight(
+  primaryInfo: LegacyCompatibilityBirthInfo,
+): LegacyZodiacCompatibilityInsight | null {
+  const zodiacName = determineWesternZodiacName(primaryInfo.birthDate)
+  if (!zodiacName) {
+    return null
+  }
+
+  const lookupKey = zodiacName
+  const record = readLegacyG019Record(lookupKey)
+
+  if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {
+    return null
+  }
+
+  const text = record.data.replace(/<[^>]*>/g, "")
+  if (!text.trim()) {
+    return null
+  }
+
+  return {
+    sourceTable: "G019",
+    title: "별자리 궁합",
+    scoreLabel: "별자리 궁합",
+    lookupKey,
+    text,
+  }
+}
+
+export interface LegacyAnimalCompatibilityInsight {
+  readonly sourceTable: "G026"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+  readonly score: number | null
+}
+
+// PROVENANCE: No PHP source file found. Key formula (primaryIndex-1)*12+partnerIndex
+// is reverse-engineered from the 12×12 animal compatibility data structure (144 records).
+function readLegacyG026Record(lookupKey: string): { readonly data?: string; readonly numerical?: number | string | null } | null {
+  const gTables = getDataLoader().loadGTables() as Record<string, Record<string, Record<string, unknown>>>
+  const record = gTables.G026?.[lookupKey]
+  if (!record || typeof record !== "object") {
+    return null
+  }
+  return record as { readonly data?: string; readonly numerical?: number | string | null }
+}
+
+export function buildLegacyAnimalCompatibilityInsight(
+  primaryFortune: FortuneResponse,
+  partnerFortune: FortuneResponse,
+): LegacyAnimalCompatibilityInsight | null {
+  const primaryIndex = getYearBranchIndex(primaryFortune)
+  const partnerIndex = getYearBranchIndex(partnerFortune)
+  if (primaryIndex < 1 || partnerIndex < 1) {
+    return null
+  }
+
+  const lookupKey = String((primaryIndex - 1) * 12 + partnerIndex)
+  const record = readLegacyG026Record(lookupKey)
+
+  if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {
+    return null
+  }
+
+  const numericalValue =
+    typeof record.numerical === "number"
+      ? record.numerical
+      : typeof record.numerical === "string"
+        ? Number.parseInt(record.numerical, 10)
+        : null
+
+  return {
+    sourceTable: "G026",
+    title: "띠 궁합",
+    scoreLabel: "띠궁합 지수",
+    lookupKey,
+    text: record.data,
+    score: Number.isFinite(numericalValue) ? numericalValue : null,
+  }
+}
