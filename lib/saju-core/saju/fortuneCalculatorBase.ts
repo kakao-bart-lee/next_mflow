@@ -6,6 +6,17 @@
 import { extractKorean } from '../utils';
 import { getSipsinForBranch, KOREAN_BRANCH_TO_DISPLAY } from './constants';
 import { getDataLoader } from './dataLoader';
+import {
+  calculateGenderedNarrativeExpression,
+  getWesternZodiacName,
+  resolveGenderKey,
+  resolveGenderedNarrativeExpressionKind,
+} from './genderedNarratives';
+import {
+  calculateNewYearMonthlyExpression,
+  calculateNewYearSignalExpression,
+  calculateNewYearSignalWithHourExpression,
+} from './newYearSignals';
 import { createLifecycleStageCalculator } from './lifecycleStage';
 import { calculateSinsal } from './twelveSinsal/utils';
 
@@ -1125,13 +1136,13 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
       methodName === 's099_new_year_signal' ||
       methodName === 's100_new_year_signal'
     ) {
-      return this.calculateNewYearSignalExpression(inputData);
+      return calculateNewYearSignalExpression(inputData);
     }
     if (methodName === 's097_new_year_signal') {
-      return this.calculateNewYearSignalWithHourExpression(inputData);
+      return calculateNewYearSignalWithHourExpression(inputData);
     }
     if (methodName === 's101_monthly_new_year_signal') {
-      return this.calculateS101Expression(inputData);
+      return calculateNewYearMonthlyExpression(inputData, (stemKr) => this.stemToAlpha(stemKr));
     }
     if (
       methodName === 's103_tojeong_cut_tot' ||
@@ -1589,16 +1600,6 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     };
   }
 
-  private calculateNewYearSignalExpression(inputData: CalculationInput): string {
-    const dayStemValue = this.getNewYearSignalStemValue(inputData.dayStem);
-    const currentYearStemValue = this.getCurrentYearStemSignalValue(inputData);
-    let total = (dayStemValue * currentYearStemValue) % 25;
-    if (total === 0) {
-      total = 1;
-    }
-    return String(total);
-  }
-
   private buildS014Context(inputData: CalculationInput): {
     readonly yongCode: string;
     readonly heeCode: string;
@@ -1659,23 +1660,8 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     };
   }
 
-  private calculateNewYearSignalWithHourExpression(inputData: CalculationInput): string {
-    const dayStemValue = this.getNewYearSignalStemValue(inputData.dayStem);
-    const currentYearStemValue = this.getCurrentYearStemSignalValue(inputData);
-    const hourOffset = Math.floor(this.getBirthHourValue(inputData) / 2) % 12;
-    let total = (dayStemValue * currentYearStemValue + hourOffset) % 25;
-    if (total === 0) {
-      total = 1;
-    }
-    return String(total);
-  }
-
-  private calculateS101Expression(inputData: CalculationInput): string {
-    return `${this.stemToAlpha(extractKorean(inputData.dayStem))}${this.getCurrentYearStemAlpha(inputData)}`;
-  }
-
   private calculateS101Result(inputData: CalculationInput): CalculationResult {
-    const expression = this.calculateS101Expression(inputData);
+    const expression = calculateNewYearMonthlyExpression(inputData, (stemKr) => this.stemToAlpha(stemKr));
     return this.buildMonthlyRecordResult(expression, inputData);
   }
 
@@ -1815,25 +1801,16 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     return `${cut01}${cut02}${cut03}`;
   }
 
-  private getNewYearSignalStemValue(dayStem: string): number {
-    return this.getStemNumber(extractKorean(dayStem));
-  }
-
-  private getCurrentYearStemSignalValue(inputData: CalculationInput): number {
-    const alpha = this.getCurrentYearStemAlpha(inputData);
-    return this.getStemNumberFromCode(alpha);
-  }
-
-  private getCurrentYearStemAlpha(inputData: CalculationInput): string {
-    const currentDate = this.getCurrentDateContext(inputData);
-    if (!currentDate) {
-      return 'B';
+  private getBirthDateParts(inputData: CalculationInput): { year: string; month: string; day: string } | null {
+    const birthDate = inputData.additionalData?.birth_date;
+    if (typeof birthDate !== 'string') {
+      return null;
     }
-
-    const mansedata = getDataLoader().loadMansedata() as Record<string, Record<string, unknown>>;
-    const manse = mansedata[currentDate.dateCode];
-    const stemCode = typeof manse?.year_h === 'string' && manse.year_h ? manse.year_h : 'B';
-    return stemCode;
+    const [year, month, day] = birthDate.split('-');
+    if (!year || !month || !day) {
+      return null;
+    }
+    return { year, month, day };
   }
 
   private getBirthHourValue(inputData: CalculationInput): number {
@@ -1845,18 +1822,6 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     const [hourText] = birthTime.split(':');
     const hour = Number.parseInt(hourText ?? '0', 10);
     return Number.isFinite(hour) ? hour : 0;
-  }
-
-  private getBirthDateParts(inputData: CalculationInput): { year: string; month: string; day: string } | null {
-    const birthDate = inputData.additionalData?.birth_date;
-    if (typeof birthDate !== 'string') {
-      return null;
-    }
-    const [year, month, day] = birthDate.split('-');
-    if (!year || !month || !day) {
-      return null;
-    }
-    return { year, month, day };
   }
 
   private getBirthLunarDateParts(inputData: CalculationInput): { year: string; month: string; day: string } | null {
@@ -2181,16 +2146,13 @@ export class GenderBasedCalculator extends AbstractFortuneCalculator {
       throw new Error(`Missing gender-based field for ${this.config.tableName}`);
     }
 
-    if (fieldName === 'combined_value' || fieldName === 'western_zodiac_number') {
-      return this.getWesternZodiacNumber(inputData).toString().padStart(2, '0');
-    }
-
-    if (fieldName === 'day_stem_num' || fieldName === 'day_stem_index') {
-      return this.getStemNumber(inputData.dayStem).toString().padStart(2, '0');
+    const expressionKind = resolveGenderedNarrativeExpressionKind(fieldName);
+    if (expressionKind) {
+      return calculateGenderedNarrativeExpression(expressionKind, inputData);
     }
 
     if (fieldName === 'star_name') {
-      return this.getWesternZodiacName(inputData);
+      return getWesternZodiacName(inputData);
     }
 
     throw new Error(`Unsupported gender-based field: ${fieldName} for ${this.config.tableName}`);
@@ -2217,7 +2179,7 @@ export class GenderBasedCalculator extends AbstractFortuneCalculator {
       return super.retrieveData(expression);
     }
 
-    const genderKey = this.resolveGenderKey(gender);
+    const genderKey = resolveGenderKey(gender);
     const preferredColumn = genderKey ? this.config.genderColumns[genderKey] : undefined;
 
     if (!preferredColumn) {
@@ -2225,71 +2187,6 @@ export class GenderBasedCalculator extends AbstractFortuneCalculator {
     }
 
     return super.retrieveData(expression, { preferredColumns: [preferredColumn] });
-  }
-
-  private resolveGenderKey(gender: string): 'M' | 'F' | null {
-    const normalized = String(gender ?? '').trim().toUpperCase();
-
-    if (normalized === 'M' || normalized === 'MALE' || normalized.startsWith('남')) {
-      return 'M';
-    }
-
-    if (normalized === 'F' || normalized === 'FEMALE' || normalized.startsWith('여')) {
-      return 'F';
-    }
-
-    return null;
-  }
-
-  private getWesternZodiacNumber(inputData: CalculationInput): number {
-    const birthDate = inputData.additionalData?.birth_date;
-    if (typeof birthDate !== 'string' || !birthDate) {
-      return 1;
-    }
-
-    const [, monthText = '01', dayText = '01'] = birthDate.split('-');
-    const month = Number.parseInt(monthText, 10);
-    const day = Number.parseInt(dayText, 10);
-
-    if ((month === 12 && day > 23) || (month === 1 && day < 21)) return 12;
-    if ((month === 1 && day > 20) || (month === 2 && day < 20)) return 1;
-    if ((month === 2 && day > 19) || (month === 3 && day < 21)) return 2;
-    if ((month === 3 && day > 20) || (month === 4 && day < 21)) return 3;
-    if ((month === 4 && day > 20) || (month === 5 && day < 22)) return 4;
-    if ((month === 5 && day > 21) || (month === 6 && day < 22)) return 5;
-    if ((month === 6 && day > 21) || (month === 7 && day < 24)) return 6;
-    if ((month === 7 && day > 23) || (month === 8 && day < 24)) return 7;
-    if ((month === 8 && day > 23) || (month === 9 && day < 24)) return 8;
-    if ((month === 9 && day > 23) || (month === 10 && day < 24)) return 9;
-    if ((month === 10 && day > 23) || (month === 11 && day < 23)) return 10;
-    return 11;
-  }
-
-  private getWesternZodiacName(inputData: CalculationInput): string {
-    const zodiacNames = [
-      '물병자리',
-      '물고기자리',
-      '양자리',
-      '황소자리',
-      '쌍둥이자리',
-      '게자리',
-      '사자자리',
-      '처녀자리',
-      '천칭자리',
-      '전갈자리',
-      '사수자리',
-      '염소자리',
-    ] as const;
-
-    const zodiacNumber = this.getWesternZodiacNumber(inputData);
-    return zodiacNames[zodiacNumber - 1] ?? '물병자리';
-  }
-
-  private getStemNumber(stem: string): number {
-    const stemKr = extractKorean(stem);
-    const stems = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계'];
-    const index = stems.indexOf(stemKr);
-    return index >= 0 ? index + 1 : 1;
   }
 }
 

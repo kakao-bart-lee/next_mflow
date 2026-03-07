@@ -250,6 +250,84 @@ describe("GenderBasedCalculator", () => {
     expect(result.text).toBe("남성 오행 보완 포인트")
     expect(result.numerical).toBe("2")
   })
+
+  it("keeps legacy gendered narrative aliases working", () => {
+    const retriever = new DatabaseResultRetriever({
+      T022: {
+        "07": {
+          data: "기본 텍스트",
+          DB_data_m: "남성 전용 텍스트",
+          DB_data_w: "여성 전용 텍스트",
+          numerical: 9,
+        },
+      },
+    })
+
+    const calculator = new GenderBasedCalculator(
+      {
+        tableName: "T022",
+        calculatorType: CalculatorType.GENDER_BASED,
+        expressionFields: ["combined_value"],
+        genderColumns: { M: "DB_data_m", F: "DB_data_w" },
+      },
+      retriever
+    )
+
+    expect(
+      calculator.calculate({
+        yearStem: "갑(甲)",
+        yearBranch: "자(子)",
+        monthStem: "갑(甲)",
+        monthBranch: "자(子)",
+        dayStem: "갑(甲)",
+        dayBranch: "자(子)",
+        hourStem: "갑(甲)",
+        hourBranch: "자(子)",
+        gender: "F",
+        additionalData: { birth_date: "1980-07-30" },
+      }).expression
+    ).toBe("07")
+  })
+
+  it("keeps legacy day stem aliases working", () => {
+    const retriever = new DatabaseResultRetriever({
+      S085: {
+        "01": {
+          data: "",
+          DB_data_m: "남성 선천적기질운",
+          DB_data_w: "여성 선천적기질운",
+          numerical: 4,
+        },
+      },
+    })
+
+    const calculator = new GenderBasedCalculator(
+      {
+        tableName: "S085",
+        calculatorType: CalculatorType.GENDER_BASED,
+        expressionFields: ["day_stem_num"],
+        genderColumns: { M: "DB_data_m", F: "DB_data_w" },
+      },
+      retriever
+    )
+
+    const result = calculator.calculate({
+      yearStem: "갑(甲)",
+      yearBranch: "자(子)",
+      monthStem: "갑(甲)",
+      monthBranch: "자(子)",
+      dayStem: "갑(甲)",
+      dayBranch: "자(子)",
+      hourStem: "갑(甲)",
+      hourBranch: "자(子)",
+      gender: "남자",
+      additionalData: { birth_date: "1980-07-30" },
+    })
+
+    expect(result.expression).toBe("01")
+    expect(result.text).toBe("남성 선천적기질운")
+    expect(result.numerical).toBe("4")
+  })
 })
 
 // ──────────────────────────────────────────────
