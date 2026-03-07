@@ -27,6 +27,7 @@ import { DatabaseResultRetriever } from "@/lib/saju-core/saju/fortuneInterpreter
 import {
   buildLegacyBedroomInsight,
   buildLegacyIntimacyInsight,
+  buildLegacyPartnerRoleInsight,
   buildLegacyRelationshipTimingInsight,
   buildLegacyMarriageFlowInsight,
   buildLegacyLoveStyleInsight,
@@ -731,6 +732,27 @@ describe("legacyCompatibility", () => {
     expect(legacyRelationshipTiming?.matchedYear).toBeLessThan((legacyRelationshipTiming?.currentYear ?? 0) + 10)
     expect(legacyRelationshipTiming?.matchedGanji).toBe(legacyRelationshipTiming?.lookupKey)
     expect(legacyRelationshipTiming?.text.trim().length).toBeGreaterThan(0)
+  })
+
+  it("builds the legacy G031 spouse-role detail from yongsin role and spouse palace", () => {
+    const service = new FortuneTellerService()
+    const primaryInfo = {
+      birthDate: "1990-01-15",
+      birthTime: "14:30",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "M" as const,
+    }
+
+    const primaryFortune = service.calculateSaju(primaryInfo)
+    const legacyPartnerRole = buildLegacyPartnerRoleInsight(primaryInfo, primaryFortune)
+
+    expect(legacyPartnerRole).toBeDefined()
+    expect(legacyPartnerRole?.sourceTable).toBe("G031")
+    expect(legacyPartnerRole?.lookupKey).toContain("|")
+    expect(legacyPartnerRole?.spouseRole).toMatch(/^(용신|희신|기신|구신|한신)$/)
+    expect(legacyPartnerRole?.palaceRole).toMatch(/^(용신|희신|기신|구신|한신)$/)
+    expect(legacyPartnerRole?.text.trim().length).toBeGreaterThan(0)
   })
 })
 

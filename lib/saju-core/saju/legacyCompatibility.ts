@@ -9,7 +9,12 @@
 import type { FortuneResponse } from "../models/fortuneTeller"
 import { getDataLoader } from "./dataLoader"
 import { calculateWoon12Daygi } from "./yongsinFlows"
-import { extractKorean } from "../utils"
+import {
+  classifyBranchRoleLabel,
+  classifyElementRoleLabel,
+  getElementRoleProfile,
+} from "./elementRoleProfiles"
+import { extractHanja, extractKorean } from "../utils"
 
 interface LegacyCompatibilityBirthInfo {
   readonly birthDate: string
@@ -136,6 +141,16 @@ export interface LegacyRelationshipTimingInsight {
   readonly currentYear: number
   readonly matchedYear: number
   readonly matchedGanji: string
+}
+
+export interface LegacyPartnerRoleInsight {
+  readonly sourceTable: "G031"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly spouseRole: string
+  readonly palaceRole: string
+  readonly text: string
 }
 
 const BRANCH_INDEX = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
@@ -313,6 +328,22 @@ function readLegacyG034Record(lookupKey: string): { readonly data?: string } | n
     }
   }
   return null
+}
+
+function readLegacyG031Record(
+  spouseRole: string,
+  palaceRole: string,
+): { readonly data?: string; readonly DB_data_w?: string } | null {
+  const gTables = getDataLoader().loadGTables() as Record<string, Record<string, Record<string, unknown>>>
+  const rolePayload = gTables.G031?.[spouseRole]
+  if (!rolePayload || typeof rolePayload !== "object") {
+    return null
+  }
+  const record = rolePayload[palaceRole]
+  if (!record || typeof record !== "object") {
+    return null
+  }
+  return record as { readonly data?: string; readonly DB_data_w?: string }
 }
 
 function readLegacyT010Record(lookupKey: string): { readonly data?: string } | null {
@@ -537,6 +568,24 @@ function resolveStemElement(stem: string): string | null {
     default:
       return null
   }
+}
+
+function resolveSpouseStarElement(dayStemHanja: string, gender: "M" | "F"): string | null {
+  if (gender === "M") {
+    if (dayStemHanja === "甲" || dayStemHanja === "乙") return "土"
+    if (dayStemHanja === "丙" || dayStemHanja === "丁") return "金"
+    if (dayStemHanja === "戊" || dayStemHanja === "己") return "水"
+    if (dayStemHanja === "庚" || dayStemHanja === "辛") return "木"
+    if (dayStemHanja === "壬" || dayStemHanja === "癸") return "火"
+    return null
+  }
+
+  if (dayStemHanja === "甲" || dayStemHanja === "乙") return "金"
+  if (dayStemHanja === "丙" || dayStemHanja === "丁") return "水"
+  if (dayStemHanja === "戊" || dayStemHanja === "己") return "木"
+  if (dayStemHanja === "庚" || dayStemHanja === "辛") return "火"
+  if (dayStemHanja === "壬" || dayStemHanja === "癸") return "土"
+  return null
 }
 
 function resolveFiveElementByYearCode(yearCodePair: string): string {
@@ -852,6 +901,42 @@ export function buildLegacyPartnerPersonalityInsight(
     title: "이성의 성격",
     scoreLabel: "성격궁합",
     lookupKey,
+    text,
+  }
+}
+
+export function buildLegacyPartnerRoleInsight(
+  primaryInfo: LegacyCompatibilityBirthInfo,
+  primaryFortune: FortuneResponse,
+): LegacyPartnerRoleInsight | null {
+  const dayStemHanja = extractHanja(primaryFortune.sajuData.pillars.일.천간)
+  const monthBranchHanja = extractHanja(primaryFortune.sajuData.pillars.월.지지)
+  const dayBranchHanja = extractHanja(primaryFortune.sajuData.pillars.일.지지)
+  const spouseStarElement = resolveSpouseStarElement(dayStemHanja, primaryInfo.gender)
+  if (!spouseStarElement) {
+    return null
+  }
+
+  const roleProfile = getElementRoleProfile(`${dayStemHanja}${monthBranchHanja}`)
+  const spouseRole = classifyElementRoleLabel(spouseStarElement, roleProfile.primary)
+  const palaceRole = classifyBranchRoleLabel(dayBranchHanja, roleProfile)
+  if (!spouseRole || !palaceRole) {
+    return null
+  }
+
+  const record = readLegacyG031Record(spouseRole, palaceRole)
+  const text = primaryInfo.gender === "M" ? record?.data ?? "" : record?.DB_data_w ?? ""
+  if (!text.trim()) {
+    return null
+  }
+
+  return {
+    sourceTable: "G031",
+    title: "배우자성·배우자궁 해설",
+    scoreLabel: "배우자궁합",
+    lookupKey: `${spouseRole}|${palaceRole}`,
+    spouseRole,
+    palaceRole,
     text,
   }
 }

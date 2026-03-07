@@ -75,6 +75,15 @@ interface CompatibilityResult {
     matchedYear: number
     matchedGanji: string
   } | null
+  legacy_partner_role?: {
+    sourceTable: "G031"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    spouseRole: string
+    palaceRole: string
+    text: string
+  } | null
   legacy_marriage_flow?: {
     sourceTable: "G001"
     title: string
@@ -460,6 +469,28 @@ export function CompatibilityScreen() {
                     </p>
                     <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                       {result.legacy_relationship_timing.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_partner_role ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_partner_role.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_partner_role.sourceTable} · key {result.legacy_partner_role.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_partner_role.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      배우자성 {result.legacy_partner_role.spouseRole} · 배우자궁 {result.legacy_partner_role.palaceRole}
+                    </p>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_partner_role.text}
                     </p>
                   </div>
                 ) : null}

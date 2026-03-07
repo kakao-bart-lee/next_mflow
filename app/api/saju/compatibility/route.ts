@@ -11,6 +11,7 @@ import {
 import {
   buildLegacyBedroomInsight,
   buildLegacyIntimacyInsight,
+  buildLegacyPartnerRoleInsight,
   buildLegacyRelationshipTimingInsight,
   buildLegacyMarriageFlowInsight,
   buildLegacyLoveStyleInsight,
@@ -101,6 +102,7 @@ export async function POST(req: NextRequest) {
     const legacyMarriageFlow = buildLegacyMarriageFlowInsight(personA, fortuneA)
     const legacyLoveStyle = buildLegacyLoveStyleInsight(personB, fortuneB)
     const legacyLoveWeakPoint = buildLegacyLoveWeakPointInsight(fortuneA)
+    const legacyPartnerRole = buildLegacyPartnerRoleInsight(personA, fortuneA)
     const legacyRelationshipTiming = buildLegacyRelationshipTimingInsight(personA, fortuneA)
     const legacyDestinyCore = buildLegacyDestinyCoreInsight(personA, fortuneA, fortuneB)
     const legacyOuterCompatibility = buildLegacyOuterCompatibilityInsight(personA, fortuneA, fortuneB)
@@ -122,6 +124,7 @@ export async function POST(req: NextRequest) {
         legacy_marriage_flow: legacyMarriageFlow,
         legacy_love_style: legacyLoveStyle,
         legacy_love_weak_point: legacyLoveWeakPoint,
+        legacy_partner_role: legacyPartnerRole,
         legacy_relationship_timing: legacyRelationshipTiming,
         legacy_destiny_core: legacyDestinyCore,
         legacy_outer_compatibility: legacyOuterCompatibility,
