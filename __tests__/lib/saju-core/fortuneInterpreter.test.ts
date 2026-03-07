@@ -30,6 +30,7 @@ import {
   buildLegacyMarriageFlowInsight,
   buildLegacyLoveStyleInsight,
   buildLegacyLoveWeakPointInsight,
+  buildLegacyTypeProfileInsight,
   buildLegacyYearlyLoveCycleInsight,
 } from "@/lib/saju-core/saju/legacyCompatibility"
 import {
@@ -576,6 +577,25 @@ describe("legacyCompatibility", () => {
     expect(legacyMarriageFlow?.currentMonth).toBeGreaterThanOrEqual(1)
     expect(legacyMarriageFlow?.currentMonth).toBeLessThanOrEqual(12)
     expect(legacyMarriageFlow?.text.trim().length).toBeGreaterThan(0)
+  })
+
+  it("builds the legacy T010 type-profile detail from the primary year branch category", () => {
+    const service = new FortuneTellerService()
+    const primaryInfo = {
+      birthDate: "1990-01-15",
+      birthTime: "14:30",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "M" as const,
+    }
+
+    const primaryFortune = service.calculateSaju(primaryInfo)
+    const legacyTypeProfile = buildLegacyTypeProfileInsight(primaryFortune)
+
+    expect(legacyTypeProfile).toBeDefined()
+    expect(legacyTypeProfile?.sourceTable).toBe("T010")
+    expect(legacyTypeProfile?.lookupKey).toMatch(/^\d{2}$/)
+    expect(legacyTypeProfile?.text.trim().length).toBeGreaterThan(0)
   })
 })
 

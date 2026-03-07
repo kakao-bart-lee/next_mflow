@@ -87,6 +87,14 @@ export interface LegacyMarriageFlowInsight {
   readonly currentMonth: number
 }
 
+export interface LegacyTypeProfileInsight {
+  readonly sourceTable: "T010"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+}
+
 const BRANCH_INDEX = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
 
 function toCalculationInput(fortune: FortuneResponse, gender: "M" | "F"): LegacyCompatibilityCalculationInput {
@@ -144,6 +152,15 @@ function readLegacyG001Record(lookupKey: string): { readonly data?: string; read
     }
   }
   return null
+}
+
+function readLegacyT010Record(lookupKey: string): { readonly data?: string } | null {
+  const tTables = getDataLoader().loadTTables() as Record<string, Record<string, Record<string, unknown>>>
+  const record = tTables.T010?.[lookupKey]
+  if (!record || typeof record !== "object") {
+    return null
+  }
+  return record as { readonly data?: string }
 }
 
 function readLegacyY003Record(lookupKey: string): { readonly DB_data_m?: string; readonly DB_data_w?: string; readonly numerical?: number | string | null } | null {
@@ -204,6 +221,30 @@ function getYearBranchIndex(fortune: FortuneResponse): number {
 
 function getDayBranchIndex(fortune: FortuneResponse): number {
   return BRANCH_INDEX.indexOf(extractKorean(fortune.sajuData.pillars.일.지지)) + 1
+}
+
+function getYearBranchCategory(fortune: FortuneResponse): number | null {
+  const yearBranchIndex = getYearBranchIndex(fortune)
+  switch (String(yearBranchIndex).padStart(2, "0")) {
+    case "01":
+    case "03":
+    case "05":
+      return 1
+    case "06":
+    case "07":
+    case "11":
+      return 2
+    case "02":
+    case "04":
+    case "09":
+      return 3
+    case "08":
+    case "10":
+    case "12":
+      return 4
+    default:
+      return null
+  }
 }
 
 export function buildLegacyIntimacyInsight(
@@ -337,6 +378,30 @@ export function buildLegacyMarriageFlowInsight(
     text: record.data,
     score: Number.isFinite(numericalValue) ? numericalValue : null,
     currentMonth,
+  }
+}
+
+export function buildLegacyTypeProfileInsight(
+  primaryFortune: FortuneResponse,
+): LegacyTypeProfileInsight | null {
+  const yearBranchIndex = getYearBranchIndex(primaryFortune)
+  const category = getYearBranchCategory(primaryFortune)
+  if (yearBranchIndex < 1 || category === null) {
+    return null
+  }
+
+  const lookupKey = String(yearBranchIndex * category).padStart(2, "0")
+  const record = readLegacyT010Record(lookupKey)
+  if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {
+    return null
+  }
+
+  return {
+    sourceTable: "T010",
+    title: "사주 타입 분석",
+    scoreLabel: "성향 분석",
+    lookupKey,
+    text: record.data,
   }
 }
 
