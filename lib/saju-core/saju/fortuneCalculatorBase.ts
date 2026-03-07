@@ -6,7 +6,12 @@
 import { extractKorean } from '../utils';
 import { getSipsinForBranch, KOREAN_BRANCH_TO_DISPLAY } from './constants';
 import { getDataLoader } from './dataLoader';
-import { classifyCurrentFortuneElement, getElementRoleProfile } from './elementRoleProfiles';
+import {
+  classifyBranchRoleLabel,
+  classifyCurrentFortuneElement,
+  classifyStemRoleLabel,
+  getElementRoleProfile,
+} from './elementRoleProfiles';
 import {
   calculateGenderedNarrativeExpression,
   getWesternZodiacName,
@@ -1549,6 +1554,8 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
         role_profile_source: context.elementRoleProfile.sourceTitleKey,
         role_profile_number: context.elementRoleProfile.sourceNumber,
         role_profile_primary: context.elementRoleProfile.primary,
+        current_year_stem_role: context.currentYearStemRole,
+        current_year_branch_role: context.currentYearBranchRole,
       },
     };
   }
@@ -1559,6 +1566,8 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     readonly woonY: string;
     readonly woonZ: string;
     readonly elementRoleProfile: import('./elementRoleProfiles').ElementRoleProfile;
+    readonly currentYearStemRole: import('./elementRoleProfiles').ElementRoleLabel;
+    readonly currentYearBranchRole: import('./elementRoleProfiles').ElementRoleLabel;
   } {
     const currentDate = this.getCurrentDateContext(inputData);
     if (!currentDate) {
@@ -1591,6 +1600,8 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     let toYGSibsin = this.getCurrentBranchSibsin(dayStemNumber, dayStemElementGroup, currentBranchRule.oh, currentBranchRule.ey);
     let woonY = classifyCurrentFortuneElement(this.getStemElementGroup(currentYearStemNumber), elementRoleProfile);
     let woonZ = classifyCurrentFortuneElement(currentBranchRule.oh, elementRoleProfile);
+    const currentYearStemRole = classifyStemRoleLabel(STEM_CODE_TO_HANJA[currentYearStem] ?? '', elementRoleProfile);
+    const currentYearBranchRole = classifyBranchRoleLabel(currentYearBranchHanja ?? '', elementRoleProfile);
 
     if (inputData.gender !== 'M') {
       woonY = this.incrementWoonCode(woonY);
@@ -1607,6 +1618,8 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
       woonY,
       woonZ,
       elementRoleProfile,
+      currentYearStemRole,
+      currentYearBranchRole,
     };
   }
 

@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest"
 import { FortuneTellerService } from "@/lib/saju-core/facade"
 import {
+  classifyBranchRoleLabel,
   classifyCurrentFortuneElement,
+  classifyStemRoleLabel,
   getElementRoleProfile,
 } from "@/lib/saju-core/saju/elementRoleProfiles"
 import {
@@ -371,6 +373,8 @@ describe("elementRoleProfiles", () => {
     expect(profile.sourceTitleKey).toBe("甲子")
     expect(profile.primary.usefulElement).toBeTruthy()
     expect(profile.secondary.favorableElement).toBeTruthy()
+    expect(classifyStemRoleLabel("丙", profile)).toBe("용신")
+    expect(classifyBranchRoleLabel("辰", profile)).toBe("한신")
   })
 })
 

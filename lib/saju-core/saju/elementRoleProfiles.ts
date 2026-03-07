@@ -17,6 +17,8 @@ export interface ElementRoleSnapshot {
   readonly reserveElement: string
 }
 
+export type ElementRoleLabel = "용신" | "희신" | "기신" | "구신" | "한신" | null
+
 export interface ElementRoleProfile {
   readonly sourceTitleKey: string
   readonly sourceNumber: string
@@ -42,6 +44,24 @@ function buildElementRoleSnapshot(record: Record<string, unknown>, suffix: "1" |
 
 function getElementCode(hanja: string): string {
   return ELEMENT_CODE_BY_HANJA[hanja] ?? "1"
+}
+
+function getStemElement(stemHanja: string): string | null {
+  if (stemHanja === "甲" || stemHanja === "乙") return "木"
+  if (stemHanja === "丙" || stemHanja === "丁") return "火"
+  if (stemHanja === "戊" || stemHanja === "己") return "土"
+  if (stemHanja === "庚" || stemHanja === "辛") return "金"
+  if (stemHanja === "壬" || stemHanja === "癸") return "水"
+  return null
+}
+
+function getBranchElement(branchHanja: string): string | null {
+  if (branchHanja === "寅" || branchHanja === "卯") return "木"
+  if (branchHanja === "巳" || branchHanja === "午") return "火"
+  if (branchHanja === "申" || branchHanja === "酉") return "金"
+  if (branchHanja === "亥" || branchHanja === "子") return "水"
+  if (branchHanja === "辰" || branchHanja === "戌" || branchHanja === "丑" || branchHanja === "未") return "土"
+  return null
 }
 
 export function getElementRoleProfile(titleKey: string): ElementRoleProfile {
@@ -84,4 +104,23 @@ export function classifyCurrentFortuneElement(
     return "02"
   }
   return "03"
+}
+
+export function classifyElementRoleLabel(targetElement: string, snapshot: ElementRoleSnapshot): ElementRoleLabel {
+  if (snapshot.usefulElement === targetElement) return "용신"
+  if (snapshot.favorableElement === targetElement) return "희신"
+  if (snapshot.harmfulElement === targetElement) return "기신"
+  if (snapshot.adverseElement === targetElement) return "구신"
+  if (snapshot.reserveElement === targetElement) return "한신"
+  return null
+}
+
+export function classifyStemRoleLabel(stemHanja: string, roleProfile: ElementRoleProfile): ElementRoleLabel {
+  const element = getStemElement(stemHanja)
+  return element ? classifyElementRoleLabel(element, roleProfile.primary) : null
+}
+
+export function classifyBranchRoleLabel(branchHanja: string, roleProfile: ElementRoleProfile): ElementRoleLabel {
+  const element = getBranchElement(branchHanja)
+  return element ? classifyElementRoleLabel(element, roleProfile.primary) : null
 }
