@@ -4,6 +4,7 @@ import {
   classifyCurrentFortuneElement,
   getElementRoleProfile,
 } from "@/lib/saju-core/saju/elementRoleProfiles"
+import { resolveFortuneYearMarkers } from "@/lib/saju-core/saju/fortuneYearMarkers"
 import {
   calculateJuyeokGanSerial,
   calculateJuyeokJiSerial,
@@ -380,6 +381,36 @@ describe("legacyCycles", () => {
 
     expect(advanceLegacyCycle(15, 5, 10)).toBe(1)
     expect(advanceLegacyCycle(14, 10, 12)).toBe(1)
+  })
+})
+
+describe("fortuneYearMarkers", () => {
+  it("resolves cheondeok and cheondeokhap markers from legacy month/year rules", () => {
+    expect(
+      resolveFortuneYearMarkers({
+        monthBranch: "子",
+        targetYearStem: "甲",
+        targetYearBranch: "巳",
+      })
+    ).toEqual(["천덕귀인", "천덕합"])
+  })
+
+  it("resolves woldeok and woldeokhap markers from legacy month/year rules", () => {
+    expect(
+      resolveFortuneYearMarkers({
+        monthBranch: "寅",
+        targetYearStem: "辛",
+        targetYearBranch: "酉",
+      })
+    ).toEqual(["월덕합"])
+
+    expect(
+      resolveFortuneYearMarkers({
+        monthBranch: "寅",
+        targetYearStem: "丙",
+        targetYearBranch: "戌",
+      })
+    ).toEqual(["월덕귀인"])
   })
 })
 

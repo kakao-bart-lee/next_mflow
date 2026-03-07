@@ -1,5 +1,6 @@
 import type { FortuneProfileEntry, FortuneProfileSection, FortuneRequest, FortuneResponse } from '../models/fortuneTeller'
 import { extractHanja, extractKorean } from '../utils'
+import { resolveFortuneYearMarkers } from './fortuneYearMarkers'
 import { getSipsinForBranch, getSipsinForStem } from './constants'
 import type { ProfileSectionDefinition } from './fortuneProfiles'
 import { GONGMANG_MAPPING, YANGINSAL_MAPPING } from './twelveSinsal/mappings'
@@ -28,6 +29,7 @@ type YearWindowRow = {
   readonly stemSipsin: string
   readonly branchSipsin: string
   readonly sinsal: string | null
+  readonly yearMarkers: readonly string[]
   readonly hasYangin: boolean
   readonly hasGongmang: boolean
   readonly isCurrentYear: boolean
@@ -111,6 +113,7 @@ function buildMarkerSummary(row: YearWindowRow): string {
   if (row.sinsal) {
     markers.push(row.sinsal)
   }
+  markers.push(...row.yearMarkers)
   if (row.hasYangin) {
     markers.push('양인')
   }
@@ -131,6 +134,7 @@ function buildYearWindowRows(
   const dayStemKorean = extractKorean(fortuneResponse.sajuData.pillars.일.천간)
   const dayStemHanja = extractHanja(fortuneResponse.sajuData.pillars.일.천간)
   const dayBranchKorean = extractKorean(fortuneResponse.sajuData.pillars.일.지지)
+  const monthBranchHanja = extractHanja(fortuneResponse.sajuData.pillars.월.지지)
   const dayPillarKey = `${dayStemKorean}${dayBranchKorean}`
 
   return YEAR_WINDOW_OFFSETS.map((offset) => {
@@ -150,6 +154,11 @@ function buildYearWindowRows(
       stemSipsin: getSipsinForStem(dayStemHanja, pillar.stem),
       branchSipsin: getSipsinForBranch(dayStemHanja, pillar.branch),
       sinsal: calculateSinsal(dayBranchKorean, branchDisplay),
+      yearMarkers: resolveFortuneYearMarkers({
+        monthBranch: monthBranchHanja,
+        targetYearStem: pillar.stem,
+        targetYearBranch: pillar.branch,
+      }),
       hasYangin: yanginTargets.includes(branchDisplay),
       hasGongmang: gongmangTargets.includes(branchDisplay),
       isCurrentYear: offset === 0,
