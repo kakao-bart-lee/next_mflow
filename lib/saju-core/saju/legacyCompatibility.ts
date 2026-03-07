@@ -103,6 +103,14 @@ export interface LegacyOuterCompatibilityInsight {
   readonly text: string
 }
 
+export interface LegacyTraditionalCompatibilityInsight {
+  readonly sourceTable: "G022"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+}
+
 const BRANCH_INDEX = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
 const STEM_CODE_BY_KOREAN: Record<string, string> = {
   갑: "A",
@@ -189,6 +197,19 @@ function readLegacyG023Record(lookupKey: string): { readonly data?: string } | n
     return null
   }
   return record as { readonly data?: string }
+}
+
+function readLegacyG022Record(lookupKey: string): { readonly data?: string } | null {
+  const gTables = getDataLoader().loadGTables() as Record<string, Record<string, Record<string, unknown>>>
+  const table = gTables.G022
+  const candidates = [lookupKey, lookupKey.trim(), String(Number.parseInt(lookupKey, 10))]
+  for (const candidate of candidates) {
+    const record = table?.[candidate]
+    if (record && typeof record === "object") {
+      return record as { readonly data?: string }
+    }
+  }
+  return null
 }
 
 function readLegacyT010Record(lookupKey: string): { readonly data?: string } | null {
@@ -313,6 +334,26 @@ function resolveFiveElementByYearCode(yearCodePair: string): string {
 
   const fallbackIndex = branchIndex % 5
   return FIVE_ELEMENT_FALLBACK[fallbackIndex] ?? "금"
+}
+
+function resolveOuterCompatibilityElements(
+  primaryInfo: LegacyCompatibilityBirthInfo,
+  primaryFortune: FortuneResponse,
+  partnerFortune: FortuneResponse,
+): { readonly primaryElement: string; readonly partnerElement: string } | null {
+  const primaryYearCode = resolveYearCodePair(primaryFortune)
+  const partnerYearCode = resolveYearCodePair(partnerFortune)
+  if (!primaryYearCode || !partnerYearCode) {
+    return null
+  }
+
+  const resolvedPrimary = resolveFiveElementByYearCode(primaryYearCode)
+  const resolvedPartner = resolveFiveElementByYearCode(partnerYearCode)
+
+  if (primaryInfo.gender === "M") {
+    return { primaryElement: resolvedPrimary, partnerElement: resolvedPartner }
+  }
+  return { primaryElement: resolvedPartner, partnerElement: resolvedPrimary }
 }
 
 export function buildLegacyIntimacyInsight(
@@ -478,18 +519,11 @@ export function buildLegacyOuterCompatibilityInsight(
   primaryFortune: FortuneResponse,
   partnerFortune: FortuneResponse,
 ): LegacyOuterCompatibilityInsight | null {
-  const primaryYearCode = resolveYearCodePair(primaryFortune)
-  const partnerYearCode = resolveYearCodePair(partnerFortune)
-  if (!primaryYearCode || !partnerYearCode) {
+  const elements = resolveOuterCompatibilityElements(primaryInfo, primaryFortune, partnerFortune)
+  if (!elements) {
     return null
   }
-
-  const primaryElement = resolveFiveElementByYearCode(primaryYearCode)
-  const partnerElement = resolveFiveElementByYearCode(partnerYearCode)
-  const lookupKey =
-    primaryInfo.gender === "M"
-      ? `${primaryElement}${partnerElement}`
-      : `${partnerElement}${primaryElement}`
+  const lookupKey = `${elements.primaryElement}${elements.partnerElement}`
   const record = readLegacyG023Record(lookupKey)
   if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {
     return null
@@ -499,6 +533,38 @@ export function buildLegacyOuterCompatibilityInsight(
     sourceTable: "G023",
     title: "겉궁합",
     scoreLabel: "오행궁합",
+    lookupKey,
+    text: record.data,
+  }
+}
+
+export function buildLegacyTraditionalCompatibilityInsight(
+  primaryInfo: LegacyCompatibilityBirthInfo,
+  primaryFortune: FortuneResponse,
+  partnerFortune: FortuneResponse,
+): LegacyTraditionalCompatibilityInsight | null {
+  const elements = resolveOuterCompatibilityElements(primaryInfo, primaryFortune, partnerFortune)
+  if (!elements) {
+    return null
+  }
+
+  const elementOrder = ["목", "화", "토", "금", "수"]
+  const primaryValue = elementOrder.indexOf(elements.primaryElement) + 1
+  const partnerValue = elementOrder.indexOf(elements.partnerElement) + 1
+  if (primaryValue < 1 || partnerValue < 1) {
+    return null
+  }
+
+  const lookupKey = String(primaryValue * partnerValue || 25)
+  const record = readLegacyG022Record(lookupKey)
+  if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {
+    return null
+  }
+
+  return {
+    sourceTable: "G022",
+    title: "정통궁합",
+    scoreLabel: "정통궁합",
     lookupKey,
     text: record.data,
   }
