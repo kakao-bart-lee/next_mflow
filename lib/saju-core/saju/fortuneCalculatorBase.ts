@@ -6,6 +6,7 @@
 import { extractKorean } from '../utils';
 import { getSipsinForBranch, KOREAN_BRANCH_TO_DISPLAY } from './constants';
 import { getDataLoader } from './dataLoader';
+import { classifyCurrentFortuneElement, getElementRoleProfile } from './elementRoleProfiles';
 import {
   calculateGenderedNarrativeExpression,
   getWesternZodiacName,
@@ -197,13 +198,6 @@ const BRANCH_DISPLAY_TO_HANJA: Record<string, string> = {
   해: '亥',
   자: '子',
   축: '丑',
-};
-const ELEMENT_CODE_BY_HANJA: Record<string, string> = {
-  木: '1',
-  火: '2',
-  土: '3',
-  '金': '4',
-  水: '5',
 };
 const CURRENT_YEAR_BRANCH_RULES: Record<number, { oh: string; ey: number }> = {
   1: { oh: '5', ey: 2 },
@@ -1611,10 +1605,6 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
   }
 
   private buildS014Context(inputData: CalculationInput): {
-    readonly yongCode: string;
-    readonly heeCode: string;
-    readonly keeCode: string;
-    readonly gooCode: string;
     readonly toYCSibsin: string;
     readonly toYGSibsin: string;
     readonly woonY: string;
@@ -1642,15 +1632,15 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     const dayStemDisplay = extractKorean(inputData.dayStem);
     const monthBranchDisplay = extractKorean(inputData.monthBranch);
     const titleKey = `${STEM_DISPLAY_TO_HANJA[dayStemDisplay] ?? ''}${BRANCH_DISPLAY_TO_HANJA[monthBranchDisplay] ?? ''}`;
-    const yongsinCodes = this.getYongsinElementCodes(titleKey);
+    const elementRoleProfile = getElementRoleProfile(titleKey);
 
     const dayStemNumber = this.getStemNumber(dayStemDisplay);
     const dayStemElementGroup = this.getStemElementGroup(dayStemNumber);
 
     let toYCSibsin = this.getCurrentStemSibsin(dayStemNumber, currentYearStemNumber);
     let toYGSibsin = this.getCurrentBranchSibsin(dayStemNumber, dayStemElementGroup, currentBranchRule.oh, currentBranchRule.ey);
-    let woonY = this.getWoonCode(this.getStemElementGroup(currentYearStemNumber), yongsinCodes);
-    let woonZ = this.getWoonCode(currentBranchRule.oh, yongsinCodes);
+    let woonY = classifyCurrentFortuneElement(this.getStemElementGroup(currentYearStemNumber), elementRoleProfile);
+    let woonZ = classifyCurrentFortuneElement(currentBranchRule.oh, elementRoleProfile);
 
     if (inputData.gender !== 'M') {
       woonY = this.incrementWoonCode(woonY);
@@ -1662,7 +1652,6 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     toYGSibsin = String(Math.abs(hourOffset - Number.parseInt(toYGSibsin, 10))).padStart(2, '0');
 
     return {
-      ...yongsinCodes,
       toYCSibsin,
       toYGSibsin,
       woonY,
@@ -1762,30 +1751,6 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     };
   }
 
-  private getYongsinElementCodes(titleKey: string): {
-    readonly yongCode: string;
-    readonly heeCode: string;
-    readonly keeCode: string;
-    readonly gooCode: string;
-  } {
-    const etcTables = getDataLoader().loadEtcTables() as Record<string, unknown>;
-    const rows = Array.isArray(etcTables.toC_yongsin_01) ? etcTables.toC_yongsin_01 : [];
-    const record = rows.find(
-      (row): row is Record<string, unknown> =>
-        typeof row === 'object' && row !== null && typeof row.title === 'string' && row.title === titleKey
-    );
-    if (!record) {
-      throw new Error(`yongsin reference is unavailable for ${titleKey}`);
-    }
-
-    return {
-      yongCode: ELEMENT_CODE_BY_HANJA[String(record.yo1 ?? '')] ?? '1',
-      heeCode: ELEMENT_CODE_BY_HANJA[String(record.he1 ?? '')] ?? '1',
-      keeCode: ELEMENT_CODE_BY_HANJA[String(record.gi1 ?? '')] ?? '1',
-      gooCode: ELEMENT_CODE_BY_HANJA[String(record.gu1 ?? '')] ?? '1',
-    };
-  }
-
   private getStemElementGroup(stemNumber: number): string {
     if (stemNumber === 1 || stemNumber === 2) return '1';
     if (stemNumber === 3 || stemNumber === 4) return '2';
@@ -1821,19 +1786,9 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     return result;
   }
 
-  private getWoonCode(targetElementCode: string, codes: { yongCode: string; heeCode: string; keeCode: string; gooCode: string }): string {
-    if (codes.yongCode === targetElementCode || codes.heeCode === targetElementCode) {
-      return '01';
-    }
-    if (codes.keeCode === targetElementCode || codes.gooCode === targetElementCode) {
-      return '02';
-    }
-    return '03';
-  }
-
-  private incrementWoonCode(code: string): string {
+  private incrementWoonCode(code: string): '01' | '02' | '03' {
     const next = (Number.parseInt(code, 10) % 3) + 1;
-    return String(next).padStart(2, '0');
+    return String(next).padStart(2, '0') as '01' | '02' | '03';
   }
 
 

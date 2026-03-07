@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest"
 import { FortuneTellerService } from "@/lib/saju-core/facade"
+import {
+  classifyCurrentFortuneElement,
+  getElementRoleProfile,
+} from "@/lib/saju-core/saju/elementRoleProfiles"
 import { DatabaseResultRetriever } from "@/lib/saju-core/saju/fortuneInterpreter"
 import {
   CalculatorType,
@@ -327,6 +331,28 @@ describe("GenderBasedCalculator", () => {
     expect(result.expression).toBe("01")
     expect(result.text).toBe("남성 선천적기질운")
     expect(result.numerical).toBe("4")
+  })
+})
+
+describe("elementRoleProfiles", () => {
+  it("classifies current fortune elements using semantic role buckets", () => {
+    const profile = getElementRoleProfile("甲子")
+
+    expect(classifyCurrentFortuneElement(profile.usefulCode, profile)).toBe("01")
+    expect(classifyCurrentFortuneElement(profile.favorableCode, profile)).toBe("01")
+    expect(classifyCurrentFortuneElement(profile.harmfulCode, profile)).toBe("02")
+    expect(classifyCurrentFortuneElement(profile.adverseCode, profile)).toBe("02")
+
+    const neutralCode = ["1", "2", "3", "4", "5"].find(
+      (code) =>
+        code !== profile.usefulCode &&
+        code !== profile.favorableCode &&
+        code !== profile.harmfulCode &&
+        code !== profile.adverseCode
+    )
+
+    expect(neutralCode).toBeDefined()
+    expect(classifyCurrentFortuneElement(neutralCode ?? "1", profile)).toBe("03")
   })
 })
 
