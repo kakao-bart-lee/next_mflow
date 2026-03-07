@@ -43,6 +43,8 @@ export const BirthInfoSchema = z
     latitude: z.number().min(-90).max(90).optional(),
     longitude: z.number().min(-180).max(180).optional(),
     locationName: z.string().optional(),
+    // 사상체질: ty=태양인, sy=소양인, tu=태음인, su=소음인 (optional, G028 궁합용)
+    sasangConstitution: z.enum(["ty", "sy", "tu", "su"]).optional(),
   })
   .superRefine((val, ctx) => {
     if (val.isTimeUnknown) {
