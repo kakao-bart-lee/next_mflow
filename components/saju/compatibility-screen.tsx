@@ -26,6 +26,14 @@ interface CompatibilityResult {
   health_match: { score: number; description: string }
   wealth_match: { score: number; description: string }
   career_match: { score: number; description: string }
+  legacy_intimacy?: {
+    sourceTable: "G016"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    score: number | null
+  } | null
   overall_interpretation: string
   recommendations: string[]
 }
@@ -235,6 +243,27 @@ export function CompatibilityScreen() {
                     </div>
                   ))}
                 </div>
+
+                {result.legacy_intimacy ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_intimacy.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_intimacy.sourceTable} · key {result.legacy_intimacy.lookupKey}
+                        </p>
+                      </div>
+                      {typeof result.legacy_intimacy.score === "number" ? (
+                        <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                          {result.legacy_intimacy.scoreLabel} {result.legacy_intimacy.score}
+                        </div>
+                      ) : null}
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_intimacy.text}
+                    </p>
+                  </div>
+                ) : null}
 
                 {/* 강점/약점/조언 */}
                 {result.total_score.strengths.length > 0 && (

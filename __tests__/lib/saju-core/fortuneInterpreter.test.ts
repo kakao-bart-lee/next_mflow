@@ -24,6 +24,7 @@ import {
 } from "@/lib/saju-core/saju/juyeokTrigrams"
 import { advanceLegacyCycle, getFiveElementGroup } from "@/lib/saju-core/saju/legacyCycles"
 import { DatabaseResultRetriever } from "@/lib/saju-core/saju/fortuneInterpreter"
+import { buildLegacyIntimacyInsight } from "@/lib/saju-core/saju/legacyCompatibility"
 import {
   CalculatorType,
   GenderBasedCalculator,
@@ -439,6 +440,35 @@ describe("yongsinFlows", () => {
     expect(calculateYongToSipsin(inputData)).toBe("03")
     expect(calculateYongChungan(inputData)).toBe("03")
     expect(calculateWoon12Daygi(inputData)).toBe("04")
+  })
+})
+
+describe("legacyCompatibility", () => {
+  it("builds the legacy G016 intimacy detail from two saju results", () => {
+    const service = new FortuneTellerService()
+    const primaryInfo = {
+      birthDate: "1990-01-15",
+      birthTime: "14:30",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "M" as const,
+    }
+    const partnerInfo = {
+      birthDate: "1992-08-03",
+      birthTime: "09:10",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "F" as const,
+    }
+
+    const primaryFortune = service.calculateSaju(primaryInfo)
+    const partnerFortune = service.calculateSaju(partnerInfo)
+    const legacyIntimacy = buildLegacyIntimacyInsight(primaryInfo, primaryFortune, partnerInfo, partnerFortune)
+
+    expect(legacyIntimacy).toBeDefined()
+    expect(legacyIntimacy?.sourceTable).toBe("G016")
+    expect(legacyIntimacy?.lookupKey).toMatch(/^\d{2}-\d{2}$/)
+    expect(legacyIntimacy?.text.trim().length).toBeGreaterThan(0)
   })
 })
 
