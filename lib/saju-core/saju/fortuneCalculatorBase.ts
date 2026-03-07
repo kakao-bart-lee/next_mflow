@@ -13,6 +13,7 @@ import {
   resolveGenderKey,
   resolveGenderedNarrativeExpressionKind,
 } from './genderedNarratives';
+import { calculateJuyeokGanSerial, calculateJuyeokJiSerial, calculateJuyeokPairSerial } from './juyeokTrigrams';
 import {
   calculateNewYearMonthlyExpression,
   calculateNewYearSignalExpression,
@@ -112,36 +113,6 @@ const SINSAL_DISP_TABLE_KEY_BY_LABEL: Record<string, string> = {
   '역마살(驛馬殺)': '역마살_disp',
   '육해살(六害殺)': '육해살_disp',
   '화개살(華蓋殺)': '화개살_disp',
-};
-const JUYEOK_TRIGRAM_GAN_GROUPS: Record<string, readonly string[]> = {
-  건: ['갑인', '갑오', '갑술', '병신', '병자', '병진', '무해', '무묘', '무미', '경사', '임인', '경유', '경축', '임오', '임술'],
-  태: ['을인', '을오', '을술', '정신', '기묘', '정진', '기해', '정자', '기미', '신사', '계오', '계인', '신유', '신축', '계술'],
-  이: ['갑사', '갑유', '갑축', '병인', '병오', '병술', '무신', '무자', '무진', '경해', '경묘', '경미', '임사', '임유', '임축'],
-  진: ['을사', '을유', '을축', '정오', '정인', '정술', '기신', '기자', '기진', '신해', '신묘', '신미', '계사', '계유', '계축'],
-  손: ['갑해', '갑묘', '갑미', '병사', '병유', '병축', '경신', '무인', '무오', '경자', '무술', '임해', '임묘', '임미', '경진'],
-  감: ['을해', '을묘', '정사', '을미', '정유', '정축', '기인', '기오', '기술', '신신', '계해', '신진', '신자', '계묘', '계미'],
-  간: ['갑신', '갑자', '갑진', '병해', '병묘', '임신', '무축', '무사', '병미', '경술', '경오', '경인', '무유', '임진', '임자'],
-  곤: ['을신', '을자', '을진', '정해', '정묘', '기사', '정미', '기유', '신오', '신술', '신인', '계신', '기축', '계진', '계자'],
-};
-const JUYEOK_TRIGRAM_JI_GROUPS: Record<string, readonly string[]> = {
-  건: ['자인', '자오', '자술', '묘신', '묘자', '묘진', '진사', '미묘', '진유', '미미', '해자', '진축', '미해', '신인', '신오', '신술', '해신', '해진'],
-  태: ['축인', '축오', '인신', '축술', '사유', '인자', '인진', '오해', '오미', '사사', '술신', '유술', '오묘', '유오', '유인', '술진', '술자', '사축'],
-  이: ['축신', '축자', '축진', '인인', '인오', '인술', '사해', '사묘', '사미', '유진', '오사', '오축', '오유', '유신', '유자', '술인', '술술', '술오'],
-  진: ['자신', '자자', '자진', '해술', '묘인', '묘술', '진해', '진묘', '미유', '신진', '진미', '미축', '신자', '해인', '미사', '묘오', '신신', '해오'],
-  손: ['자사', '자유', '해미', '자축', '묘해', '묘묘', '묘미', '진인', '진오', '진술', '미신', '미자', '미진', '신사', '신유', '신축', '해해', '해묘'],
-  감: ['축사', '축유', '축축', '인해', '인묘', '사인', '인미', '사오', '사술', '오신', '오자', '오진', '술해', '유축', '유유', '유사', '술미', '술묘'],
-  간: ['축해', '축묘', '축미', '인사', '인유', '인축', '사신', '사자', '사진', '오인', '오오', '오술', '유해', '유묘', '유미', '술사', '술축', '술유'],
-  곤: ['자해', '자묘', '자미', '묘사', '묘유', '묘축', '진신', '진자', '진진', '미인', '미오', '미술', '신해', '신묘', '신미', '해사', '해축', '해유'],
-};
-const TRIGRAM_TO_SERIAL: Record<string, number> = {
-  건: 1,
-  태: 2,
-  이: 3,
-  진: 4,
-  손: 5,
-  감: 6,
-  간: 7,
-  곤: 8,
 };
 const BRANCHES_FROM_IN_DISPLAY = ['인', '묘', '진', '사', '오', '미', '신', '유', '술', '해', '자', '축'] as const;
 const HEAVENLY_STEM_DISPLAY_BY_CODE: Record<string, string> = {
@@ -276,20 +247,6 @@ const ZIWEI_QUERY_STAR_ORDER = [
   '자미',
 ] as const;
 
-function resolveJuyeokTrigram(mode: 'Gan' | 'Ji', first: string, second: string): string | null {
-  const groups = mode === 'Gan' ? JUYEOK_TRIGRAM_GAN_GROUPS : JUYEOK_TRIGRAM_JI_GROUPS;
-  const key = `${first}${second}`;
-  for (const [trigram, combos] of Object.entries(groups)) {
-    if (combos.includes(key)) {
-      return trigram;
-    }
-  }
-  return null;
-}
-
-function trigramToSerial(trigram: string | null): number {
-  return TRIGRAM_TO_SERIAL[trigram ?? ''] ?? 8;
-}
 type CurrentDateContext = {
   readonly year: number;
   readonly month: number;
@@ -594,8 +551,7 @@ export class SimpleQueryCalculator extends AbstractFortuneCalculator {
 
     const birthDayBranch = this.branchOrgCodeToKorean(this.getBranchOrgNumber(inputData.dayBranch));
     const currentDayBranch = this.branchOrgCodeToKorean(currentDayBranchNumber);
-    const trigram = resolveJuyeokTrigram('Ji', birthDayBranch, currentDayBranch);
-    return String(trigramToSerial(trigram));
+    return calculateJuyeokJiSerial(birthDayBranch, currentDayBranch);
   }
 
   private branchOrgCodeToKorean(value: number): string {
@@ -613,9 +569,7 @@ export class SimpleQueryCalculator extends AbstractFortuneCalculator {
     const birthDayBranch = this.branchOrgCodeToKorean(this.getBranchOrgNumber(inputData.dayBranch));
     const currentDayBranch = this.branchOrgCodeToKorean(currentDayBranchNumber);
 
-    const ganSerial = trigramToSerial(resolveJuyeokTrigram('Gan', birthDayStem, currentDayBranch));
-    const jiSerial = trigramToSerial(resolveJuyeokTrigram('Ji', birthDayBranch, currentDayBranch));
-    return `${ganSerial}${jiSerial}`;
+    return calculateJuyeokPairSerial(birthDayStem, birthDayBranch, currentDayBranch);
   }
 
   private getBranchKorean(branch: string): string {
@@ -1307,8 +1261,7 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
 
     const birthDayStem = extractKorean(inputData.dayStem);
     const currentDayBranch = this.branchOrgCodeToKorean(currentDayBranchNumber);
-    const trigram = resolveJuyeokTrigram('Gan', birthDayStem, currentDayBranch);
-    return String(trigramToSerial(trigram));
+    return calculateJuyeokGanSerial(birthDayStem, currentDayBranch);
   }
 
   private calculateS126Expression(inputData: CalculationInput): string {

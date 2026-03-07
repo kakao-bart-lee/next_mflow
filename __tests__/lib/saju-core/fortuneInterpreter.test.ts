@@ -4,6 +4,11 @@ import {
   classifyCurrentFortuneElement,
   getElementRoleProfile,
 } from "@/lib/saju-core/saju/elementRoleProfiles"
+import {
+  calculateJuyeokGanSerial,
+  calculateJuyeokJiSerial,
+  calculateJuyeokPairSerial,
+} from "@/lib/saju-core/saju/juyeokTrigrams"
 import { DatabaseResultRetriever } from "@/lib/saju-core/saju/fortuneInterpreter"
 import {
   CalculatorType,
@@ -353,6 +358,14 @@ describe("elementRoleProfiles", () => {
 
     expect(neutralCode).toBeDefined()
     expect(classifyCurrentFortuneElement(neutralCode ?? "1", profile)).toBe("03")
+  })
+})
+
+describe("juyeokTrigrams", () => {
+  it("builds gan/ji/pair serials from the shared trigram mapping", () => {
+    expect(calculateJuyeokGanSerial("갑", "오")).toBe("1")
+    expect(calculateJuyeokJiSerial("오", "오")).toBe("1")
+    expect(calculateJuyeokPairSerial("갑", "오", "오")).toBe("11")
   })
 })
 
