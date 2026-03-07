@@ -26,6 +26,7 @@ import { advanceLegacyCycle, getFiveElementGroup } from "@/lib/saju-core/saju/le
 import { DatabaseResultRetriever } from "@/lib/saju-core/saju/fortuneInterpreter"
 import {
   buildLegacyBedroomInsight,
+  buildLegacyFutureSpouseInsight,
   buildLegacyIntimacyInsight,
   buildLegacyPartnerRoleInsight,
   buildLegacyRelationshipTimingInsight,
@@ -753,6 +754,34 @@ describe("legacyCompatibility", () => {
     expect(legacyPartnerRole?.spouseRole).toMatch(/^(용신|희신|기신|구신|한신)$/)
     expect(legacyPartnerRole?.palaceRole).toMatch(/^(용신|희신|기신|구신|한신)$/)
     expect(legacyPartnerRole?.text.trim().length).toBeGreaterThan(0)
+  })
+
+  it("builds the legacy G004-G007 future-spouse detail family from the shared serial flow", () => {
+    const service = new FortuneTellerService()
+    const primaryInfo = {
+      birthDate: "1990-01-15",
+      birthTime: "14:30",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "M" as const,
+    }
+
+    const primaryFortune = service.calculateSaju(primaryInfo)
+    const entries = [
+      buildLegacyFutureSpouseInsight("G004", primaryInfo, primaryFortune),
+      buildLegacyFutureSpouseInsight("G005", primaryInfo, primaryFortune),
+      buildLegacyFutureSpouseInsight("G006", primaryInfo, primaryFortune),
+      buildLegacyFutureSpouseInsight("G007", primaryInfo, primaryFortune),
+    ]
+
+    expect(entries).toHaveLength(4)
+    for (const [index, entry] of entries.entries()) {
+      expect(entry).toBeDefined()
+      expect(entry?.sourceTable).toBe(`G00${index + 4}`)
+      expect(entry?.lookupKey).toMatch(/^\d+$/)
+      expect(entry?.currentMonthStem).toMatch(/^[A-J]$/)
+      expect(entry?.text.trim().length).toBeGreaterThan(0)
+    }
   })
 })
 

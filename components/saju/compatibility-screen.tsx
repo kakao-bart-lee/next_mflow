@@ -65,6 +65,42 @@ interface CompatibilityResult {
     lookupKey: string
     text: string
   } | null
+  legacy_future_spouse_face?: {
+    sourceTable: "G004"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    currentMonthStem: string
+    currentDay: number
+  } | null
+  legacy_future_spouse_personality?: {
+    sourceTable: "G005"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    currentMonthStem: string
+    currentDay: number
+  } | null
+  legacy_future_spouse_career?: {
+    sourceTable: "G006"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    currentMonthStem: string
+    currentDay: number
+  } | null
+  legacy_future_spouse_romance?: {
+    sourceTable: "G007"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    currentMonthStem: string
+    currentDay: number
+  } | null
   legacy_relationship_timing?: {
     sourceTable: "G034"
     title: string
@@ -450,6 +486,32 @@ export function CompatibilityScreen() {
                     </p>
                   </div>
                 ) : null}
+
+                {([
+                  result.legacy_future_spouse_face,
+                  result.legacy_future_spouse_personality,
+                  result.legacy_future_spouse_career,
+                  result.legacy_future_spouse_romance,
+                ] as const).map((entry) =>
+                  entry ? (
+                    <div key={`${entry.sourceTable}-${entry.lookupKey}`} className="rounded-xl border border-border bg-card p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="text-sm font-semibold text-foreground">{entry.title}</h3>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            PHP 레거시 상세 해설 · {entry.sourceTable} · key {entry.lookupKey} · month_h {entry.currentMonthStem}
+                          </p>
+                        </div>
+                        <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                          {entry.scoreLabel}
+                        </div>
+                      </div>
+                      <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                        {entry.text}
+                      </p>
+                    </div>
+                  ) : null
+                )}
 
                 {result.legacy_relationship_timing ? (
                   <div className="rounded-xl border border-border bg-card p-5">

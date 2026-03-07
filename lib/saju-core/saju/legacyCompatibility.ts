@@ -153,6 +153,16 @@ export interface LegacyPartnerRoleInsight {
   readonly text: string
 }
 
+export interface LegacyFutureSpouseInsight {
+  readonly sourceTable: "G004" | "G005" | "G006" | "G007"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+  readonly currentMonthStem: string
+  readonly currentDay: number
+}
+
 const BRANCH_INDEX = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
 const STEM_CODE_BY_KOREAN: Record<string, string> = {
   갑: "A",
@@ -216,6 +226,12 @@ const HANJA_BRANCH_TO_KOREAN: Record<string, string> = {
 }
 const SEXAGENARY_STEMS = ["갑", "을", "병", "정", "무", "기", "경", "신", "임", "계"] as const
 const SEXAGENARY_BRANCHES = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"] as const
+const SERIAL_TABLE_TITLES: Record<LegacyFutureSpouseInsight["sourceTable"], string> = {
+  G004: "미래 배우자 얼굴상",
+  G005: "미래 배우자 성격상",
+  G006: "미래 배우자 직업상",
+  G007: "미래 배우자 연애타입",
+}
 
 function toCalculationInput(fortune: FortuneResponse, gender: "M" | "F"): LegacyCompatibilityCalculationInput {
   const pillars = fortune.sajuData.pillars
@@ -346,6 +362,39 @@ function readLegacyG031Record(
   return record as { readonly data?: string; readonly DB_data_w?: string }
 }
 
+function readLegacySerialRecord(
+  tableName: LegacyFutureSpouseInsight["sourceTable"],
+  lookupKey: string,
+): { readonly data?: string } | null {
+  const gTables = getDataLoader().loadGTables() as Record<string, Record<string, Record<string, unknown>>>
+  const table = gTables[tableName]
+  const candidates = [lookupKey, lookupKey.trim(), `${Number.parseInt(lookupKey, 10)} `, String(Number.parseInt(lookupKey, 10))]
+  for (const candidate of candidates) {
+    const record = table?.[candidate]
+    if (record && typeof record === "object") {
+      return record as { readonly data?: string }
+    }
+  }
+  const numericLookup = Number.parseInt(lookupKey, 10)
+  if (Number.isFinite(numericLookup) && table && typeof table === "object") {
+    for (const record of Object.values(table)) {
+      if (!record || typeof record !== "object") {
+        continue
+      }
+      const numericId =
+        typeof record.num === "number"
+          ? record.num
+          : typeof record.num === "string"
+            ? Number.parseInt(record.num, 10)
+            : Number.NaN
+      if (numericId === numericLookup) {
+        return record as { readonly data?: string }
+      }
+    }
+  }
+  return null
+}
+
 function readLegacyT010Record(lookupKey: string): { readonly data?: string } | null {
   const tTables = getDataLoader().loadTTables() as Record<string, Record<string, Record<string, unknown>>>
   const record = tTables.T010?.[lookupKey]
@@ -418,6 +467,27 @@ function getCurrentYearInTimezone(timezone: string): number {
   return Number.isFinite(numericYear) && numericYear > 0 ? numericYear : new Date().getFullYear()
 }
 
+function getCurrentDayInTimezone(timezone: string): number {
+  const dayPart = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    day: "numeric",
+  })
+    .formatToParts(new Date())
+    .find((part) => part.type === "day")?.value
+  const numericDay = Number.parseInt(dayPart ?? "", 10)
+  return Number.isFinite(numericDay) && numericDay >= 1 && numericDay <= 31 ? numericDay : new Date().getDate()
+}
+
+function getCurrentMonthStemCode(timezone: string): string | null {
+  const year = getCurrentYearInTimezone(timezone)
+  const month = getCurrentMonthInTimezone(timezone)
+  const day = getCurrentDayInTimezone(timezone)
+  const mansedata = getDataLoader().loadMansedata() as Record<string, Record<string, unknown>>
+  const record = mansedata[`${year.toString().padStart(4, "0")}${String(month).padStart(2, "0")}${String(day).padStart(2, "0")}`]
+  const stemCode = typeof record?.month_h === "string" ? record.month_h : null
+  return stemCode && stemCode.length === 1 ? stemCode : null
+}
+
 function getYearBranchIndex(fortune: FortuneResponse): number {
   return BRANCH_INDEX.indexOf(extractKorean(fortune.sajuData.pillars.년.지지)) + 1
 }
@@ -431,6 +501,17 @@ function getGregorianSexagenaryKey(year: number): string {
   const stem = SEXAGENARY_STEMS[((offset % 10) + 10) % 10] ?? "갑"
   const branch = SEXAGENARY_BRANCHES[((offset % 12) + 12) % 12] ?? "자"
   return `${stem}${branch}`
+}
+
+function getSexagenarySerial(stemCode: string, branchIndex: number): number {
+  for (let index = 0; index < 60; index += 1) {
+    const cycleStem = String.fromCharCode("A".charCodeAt(0) + (index % 10))
+    const cycleBranch = ((index % 12) + 1)
+    if (cycleStem === stemCode && cycleBranch === branchIndex) {
+      return index + 1
+    }
+  }
+  return 60
 }
 
 function resolveLunarYearGanji(
@@ -938,6 +1019,61 @@ export function buildLegacyPartnerRoleInsight(
     spouseRole,
     palaceRole,
     text,
+  }
+}
+
+export function buildLegacyFutureSpouseInsight(
+  tableName: LegacyFutureSpouseInsight["sourceTable"],
+  primaryInfo: LegacyCompatibilityBirthInfo,
+  primaryFortune: FortuneResponse,
+): LegacyFutureSpouseInsight | null {
+  const currentMonthStem = getCurrentMonthStemCode(primaryInfo.timezone)
+  const yearBranchIndex = getYearBranchIndex(primaryFortune)
+  const dayBranchIndex = getDayBranchIndex(primaryFortune)
+  if (!currentMonthStem || yearBranchIndex < 1 || dayBranchIndex < 1) {
+    return null
+  }
+
+  const currentDay = getCurrentDayInTimezone(primaryInfo.timezone)
+  const requestDay = Number.parseInt(primaryInfo.birthDate.slice(-2), 10)
+  let serial = getSexagenarySerial(currentMonthStem, yearBranchIndex)
+
+  if (currentDay === requestDay) {
+    let werewf1 = 2
+    if (yearBranchIndex === 1 || yearBranchIndex === 3 || yearBranchIndex === 5) {
+      werewf1 = 1
+    } else if (yearBranchIndex === 6 || yearBranchIndex === 7 || yearBranchIndex === 11) {
+      werewf1 = 2
+    } else if (yearBranchIndex === 2 || yearBranchIndex === 4 || yearBranchIndex === 9) {
+      werewf1 = 1
+    }
+    serial += dayBranchIndex * werewf1
+  }
+
+  if (serial <= 0) {
+    serial = 1
+  }
+  if (primaryInfo.gender === "F") {
+    serial += 80
+  }
+  while (serial > 160) {
+    serial -= 160
+  }
+
+  const lookupKey = String(serial)
+  const record = readLegacySerialRecord(tableName, lookupKey)
+  if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {
+    return null
+  }
+
+  return {
+    sourceTable: tableName,
+    title: SERIAL_TABLE_TITLES[tableName],
+    scoreLabel: "배우자 해설",
+    lookupKey,
+    text: record.data,
+    currentMonthStem,
+    currentDay,
   }
 }
 

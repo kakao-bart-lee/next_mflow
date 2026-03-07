@@ -10,6 +10,7 @@ import {
 } from "@/lib/saju-core/saju/gunghap"
 import {
   buildLegacyBedroomInsight,
+  buildLegacyFutureSpouseInsight,
   buildLegacyIntimacyInsight,
   buildLegacyPartnerRoleInsight,
   buildLegacyRelationshipTimingInsight,
@@ -102,6 +103,10 @@ export async function POST(req: NextRequest) {
     const legacyMarriageFlow = buildLegacyMarriageFlowInsight(personA, fortuneA)
     const legacyLoveStyle = buildLegacyLoveStyleInsight(personB, fortuneB)
     const legacyLoveWeakPoint = buildLegacyLoveWeakPointInsight(fortuneA)
+    const legacyFutureSpouseFace = buildLegacyFutureSpouseInsight("G004", personA, fortuneA)
+    const legacyFutureSpousePersonality = buildLegacyFutureSpouseInsight("G005", personA, fortuneA)
+    const legacyFutureSpouseCareer = buildLegacyFutureSpouseInsight("G006", personA, fortuneA)
+    const legacyFutureSpouseRomance = buildLegacyFutureSpouseInsight("G007", personA, fortuneA)
     const legacyPartnerRole = buildLegacyPartnerRoleInsight(personA, fortuneA)
     const legacyRelationshipTiming = buildLegacyRelationshipTimingInsight(personA, fortuneA)
     const legacyDestinyCore = buildLegacyDestinyCoreInsight(personA, fortuneA, fortuneB)
@@ -124,6 +129,10 @@ export async function POST(req: NextRequest) {
         legacy_marriage_flow: legacyMarriageFlow,
         legacy_love_style: legacyLoveStyle,
         legacy_love_weak_point: legacyLoveWeakPoint,
+        legacy_future_spouse_face: legacyFutureSpouseFace,
+        legacy_future_spouse_personality: legacyFutureSpousePersonality,
+        legacy_future_spouse_career: legacyFutureSpouseCareer,
+        legacy_future_spouse_romance: legacyFutureSpouseRomance,
         legacy_partner_role: legacyPartnerRole,
         legacy_relationship_timing: legacyRelationshipTiming,
         legacy_destiny_core: legacyDestinyCore,
