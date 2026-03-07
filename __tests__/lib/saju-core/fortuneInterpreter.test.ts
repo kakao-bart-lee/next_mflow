@@ -271,6 +271,18 @@ describe("FortuneTellerService.getSajuFortune()", () => {
     expect(s126Entry?.fullText.trim().length).toBeGreaterThan(0)
   })
 
+  it("lifetime_overview populates the S014 current outlook entry", () => {
+    const service = new FortuneTellerService()
+    const result = service.getSajuFortune(BASE_REQUEST, "lifetime_overview")
+
+    const entries = result.fortuneProfileResult?.sections.flatMap((section) => section.entries) ?? []
+    const s014Entry = entries.find((entry) => entry.tableCode === "S014")
+
+    expect(s014Entry).toBeDefined()
+    expect(s014Entry?.fullText.trim().length).toBeGreaterThan(0)
+    expect(s014Entry?.status).toBe("resolved")
+  })
+
   it("new_year_fortune populates restored S095~S101 entries", () => {
     const service = new FortuneTellerService()
     const result = service.getSajuFortune(BASE_REQUEST, "new_year_fortune")
@@ -301,6 +313,18 @@ describe("FortuneTellerService.getSajuFortune()", () => {
     expect(targetEntries.every((entry) => entry.fullText.trim().length > 0)).toBe(true)
     expect(s110Entry?.fullText).toContain("1월")
     expect(s110Entry?.fullText).toContain("12월")
+  })
+
+  it("early_life_fortune populates the J023 ziwei career entry", () => {
+    const service = new FortuneTellerService()
+    const result = service.getSajuFortune(BASE_REQUEST, "early_life_fortune")
+
+    const entries = result.fortuneProfileResult?.sections.flatMap((section) => section.entries) ?? []
+    const j023Entry = entries.find((entry) => entry.tableCode === "J023")
+
+    expect(j023Entry).toBeDefined()
+    expect(j023Entry?.status).toBe("resolved")
+    expect(j023Entry?.fullText.trim().length).toBeGreaterThan(0)
   })
 
   it("birth_season_fortune profile returns a result with sections", () => {

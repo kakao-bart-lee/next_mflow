@@ -131,6 +131,18 @@ const TRIGRAM_TO_SERIAL: Record<string, number> = {
   곤: 8,
 };
 const BRANCHES_FROM_IN_DISPLAY = ['인', '묘', '진', '사', '오', '미', '신', '유', '술', '해', '자', '축'] as const;
+const HEAVENLY_STEM_DISPLAY_BY_CODE: Record<string, string> = {
+  A: '갑',
+  B: '을',
+  C: '병',
+  D: '정',
+  E: '무',
+  F: '기',
+  G: '경',
+  H: '신',
+  I: '임',
+  J: '계',
+};
 const STEM_CODE_TO_HANJA: Record<string, string> = {
   A: '甲',
   B: '乙',
@@ -143,6 +155,9 @@ const STEM_CODE_TO_HANJA: Record<string, string> = {
   I: '壬',
   J: '癸',
 };
+const STEM_DISPLAY_TO_HANJA: Record<string, string> = Object.fromEntries(
+  Object.entries(STEM_CODE_TO_HANJA).map(([code, hanja]) => [HEAVENLY_STEM_DISPLAY_BY_CODE[code] ?? '', hanja]).filter(([display]) => display)
+) as Record<string, string>;
 const BRANCH_NUMBER_TO_HANJA: Record<string, string> = {
   '01': '寅',
   '02': '卯',
@@ -157,20 +172,103 @@ const BRANCH_NUMBER_TO_HANJA: Record<string, string> = {
   '11': '子',
   '12': '丑',
 };
-const MONTH_BRANCH_NUMBER_TO_HANJA: Record<string, string> = {
-  '01': '戌',
-  '02': '酉',
-  '03': '申',
-  '04': '未',
-  '05': '午',
-  '06': '巳',
-  '07': '辰',
-  '08': '卯',
-  '09': '寅',
-  '10': '丑',
-  '11': '子',
-  '12': '亥',
+const BRANCH_DISPLAY_TO_HANJA: Record<string, string> = {
+  인: '寅',
+  묘: '卯',
+  진: '辰',
+  사: '巳',
+  오: '午',
+  미: '未',
+  신: '申',
+  유: '酉',
+  술: '戌',
+  해: '亥',
+  자: '子',
+  축: '丑',
 };
+const ELEMENT_CODE_BY_HANJA: Record<string, string> = {
+  木: '1',
+  火: '2',
+  土: '3',
+  '金': '4',
+  水: '5',
+};
+const CURRENT_YEAR_BRANCH_RULES: Record<number, { oh: string; ey: number }> = {
+  1: { oh: '5', ey: 2 },
+  2: { oh: '3', ey: 1 },
+  3: { oh: '1', ey: 1 },
+  4: { oh: '1', ey: 1 },
+  5: { oh: '3', ey: 2 },
+  6: { oh: '2', ey: 2 },
+  7: { oh: '2', ey: 2 },
+  8: { oh: '3', ey: 1 },
+  9: { oh: '4', ey: 1 },
+  10: { oh: '4', ey: 2 },
+  11: { oh: '3', ey: 1 },
+  12: { oh: '5', ey: 2 },
+};
+const ZIWEI_BRANCH_BY_SLOT = ['寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥', '子', '丑'] as const;
+const ZIWEI_JAMI_SLOT_BY_GUK: Record<string, readonly number[]> = {
+  '水2局': [12, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 1, 1, 2, 2, 3],
+  '木3局': [3, 12, 1, 4, 1, 2, 5, 2, 3, 6, 3, 4, 7, 4, 5, 8, 5, 6, 9, 6, 7, 10, 7, 8, 11, 8, 9, 12, 9, 10],
+  '金4局': [10, 3, 12, 1, 11, 4, 1, 2, 12, 5, 2, 3, 1, 6, 3, 4, 2, 7, 4, 5, 3, 8, 5, 6, 4, 9, 6, 7, 5, 10],
+  '土5局': [5, 10, 3, 12, 1, 6, 11, 4, 1, 2, 7, 12, 5, 2, 3, 8, 1, 6, 3, 4, 9, 2, 7, 4, 5, 10, 3, 8, 5, 6],
+  '火6局': [8, 5, 10, 3, 12, 1, 9, 6, 11, 4, 1, 2, 10, 7, 12, 5, 2, 3, 11, 8, 1, 6, 3, 4, 12, 9, 2, 7, 4, 5],
+};
+const ZIWEI_GUK_BY_MYUNG_SLOT_AND_YEAR_GROUP: Record<number, readonly string[]> = {
+  1: ['火6局', '土5局', '木3局', '金4局', '水2局'],
+  2: ['火6局', '土5局', '木3局', '金4局', '水2局'],
+  3: ['木3局', '金4局', '水2局', '火6局', '土5局'],
+  4: ['木3局', '金4局', '水2局', '火6局', '土5局'],
+  5: ['土5局', '木3局', '金4局', '水2局', '火6局'],
+  6: ['土5局', '木3局', '金4局', '水2局', '火6局'],
+  7: ['金4局', '水2局', '火6局', '土5局', '木3局'],
+  8: ['金4局', '水2局', '火6局', '土5局', '木3局'],
+  9: ['火6局', '土5局', '木3局', '金4局', '水2局'],
+  10: ['火6局', '土5局', '木3局', '金4局', '水2局'],
+  11: ['金4局', '水2局', '火6局', '土5局', '木3局'],
+  12: ['金4局', '水2局', '火6局', '土5局', '木3局'],
+};
+const ZIWEI_YEAR_GROUP_INDEX_BY_STEM: Record<string, number> = {
+  갑: 0,
+  기: 0,
+  을: 1,
+  경: 1,
+  병: 2,
+  신: 2,
+  정: 3,
+  임: 3,
+  무: 4,
+  계: 4,
+};
+const ZIWEI_SAWHA_SUFFIX_BY_STEM_HANJA: Record<string, Readonly<Record<string, string>>> = {
+  甲: { 염정: '록', 파군: '권', 무곡: '과', 태양: '기' },
+  乙: { 천기: '록', 천량: '권', 자미: '과', 태음: '기' },
+  丙: { 천동: '록', 천기: '권', 염정: '기' },
+  丁: { 태음: '록', 천동: '권', 천기: '과', 거문: '기' },
+  戊: { 탐랑: '록', 태음: '권', 천기: '기' },
+  己: { 무곡: '록', 탐랑: '권', 천량: '과' },
+  庚: { 태양: '록', 무곡: '권', 태음: '과', 천동: '기' },
+  辛: { 거문: '록', 태양: '권' },
+  壬: { 천량: '록', 자미: '권', 무곡: '기' },
+  癸: { 파군: '록', 거문: '권', 태음: '과', 탐랑: '기' },
+};
+const ZIWEI_QUERY_STAR_ORDER = [
+  '태음',
+  '탐랑',
+  '거문',
+  '천상',
+  '천량',
+  '칠살',
+  '파군',
+  '염정',
+  '천동',
+  '무곡',
+  '태양',
+  '천기',
+  '천부',
+  '자미',
+] as const;
 
 function resolveJuyeokTrigram(mode: 'Gan' | 'Ji', first: string, second: string): string | null {
   const groups = mode === 'Gan' ? JUYEOK_TRIGRAM_GAN_GROUPS : JUYEOK_TRIGRAM_JI_GROUPS;
@@ -985,6 +1083,12 @@ export class SimpleQueryCalculator extends AbstractFortuneCalculator {
  */
 export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
   override calculate(inputData: CalculationInput): CalculationResult {
+    if (this.config.calculationMethod === 'j023_ziwei_guanrok') {
+      return this.calculateJ023Result(inputData);
+    }
+    if (this.config.calculationMethod === 's014_current_fortune') {
+      return this.calculateS014Result(inputData);
+    }
     if (this.config.calculationMethod === 's126_misfortune_relief') {
       return this.calculateS126Result(inputData);
     }
@@ -1042,11 +1146,15 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     }
 
     if (methodName === 's014_current_fortune') {
-      throw new Error(`Missing yong/hee/kee/goo code pipeline for ${this.config.tableName}`);
+      return this.calculateS014Expression(inputData);
     }
 
     if (methodName === 's126_misfortune_relief') {
       return this.calculateS126Expression(inputData);
+    }
+
+    if (methodName === 'j023_ziwei_guanrok') {
+      return this.calculateJ023Expression(inputData);
     }
 
     if (methodName === 'f011_trigram') {
@@ -1210,6 +1318,40 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     };
   }
 
+  private calculateJ023Expression(inputData: CalculationInput): string {
+    const branch = this.getZiweiGuanrokBranch(inputData);
+    const key = this.getZiweiJ023QueryKey(inputData);
+    return `${branch}|${key}`;
+  }
+
+  private calculateJ023Result(inputData: CalculationInput): CalculationResult {
+    const branch = this.getZiweiGuanrokBranch(inputData);
+    const primaryKey = this.getZiweiJ023QueryKey(inputData);
+    const fallbackKey = this.getZiweiJ023FallbackKey(inputData);
+    const jTables = getDataLoader().loadJTables() as Record<string, Record<string, Record<string, unknown>>>;
+    const tableRows = jTables[this.config.tableName];
+    const branchRows = tableRows?.[branch];
+    const record =
+      this.getZiweiJ023Record(branchRows, primaryKey) ??
+      (fallbackKey !== primaryKey ? this.getZiweiJ023Record(branchRows, fallbackKey) : null);
+
+    const text = record && typeof record.data === 'string' ? record.data.trim() : '';
+    const numerical = record && record.numerical !== undefined && record.numerical !== null ? String(record.numerical) : null;
+
+    return {
+      tableName: this.config.tableName,
+      expression: `${branch}|${primaryKey}`,
+      text,
+      numerical,
+      metadata: {
+        ...this.getMetadata(inputData),
+        branch,
+        primary_key: primaryKey,
+        fallback_key: fallbackKey,
+      },
+    };
+  }
+
   private buildS126TextBlocks(inputData: CalculationInput): string[] {
     const blocks: string[] = [];
     const seen = new Set<string>();
@@ -1263,6 +1405,190 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     return blocks;
   }
 
+  private getZiweiJ023Record(
+    branchRows: Record<string, unknown> | undefined,
+    key: string
+  ): { readonly data?: string; readonly numerical?: string | number | null } | null {
+    if (!branchRows || !key) {
+      return null;
+    }
+
+    const record = branchRows[key];
+    if (!record || typeof record !== 'object') {
+      return null;
+    }
+
+    return record as { readonly data?: string; readonly numerical?: string | number | null };
+  }
+
+  private getZiweiJ023QueryKey(inputData: CalculationInput): string {
+    const stars = this.getZiweiGuanrokStars(inputData);
+    const transformedIndex = stars.findIndex((star) => this.hasZiweiSawhaSuffix(star));
+    if (transformedIndex >= 0) {
+      return stars[transformedIndex] ?? '';
+    }
+    if (stars.length >= 2) {
+      return `${stars[0] ?? ''}${stars[1] ?? ''}`;
+    }
+    return stars[0] ?? '';
+  }
+
+  private getZiweiJ023FallbackKey(inputData: CalculationInput): string {
+    const stars = this.getZiweiGuanrokStars(inputData, false);
+    if (stars.length >= 2) {
+      return `${stars[0] ?? ''}${stars[1] ?? ''}`;
+    }
+    return stars[0] ?? '';
+  }
+
+  private getZiweiGuanrokStars(inputData: CalculationInput, includeSawha = true): string[] {
+    const guanrokSlot = this.getZiweiGuanrokSlot(inputData);
+    const directStars = this.getZiweiStarsForSlot(inputData, guanrokSlot, includeSawha);
+    if (directStars.length > 0) {
+      return directStars;
+    }
+
+    // Legacy PHP falls back to the opposite spouse palace when 관록궁 is 무정요궁.
+    return this.getZiweiStarsForSlot(inputData, this.wrapZiweiSlot(guanrokSlot + 6), includeSawha);
+  }
+
+  private getZiweiStarsForSlot(inputData: CalculationInput, targetSlot: number, includeSawha: boolean): string[] {
+    const jamiSlot = this.getZiweiJamiSlot(inputData);
+    const cheanbuSlot = this.wrapZiweiSlot(14 - jamiSlot);
+    const sawhaMap = includeSawha ? this.getZiweiSawhaSuffixMap(inputData) : {};
+    const starsInGuanrok: string[] = [];
+    const assignStar = (slot: number, name: string) => {
+      if (slot === targetSlot) {
+        const suffix = sawhaMap[name];
+        starsInGuanrok.push(suffix ? `${name}${suffix}` : name);
+      }
+    };
+
+    assignStar(this.wrapZiweiSlot(jamiSlot), '자미');
+    assignStar(this.wrapZiweiSlot(jamiSlot - 1), '천기');
+    assignStar(this.wrapZiweiSlot(jamiSlot - 3), '태양');
+    assignStar(this.wrapZiweiSlot(jamiSlot - 4), '무곡');
+    assignStar(this.wrapZiweiSlot(jamiSlot - 5), '천동');
+    assignStar(this.wrapZiweiSlot(jamiSlot + 4), '염정');
+
+    assignStar(this.wrapZiweiSlot(cheanbuSlot), '천부');
+    assignStar(this.wrapZiweiSlot(cheanbuSlot + 1), '태음');
+    assignStar(this.wrapZiweiSlot(cheanbuSlot + 2), '탐랑');
+    assignStar(this.wrapZiweiSlot(cheanbuSlot + 3), '거문');
+    assignStar(this.wrapZiweiSlot(cheanbuSlot + 4), '천상');
+    assignStar(this.wrapZiweiSlot(cheanbuSlot + 5), '천량');
+    assignStar(this.wrapZiweiSlot(cheanbuSlot + 6), '칠살');
+    assignStar(this.wrapZiweiSlot(cheanbuSlot - 2), '파군');
+
+    return ZIWEI_QUERY_STAR_ORDER.flatMap((star) => {
+      const entry = starsInGuanrok.find((value) => value.startsWith(star));
+      return entry ? [entry] : [];
+    });
+  }
+
+  private hasZiweiSawhaSuffix(starName: string): boolean {
+    return starName.endsWith('록') || starName.endsWith('권') || starName.endsWith('과') || starName.endsWith('기');
+  }
+
+  private getZiweiGuanrokBranch(inputData: CalculationInput): string {
+    return ZIWEI_BRANCH_BY_SLOT[this.getZiweiGuanrokSlot(inputData) - 1] ?? '午';
+  }
+
+  private getZiweiGuanrokSlot(inputData: CalculationInput): number {
+    return this.wrapZiweiSlot(this.getZiweiMyungSlot(inputData) + 4);
+  }
+
+  private getZiweiMyungSlot(inputData: CalculationInput): number {
+    const birthLunarDate = this.getBirthLunarDateParts(inputData);
+    if (!birthLunarDate) {
+      throw new Error(`Birth lunar date is unavailable for ${this.config.tableName}`);
+    }
+
+    const lunarMonth = Number.parseInt(birthLunarDate.month, 10);
+    const hourIndex = this.getBranchNumber(inputData.hourBranch);
+    return this.wrapZiweiSlot(lunarMonth - hourIndex + 1);
+  }
+
+  private getZiweiJamiSlot(inputData: CalculationInput): number {
+    const birthLunarDate = this.getBirthLunarDateParts(inputData);
+    if (!birthLunarDate) {
+      throw new Error(`Birth lunar date is unavailable for ${this.config.tableName}`);
+    }
+
+    const day = Number.parseInt(birthLunarDate.day, 10);
+    if (!Number.isFinite(day) || day < 1 || day > 30) {
+      throw new Error(`Birth lunar day is invalid for ${this.config.tableName}`);
+    }
+
+    const guk = this.getZiweiMyungGuk(inputData);
+    const table = ZIWEI_JAMI_SLOT_BY_GUK[guk];
+    const slot = table?.[day - 1];
+    if (!slot) {
+      throw new Error(`Ziwei jami slot lookup failed for ${this.config.tableName}`);
+    }
+    return slot;
+  }
+
+  private getZiweiMyungGuk(inputData: CalculationInput): string {
+    const yearGroup = ZIWEI_YEAR_GROUP_INDEX_BY_STEM[extractKorean(inputData.yearStem)];
+    if (yearGroup === undefined) {
+      throw new Error(`Birth year stem group is unavailable for ${this.config.tableName}`);
+    }
+
+    const slot = this.getZiweiMyungSlot(inputData);
+    const guk = ZIWEI_GUK_BY_MYUNG_SLOT_AND_YEAR_GROUP[slot]?.[yearGroup];
+    if (!guk) {
+      throw new Error(`Ziwei myung guk lookup failed for ${this.config.tableName}`);
+    }
+    return guk;
+  }
+
+  private getZiweiSawhaSuffixMap(inputData: CalculationInput): Readonly<Record<string, string>> {
+    const currentDate = this.getCurrentDateContext(inputData);
+    if (!currentDate) {
+      return {};
+    }
+    const mansedata = getDataLoader().loadMansedata() as Record<string, Record<string, unknown>>;
+    const currentManse = mansedata[currentDate.dateCode];
+    const stemCode = typeof currentManse?.year_h === 'string' ? currentManse.year_h : '';
+    const hanja = STEM_CODE_TO_HANJA[stemCode] ?? STEM_DISPLAY_TO_HANJA[extractKorean(inputData.yearStem)] ?? '';
+    return ZIWEI_SAWHA_SUFFIX_BY_STEM_HANJA[hanja] ?? {};
+  }
+
+  private wrapZiweiSlot(value: number): number {
+    const normalized = ((value - 1) % 12 + 12) % 12;
+    return normalized + 1;
+  }
+
+  private calculateS014Expression(inputData: CalculationInput): string {
+    const context = this.buildS014Context(inputData);
+    return `${context.toYCSibsin}-${context.woonY}|${context.toYGSibsin}-${context.woonZ}`;
+  }
+
+  private calculateS014Result(inputData: CalculationInput): CalculationResult {
+    const context = this.buildS014Context(inputData);
+    const firstLookup = `${context.toYCSibsin}-${context.woonY}`;
+    let secondWoon = context.woonZ;
+    if (context.toYCSibsin === context.toYGSibsin && context.woonY === context.woonZ) {
+      secondWoon = String(((Number.parseInt(context.woonZ, 10) % 3) + 1)).padStart(2, '0');
+    }
+    const secondLookup = `${context.toYGSibsin}-${secondWoon}`;
+    const [firstText] = this.retrieveData(firstLookup);
+    const [secondText, numerical] = this.retrieveData(secondLookup);
+
+    return {
+      tableName: this.config.tableName,
+      expression: `${firstLookup}|${secondLookup}`,
+      text: `${firstText}${secondText}`,
+      numerical: numerical || null,
+      metadata: {
+        ...this.getMetadata(inputData),
+        first_lookup: firstLookup,
+        second_lookup: secondLookup,
+      },
+    };
+  }
+
   private calculateNewYearSignalExpression(inputData: CalculationInput): string {
     const dayStemValue = this.getNewYearSignalStemValue(inputData.dayStem);
     const currentYearStemValue = this.getCurrentYearStemSignalValue(inputData);
@@ -1271,6 +1597,66 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
       total = 1;
     }
     return String(total);
+  }
+
+  private buildS014Context(inputData: CalculationInput): {
+    readonly yongCode: string;
+    readonly heeCode: string;
+    readonly keeCode: string;
+    readonly gooCode: string;
+    readonly toYCSibsin: string;
+    readonly toYGSibsin: string;
+    readonly woonY: string;
+    readonly woonZ: string;
+  } {
+    const currentDate = this.getCurrentDateContext(inputData);
+    if (!currentDate) {
+      throw new Error(`Current date context is unavailable for ${this.config.tableName}`);
+    }
+
+    const mansedata = getDataLoader().loadMansedata() as Record<string, Record<string, unknown>>;
+    const currentManse = mansedata[currentDate.dateCode];
+    if (!currentManse || typeof currentManse !== 'object') {
+      throw new Error(`Current mansedata row is unavailable for ${this.config.tableName}`);
+    }
+
+    const currentYearStem = typeof currentManse.year_h === 'string' ? currentManse.year_h : '';
+    const currentYearBranchCode = typeof currentManse.year_e === 'string' ? currentManse.year_e : '';
+    const currentYearBranchHanja = BRANCH_NUMBER_TO_HANJA[currentYearBranchCode];
+    const currentYearBranchDisplay = currentYearBranchHanja ? KOREAN_BRANCH_TO_DISPLAY[currentYearBranchHanja] ?? '' : '';
+    const currentYearBranchNumber = currentYearBranchDisplay ? this.getBranchNumber(currentYearBranchDisplay) : 1;
+    const currentBranchRule = CURRENT_YEAR_BRANCH_RULES[currentYearBranchNumber] ?? CURRENT_YEAR_BRANCH_RULES[1];
+    const currentYearStemNumber = this.getStemNumberFromCode(currentYearStem);
+
+    const dayStemDisplay = extractKorean(inputData.dayStem);
+    const monthBranchDisplay = extractKorean(inputData.monthBranch);
+    const titleKey = `${STEM_DISPLAY_TO_HANJA[dayStemDisplay] ?? ''}${BRANCH_DISPLAY_TO_HANJA[monthBranchDisplay] ?? ''}`;
+    const yongsinCodes = this.getYongsinElementCodes(titleKey);
+
+    const dayStemNumber = this.getStemNumber(dayStemDisplay);
+    const dayStemElementGroup = this.getStemElementGroup(dayStemNumber);
+
+    let toYCSibsin = this.getCurrentStemSibsin(dayStemNumber, currentYearStemNumber);
+    let toYGSibsin = this.getCurrentBranchSibsin(dayStemNumber, dayStemElementGroup, currentBranchRule.oh, currentBranchRule.ey);
+    let woonY = this.getWoonCode(this.getStemElementGroup(currentYearStemNumber), yongsinCodes);
+    let woonZ = this.getWoonCode(currentBranchRule.oh, yongsinCodes);
+
+    if (inputData.gender !== 'M') {
+      woonY = this.incrementWoonCode(woonY);
+      woonZ = this.incrementWoonCode(woonZ);
+    }
+
+    const hourOffset = Math.floor(this.getBirthHourValue(inputData) / 2) % 12;
+    toYCSibsin = String(Math.abs(hourOffset - Number.parseInt(toYCSibsin, 10))).padStart(2, '0');
+    toYGSibsin = String(Math.abs(hourOffset - Number.parseInt(toYGSibsin, 10))).padStart(2, '0');
+
+    return {
+      ...yongsinCodes,
+      toYCSibsin,
+      toYGSibsin,
+      woonY,
+      woonZ,
+    };
   }
 
   private calculateNewYearSignalWithHourExpression(inputData: CalculationInput): string {
@@ -1371,8 +1757,8 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     }
 
     const currentLunarYear = currentUmdate.slice(0, 4);
-    const currentBirthdayLunarDay = currentUmdate.slice(6, 8) === '30' ? '29' : currentUmdate.slice(6, 8);
-    const monthRow = this.findManseRowByUmdate(`${currentLunarYear}${birthLunarDate.month}${currentBirthdayLunarDay}`);
+    const currentLunarDay = currentUmdate.slice(6, 8) === '30' ? '29' : currentUmdate.slice(6, 8);
+    const monthRow = this.findManseRowByUmdate(`${currentLunarYear}${birthLunarDate.month}${currentLunarDay}`);
     if (!monthRow) {
       throw new Error(`Current lunar month mansedata row is unavailable for ${this.config.tableName}`);
     }
@@ -1529,7 +1915,7 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
 
   private buildMonthGabja(stemCode: string, branchCode: string): string {
     const stem = STEM_CODE_TO_HANJA[stemCode];
-    const branch = MONTH_BRANCH_NUMBER_TO_HANJA[String(branchCode).padStart(2, '0')];
+    const branch = BRANCH_NUMBER_TO_HANJA[String(branchCode).padStart(2, '0')];
     if (!stem || !branch) {
       throw new Error(`Unsupported month gabja components for ${this.config.tableName}: ${stemCode}/${branchCode}`);
     }
@@ -1546,9 +1932,85 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     const value = record?.[field];
     const parsed = typeof value === 'string' || typeof value === 'number' ? Number.parseInt(String(value), 10) : NaN;
     if (!Number.isFinite(parsed)) {
-      throw new Error(`tojung_gabja ${field} is unavailable for ${gabja}`);
+      // Legacy PHP leaves the intermediate variable empty when no row exists,
+      // and the later arithmetic effectively treats it as 0.
+      return 0;
     }
     return parsed;
+  }
+
+  private getYongsinElementCodes(titleKey: string): {
+    readonly yongCode: string;
+    readonly heeCode: string;
+    readonly keeCode: string;
+    readonly gooCode: string;
+  } {
+    const etcTables = getDataLoader().loadEtcTables() as Record<string, unknown>;
+    const rows = Array.isArray(etcTables.toC_yongsin_01) ? etcTables.toC_yongsin_01 : [];
+    const record = rows.find(
+      (row): row is Record<string, unknown> =>
+        typeof row === 'object' && row !== null && typeof row.title === 'string' && row.title === titleKey
+    );
+    if (!record) {
+      throw new Error(`yongsin reference is unavailable for ${titleKey}`);
+    }
+
+    return {
+      yongCode: ELEMENT_CODE_BY_HANJA[String(record.yo1 ?? '')] ?? '1',
+      heeCode: ELEMENT_CODE_BY_HANJA[String(record.he1 ?? '')] ?? '1',
+      keeCode: ELEMENT_CODE_BY_HANJA[String(record.gi1 ?? '')] ?? '1',
+      gooCode: ELEMENT_CODE_BY_HANJA[String(record.gu1 ?? '')] ?? '1',
+    };
+  }
+
+  private getStemElementGroup(stemNumber: number): string {
+    if (stemNumber === 1 || stemNumber === 2) return '1';
+    if (stemNumber === 3 || stemNumber === 4) return '2';
+    if (stemNumber === 5 || stemNumber === 6) return '3';
+    if (stemNumber === 7 || stemNumber === 8) return '4';
+    return '5';
+  }
+
+  private getCurrentStemSibsin(dayStemNumber: number, currentYearStemNumber: number): string {
+    if (dayStemNumber % 2 === 1) {
+      const oddMapping = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10'];
+      return oddMapping[(currentYearStemNumber - dayStemNumber + 10) % 10] ?? '02';
+    }
+
+    const evenMapping = ['01', '04', '03', '06', '05', '08', '07', '10', '09', '02'];
+    return evenMapping[(currentYearStemNumber - dayStemNumber + 10) % 10] ?? '02';
+  }
+
+  private getCurrentBranchSibsin(dayStemNumber: number, dayStemElementGroup: string, branchElementGroup: string, branchEy: number): string {
+    const diff = (Number.parseInt(branchElementGroup, 10) - Number.parseInt(dayStemElementGroup, 10) + 5) % 5;
+    const baseCodes = ['02', '04', '06', '08', '10'];
+    let result = baseCodes[diff] ?? '02';
+    if (dayStemNumber % 2 === 0 && branchEy === 2) {
+      const shiftedCodes: Record<string, string> = {
+        '02': '01',
+        '04': '03',
+        '06': '05',
+        '08': '07',
+        '10': '09',
+      };
+      result = shiftedCodes[result] ?? result;
+    }
+    return result;
+  }
+
+  private getWoonCode(targetElementCode: string, codes: { yongCode: string; heeCode: string; keeCode: string; gooCode: string }): string {
+    if (codes.yongCode === targetElementCode || codes.heeCode === targetElementCode) {
+      return '01';
+    }
+    if (codes.keeCode === targetElementCode || codes.gooCode === targetElementCode) {
+      return '02';
+    }
+    return '03';
+  }
+
+  private incrementWoonCode(code: string): string {
+    const next = (Number.parseInt(code, 10) % 3) + 1;
+    return String(next).padStart(2, '0');
   }
 
 

@@ -368,6 +368,12 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
     expression_fields: ['juyeok_pair_serial'],
     description: '현재의 학업운',
   },
+  J023: {
+    calculator_type: CalculatorType.COMPLEX_CALCULATION,
+    expression_fields: ['ziwei_guanrok'],
+    calculation_method: 'j023_ziwei_guanrok',
+    description: '자미두수 취업운',
+  },
   T056: {
     calculator_type: CalculatorType.SIMPLE_QUERY,
     expression_fields: ['day_stem_name'],
