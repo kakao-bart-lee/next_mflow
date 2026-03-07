@@ -81,6 +81,13 @@ interface CompatibilityResult {
     lookupKey: string
     text: string
   } | null
+  legacy_outer_compatibility?: {
+    sourceTable: "G023"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
   overall_interpretation: string
   recommendations: string[]
 }
@@ -440,6 +447,25 @@ export function CompatibilityScreen() {
                     </div>
                     <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                       {result.legacy_type_profile.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_outer_compatibility ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_outer_compatibility.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_outer_compatibility.sourceTable} · key {result.legacy_outer_compatibility.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_outer_compatibility.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_outer_compatibility.text}
                     </p>
                   </div>
                 ) : null}

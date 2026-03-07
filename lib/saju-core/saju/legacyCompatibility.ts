@@ -95,7 +95,35 @@ export interface LegacyTypeProfileInsight {
   readonly text: string
 }
 
+export interface LegacyOuterCompatibilityInsight {
+  readonly sourceTable: "G023"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+}
+
 const BRANCH_INDEX = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
+const STEM_CODE_BY_KOREAN: Record<string, string> = {
+  갑: "A",
+  을: "B",
+  병: "C",
+  정: "D",
+  무: "E",
+  기: "F",
+  경: "G",
+  신: "H",
+  임: "I",
+  계: "J",
+}
+const FIVE_ELEMENT_FALLBACK = ["금", "화", "목", "토", "수"] as const
+const YEAR_ELEMENT_GROUPS: Record<string, readonly string[]> = {
+  금: ["A11", "B12", "I07", "J08", "G03", "H04", "A05", "B06", "I01", "J02", "G09", "H10"],
+  화: ["C01", "D02", "A09", "B10", "E11", "F12", "C07", "D08", "A03", "B04", "E05", "F06"],
+  목: ["E03", "F04", "I05", "J06", "G01", "H02", "E09", "F10", "I11", "J12", "G07", "H08"],
+  토: ["G05", "H06", "E01", "F02", "C09", "D10", "G11", "H12", "E07", "F08", "C03", "D04"],
+  수: ["C11", "D12", "A07", "B08", "I03", "J04", "C05", "D06", "A01", "B02", "I09", "J10"],
+}
 
 function toCalculationInput(fortune: FortuneResponse, gender: "M" | "F"): LegacyCompatibilityCalculationInput {
   const pillars = fortune.sajuData.pillars
@@ -152,6 +180,15 @@ function readLegacyG001Record(lookupKey: string): { readonly data?: string; read
     }
   }
   return null
+}
+
+function readLegacyG023Record(lookupKey: string): { readonly data?: string } | null {
+  const gTables = getDataLoader().loadGTables() as Record<string, Record<string, Record<string, unknown>>>
+  const record = gTables.G023?.[lookupKey]
+  if (!record || typeof record !== "object") {
+    return null
+  }
+  return record as { readonly data?: string }
 }
 
 function readLegacyT010Record(lookupKey: string): { readonly data?: string } | null {
@@ -245,6 +282,37 @@ function getYearBranchCategory(fortune: FortuneResponse): number | null {
     default:
       return null
   }
+}
+
+function resolveYearCodePair(fortune: FortuneResponse): string | null {
+  const yearStemCode = STEM_CODE_BY_KOREAN[extractKorean(fortune.sajuData.pillars.년.천간)]
+  const yearBranchIndex = getYearBranchIndex(fortune)
+  if (!yearStemCode || yearBranchIndex < 1) {
+    return null
+  }
+  return `${yearStemCode}${String(yearBranchIndex).padStart(2, "0")}`
+}
+
+function resolveFiveElementByYearCode(yearCodePair: string): string {
+  for (const [element, candidates] of Object.entries(YEAR_ELEMENT_GROUPS)) {
+    if (candidates.includes(yearCodePair)) {
+      return element
+    }
+  }
+
+  const stemCode = yearCodePair.slice(0, 1)
+  const branchIndex = Number.parseInt(yearCodePair.slice(1), 10)
+  for (const candidateBranchIndex of [branchIndex + 1, branchIndex - 1]) {
+    const candidatePair = `${stemCode}${String(((candidateBranchIndex - 1 + 12) % 12) + 1).padStart(2, "0")}`
+    for (const [element, candidates] of Object.entries(YEAR_ELEMENT_GROUPS)) {
+      if (candidates.includes(candidatePair)) {
+        return element
+      }
+    }
+  }
+
+  const fallbackIndex = branchIndex % 5
+  return FIVE_ELEMENT_FALLBACK[fallbackIndex] ?? "금"
 }
 
 export function buildLegacyIntimacyInsight(
@@ -400,6 +468,37 @@ export function buildLegacyTypeProfileInsight(
     sourceTable: "T010",
     title: "사주 타입 분석",
     scoreLabel: "성향 분석",
+    lookupKey,
+    text: record.data,
+  }
+}
+
+export function buildLegacyOuterCompatibilityInsight(
+  primaryInfo: LegacyCompatibilityBirthInfo,
+  primaryFortune: FortuneResponse,
+  partnerFortune: FortuneResponse,
+): LegacyOuterCompatibilityInsight | null {
+  const primaryYearCode = resolveYearCodePair(primaryFortune)
+  const partnerYearCode = resolveYearCodePair(partnerFortune)
+  if (!primaryYearCode || !partnerYearCode) {
+    return null
+  }
+
+  const primaryElement = resolveFiveElementByYearCode(primaryYearCode)
+  const partnerElement = resolveFiveElementByYearCode(partnerYearCode)
+  const lookupKey =
+    primaryInfo.gender === "M"
+      ? `${primaryElement}${partnerElement}`
+      : `${partnerElement}${primaryElement}`
+  const record = readLegacyG023Record(lookupKey)
+  if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {
+    return null
+  }
+
+  return {
+    sourceTable: "G023",
+    title: "겉궁합",
+    scoreLabel: "오행궁합",
     lookupKey,
     text: record.data,
   }

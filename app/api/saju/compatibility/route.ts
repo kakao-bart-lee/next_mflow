@@ -14,6 +14,7 @@ import {
   buildLegacyMarriageFlowInsight,
   buildLegacyLoveStyleInsight,
   buildLegacyLoveWeakPointInsight,
+  buildLegacyOuterCompatibilityInsight,
   buildLegacyTypeProfileInsight,
   buildLegacyYearlyLoveCycleInsight,
 } from "@/lib/saju-core/saju/legacyCompatibility"
@@ -96,6 +97,7 @@ export async function POST(req: NextRequest) {
     const legacyMarriageFlow = buildLegacyMarriageFlowInsight(personA, fortuneA)
     const legacyLoveStyle = buildLegacyLoveStyleInsight(personB, fortuneB)
     const legacyLoveWeakPoint = buildLegacyLoveWeakPointInsight(fortuneA)
+    const legacyOuterCompatibility = buildLegacyOuterCompatibilityInsight(personA, fortuneA, fortuneB)
     const legacyTypeProfile = buildLegacyTypeProfileInsight(fortuneA)
     const legacyYearlyLoveCycle = buildLegacyYearlyLoveCycleInsight(fortuneA)
 
@@ -112,6 +114,7 @@ export async function POST(req: NextRequest) {
         legacy_marriage_flow: legacyMarriageFlow,
         legacy_love_style: legacyLoveStyle,
         legacy_love_weak_point: legacyLoveWeakPoint,
+        legacy_outer_compatibility: legacyOuterCompatibility,
         legacy_type_profile: legacyTypeProfile,
         legacy_yearly_love_cycle: legacyYearlyLoveCycle,
         overall_interpretation: result.overall_interpretation,

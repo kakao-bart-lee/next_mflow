@@ -30,6 +30,7 @@ import {
   buildLegacyMarriageFlowInsight,
   buildLegacyLoveStyleInsight,
   buildLegacyLoveWeakPointInsight,
+  buildLegacyOuterCompatibilityInsight,
   buildLegacyTypeProfileInsight,
   buildLegacyYearlyLoveCycleInsight,
 } from "@/lib/saju-core/saju/legacyCompatibility"
@@ -596,6 +597,33 @@ describe("legacyCompatibility", () => {
     expect(legacyTypeProfile?.sourceTable).toBe("T010")
     expect(legacyTypeProfile?.lookupKey).toMatch(/^\d{2}$/)
     expect(legacyTypeProfile?.text.trim().length).toBeGreaterThan(0)
+  })
+
+  it("builds the legacy G023 outer-compatibility detail from both year elements", () => {
+    const service = new FortuneTellerService()
+    const primaryInfo = {
+      birthDate: "1990-01-15",
+      birthTime: "14:30",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "M" as const,
+    }
+    const partnerInfo = {
+      birthDate: "1992-08-03",
+      birthTime: "09:10",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "F" as const,
+    }
+
+    const primaryFortune = service.calculateSaju(primaryInfo)
+    const partnerFortune = service.calculateSaju(partnerInfo)
+    const legacyOuterCompatibility = buildLegacyOuterCompatibilityInsight(primaryInfo, primaryFortune, partnerFortune)
+
+    expect(legacyOuterCompatibility).toBeDefined()
+    expect(legacyOuterCompatibility?.sourceTable).toBe("G023")
+    expect(legacyOuterCompatibility?.lookupKey).toMatch(/^[가-힣]{2}$/)
+    expect(legacyOuterCompatibility?.text.trim().length).toBeGreaterThan(0)
   })
 })
 
