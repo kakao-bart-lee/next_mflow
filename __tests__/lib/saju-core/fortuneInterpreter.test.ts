@@ -27,6 +27,7 @@ import { DatabaseResultRetriever } from "@/lib/saju-core/saju/fortuneInterpreter
 import {
   buildLegacyBedroomInsight,
   buildLegacyIntimacyInsight,
+  buildLegacyRelationshipTimingInsight,
   buildLegacyMarriageFlowInsight,
   buildLegacyLoveStyleInsight,
   buildLegacyLoveWeakPointInsight,
@@ -708,6 +709,28 @@ describe("legacyCompatibility", () => {
     expect(legacyPartnerPersonality?.sourceTable).toBe("G032")
     expect(legacyPartnerPersonality?.lookupKey).toMatch(/^[가-힣]{2}$/)
     expect(legacyPartnerPersonality?.text.trim().length).toBeGreaterThan(0)
+  })
+
+  it("builds the legacy G034 relationship-timing detail from the current year window", () => {
+    const service = new FortuneTellerService()
+    const primaryInfo = {
+      birthDate: "1990-01-15",
+      birthTime: "14:30",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "M" as const,
+    }
+
+    const primaryFortune = service.calculateSaju(primaryInfo)
+    const legacyRelationshipTiming = buildLegacyRelationshipTimingInsight(primaryInfo, primaryFortune)
+
+    expect(legacyRelationshipTiming).toBeDefined()
+    expect(legacyRelationshipTiming?.sourceTable).toBe("G034")
+    expect(legacyRelationshipTiming?.lookupKey).toMatch(/^[가-힣]{2}$/)
+    expect(legacyRelationshipTiming?.matchedYear).toBeGreaterThanOrEqual((legacyRelationshipTiming?.currentYear ?? 0) - 10)
+    expect(legacyRelationshipTiming?.matchedYear).toBeLessThan((legacyRelationshipTiming?.currentYear ?? 0) + 10)
+    expect(legacyRelationshipTiming?.matchedGanji).toBe(legacyRelationshipTiming?.lookupKey)
+    expect(legacyRelationshipTiming?.text.trim().length).toBeGreaterThan(0)
   })
 })
 

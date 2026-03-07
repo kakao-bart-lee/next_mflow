@@ -127,6 +127,17 @@ export interface LegacyPartnerPersonalityInsight {
   readonly text: string
 }
 
+export interface LegacyRelationshipTimingInsight {
+  readonly sourceTable: "G034"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+  readonly currentYear: number
+  readonly matchedYear: number
+  readonly matchedGanji: string
+}
+
 const BRANCH_INDEX = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
 const STEM_CODE_BY_KOREAN: Record<string, string> = {
   갑: "A",
@@ -148,6 +159,48 @@ const YEAR_ELEMENT_GROUPS: Record<string, readonly string[]> = {
   토: ["G05", "H06", "E01", "F02", "C09", "D10", "G11", "H12", "E07", "F08", "C03", "D04"],
   수: ["C11", "D12", "A07", "B08", "I03", "J04", "C05", "D06", "A01", "B02", "I09", "J10"],
 }
+const BRANCH_HARMONY_BY_KOREAN: Record<string, string> = {
+  해: "인",
+  인: "해",
+  자: "축",
+  축: "자",
+  묘: "술",
+  술: "묘",
+  진: "유",
+  유: "진",
+  사: "신",
+  신: "사",
+  오: "미",
+  미: "오",
+}
+const HANJA_STEM_TO_KOREAN: Record<string, string> = {
+  甲: "갑",
+  乙: "을",
+  丙: "병",
+  丁: "정",
+  戊: "무",
+  己: "기",
+  庚: "경",
+  辛: "신",
+  壬: "임",
+  癸: "계",
+}
+const HANJA_BRANCH_TO_KOREAN: Record<string, string> = {
+  子: "자",
+  丑: "축",
+  寅: "인",
+  卯: "묘",
+  辰: "진",
+  巳: "사",
+  午: "오",
+  未: "미",
+  申: "신",
+  酉: "유",
+  戌: "술",
+  亥: "해",
+}
+const SEXAGENARY_STEMS = ["갑", "을", "병", "정", "무", "기", "경", "신", "임", "계"] as const
+const SEXAGENARY_BRANCHES = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"] as const
 
 function toCalculationInput(fortune: FortuneResponse, gender: "M" | "F"): LegacyCompatibilityCalculationInput {
   const pillars = fortune.sajuData.pillars
@@ -250,6 +303,18 @@ function readLegacyG032Record(
   return record as { readonly data?: string; readonly DB_data_w?: string }
 }
 
+function readLegacyG034Record(lookupKey: string): { readonly data?: string } | null {
+  const gTables = getDataLoader().loadGTables() as Record<string, Record<string, Record<string, unknown>>>
+  const candidates = [lookupKey, lookupKey.trim()]
+  for (const candidate of candidates) {
+    const record = gTables.G034?.[candidate]
+    if (record && typeof record === "object") {
+      return record as { readonly data?: string }
+    }
+  }
+  return null
+}
+
 function readLegacyT010Record(lookupKey: string): { readonly data?: string } | null {
   const tTables = getDataLoader().loadTTables() as Record<string, Record<string, Record<string, unknown>>>
   const record = tTables.T010?.[lookupKey]
@@ -311,12 +376,104 @@ function getCurrentMonthInTimezone(timezone: string): number {
   return Number.isFinite(numericMonth) && numericMonth >= 1 && numericMonth <= 12 ? numericMonth : new Date().getMonth() + 1
 }
 
+function getCurrentYearInTimezone(timezone: string): number {
+  const yearPart = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    year: "numeric",
+  })
+    .formatToParts(new Date())
+    .find((part) => part.type === "year")?.value
+  const numericYear = Number.parseInt(yearPart ?? "", 10)
+  return Number.isFinite(numericYear) && numericYear > 0 ? numericYear : new Date().getFullYear()
+}
+
 function getYearBranchIndex(fortune: FortuneResponse): number {
   return BRANCH_INDEX.indexOf(extractKorean(fortune.sajuData.pillars.년.지지)) + 1
 }
 
 function getDayBranchIndex(fortune: FortuneResponse): number {
   return BRANCH_INDEX.indexOf(extractKorean(fortune.sajuData.pillars.일.지지)) + 1
+}
+
+function getGregorianSexagenaryKey(year: number): string {
+  const offset = year - 1984
+  const stem = SEXAGENARY_STEMS[((offset % 10) + 10) % 10] ?? "갑"
+  const branch = SEXAGENARY_BRANCHES[((offset % 12) + 12) % 12] ?? "자"
+  return `${stem}${branch}`
+}
+
+function resolveLunarYearGanji(
+  year: number,
+): { readonly hanjaKey: string; readonly koreanKey: string; readonly branch: string } | null {
+  const mansedata = getDataLoader().loadMansedata() as Record<string, Record<string, unknown>>
+  const candidates = [`${year}0205`, `${year}0204`, `${year}0206`, `${year}0203`]
+
+  for (const dateCode of candidates) {
+    const record = mansedata[dateCode]
+    const stemHanja = typeof record?.lunar_year_h === "string" ? record.lunar_year_h : null
+    const branchHanja = typeof record?.lunar_year_e === "string" ? record.lunar_year_e : null
+    if (!stemHanja || !branchHanja) {
+      continue
+    }
+    const stemKorean = HANJA_STEM_TO_KOREAN[stemHanja]
+    const branchKorean = HANJA_BRANCH_TO_KOREAN[branchHanja]
+    if (!stemKorean || !branchKorean) {
+      continue
+    }
+    return {
+      hanjaKey: `${stemHanja}${branchHanja}`,
+      koreanKey: `${stemKorean}${branchKorean}`,
+      branch: branchKorean,
+    }
+  }
+
+  const fallbackKey = getGregorianSexagenaryKey(year)
+  return {
+    hanjaKey: fallbackKey,
+    koreanKey: fallbackKey,
+    branch: fallbackKey.slice(1),
+  }
+}
+
+function resolveLegacyRelationshipTimingTarget(
+  primaryInfo: LegacyCompatibilityBirthInfo,
+  primaryFortune: FortuneResponse,
+): {
+  readonly currentYear: number
+  readonly matchedYear: number
+  readonly matchedGanji: string
+  readonly lookupKey: string
+  readonly fallbackLookupKey: string
+} | null {
+  const currentYear = getCurrentYearInTimezone(primaryInfo.timezone)
+  const sourceBranch =
+    primaryInfo.gender === "M"
+      ? extractKorean(primaryFortune.sajuData.pillars.일.지지)
+      : extractKorean(primaryFortune.sajuData.pillars.월.지지)
+  const targetBranch = BRANCH_HARMONY_BY_KOREAN[sourceBranch]
+  if (!targetBranch) {
+    return null
+  }
+
+  const startYear = primaryInfo.gender === "M" ? currentYear - 3 : currentYear - 10
+  const endYear = primaryInfo.gender === "M" ? currentYear + 10 : currentYear + 3
+
+  for (let year = endYear - 1; year >= startYear; year -= 1) {
+    const ganji = resolveLunarYearGanji(year)
+    if (!ganji || ganji.branch !== targetBranch) {
+      continue
+    }
+
+    return {
+      currentYear,
+      matchedYear: year,
+      matchedGanji: ganji.koreanKey,
+      lookupKey: ganji.koreanKey,
+      fallbackLookupKey: ganji.hanjaKey,
+    }
+  }
+
+  return null
 }
 
 function getYearBranchCategory(fortune: FortuneResponse): number | null {
@@ -696,6 +853,32 @@ export function buildLegacyPartnerPersonalityInsight(
     scoreLabel: "성격궁합",
     lookupKey,
     text,
+  }
+}
+
+export function buildLegacyRelationshipTimingInsight(
+  primaryInfo: LegacyCompatibilityBirthInfo,
+  primaryFortune: FortuneResponse,
+): LegacyRelationshipTimingInsight | null {
+  const timing = resolveLegacyRelationshipTimingTarget(primaryInfo, primaryFortune)
+  if (!timing) {
+    return null
+  }
+
+  const record = readLegacyG034Record(timing.lookupKey) ?? readLegacyG034Record(timing.fallbackLookupKey)
+  if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {
+    return null
+  }
+
+  return {
+    sourceTable: "G034",
+    title: "인연 시기와 흐름",
+    scoreLabel: "인연궁합",
+    lookupKey: timing.lookupKey,
+    text: record.data,
+    currentYear: timing.currentYear,
+    matchedYear: timing.matchedYear,
+    matchedGanji: timing.matchedGanji,
   }
 }
 

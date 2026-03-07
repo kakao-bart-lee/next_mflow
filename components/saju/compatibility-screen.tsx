@@ -65,6 +65,16 @@ interface CompatibilityResult {
     lookupKey: string
     text: string
   } | null
+  legacy_relationship_timing?: {
+    sourceTable: "G034"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    currentYear: number
+    matchedYear: number
+    matchedGanji: string
+  } | null
   legacy_marriage_flow?: {
     sourceTable: "G001"
     title: string
@@ -428,6 +438,28 @@ export function CompatibilityScreen() {
                     </div>
                     <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                       {result.legacy_love_weak_point.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_relationship_timing ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_relationship_timing.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_relationship_timing.sourceTable} · key {result.legacy_relationship_timing.lookupKey} · {result.legacy_relationship_timing.currentYear}년 기준
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_relationship_timing.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      선택된 인연 해석: {result.legacy_relationship_timing.matchedYear}년생 {result.legacy_relationship_timing.matchedGanji}
+                    </p>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_relationship_timing.text}
                     </p>
                   </div>
                 ) : null}
