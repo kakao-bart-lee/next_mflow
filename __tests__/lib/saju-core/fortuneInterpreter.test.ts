@@ -410,7 +410,25 @@ describe("fortuneYearMarkers", () => {
         targetYearStem: "丙",
         targetYearBranch: "戌",
       })
-    ).toEqual(["월덕귀인"])
+    ).toEqual(["월덕귀인", "생기"])
+  })
+
+  it("resolves saenggi and cheonui branch markers from legacy month/year rules", () => {
+    expect(
+      resolveFortuneYearMarkers({
+        monthBranch: "子",
+        targetYearStem: "庚",
+        targetYearBranch: "申",
+      })
+    ).toEqual(["생기"])
+
+    expect(
+      resolveFortuneYearMarkers({
+        monthBranch: "子",
+        targetYearStem: "壬",
+        targetYearBranch: "亥",
+      })
+    ).toEqual(["월덕귀인", "천의"])
   })
 })
 

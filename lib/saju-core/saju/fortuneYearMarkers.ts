@@ -69,6 +69,36 @@ const WOLDEOKHAP_RULES: Readonly<Record<string, MixedMarkerRule>> = {
   亥: { branch: '巳' },
 }
 
+const SAENGGI_RULES: Readonly<Record<string, string>> = {
+  寅: '戌',
+  卯: '亥',
+  辰: '子',
+  巳: '丑',
+  午: '寅',
+  未: '卯',
+  申: '辰',
+  酉: '巳',
+  戌: '午',
+  亥: '未',
+  子: '申',
+  丑: '酉',
+}
+
+const CHEONUI_RULES: Readonly<Record<string, string>> = {
+  寅: '丑',
+  卯: '寅',
+  辰: '卯',
+  巳: '辰',
+  午: '巳',
+  未: '午',
+  申: '未',
+  酉: '申',
+  戌: '酉',
+  亥: '戌',
+  子: '亥',
+  丑: '子',
+}
+
 function matchesMixedRule(input: FortuneYearMarkerInput, rule: MixedMarkerRule | undefined): boolean {
   if (!rule) {
     return false
@@ -94,6 +124,12 @@ export function resolveFortuneYearMarkers(input: FortuneYearMarkerInput): string
   }
   if (matchesMixedRule(input, WOLDEOKHAP_RULES[input.monthBranch])) {
     markers.push('월덕합')
+  }
+  if (SAENGGI_RULES[input.monthBranch] === input.targetYearBranch) {
+    markers.push('생기')
+  }
+  if (CHEONUI_RULES[input.monthBranch] === input.targetYearBranch) {
+    markers.push('천의')
   }
 
   return markers
