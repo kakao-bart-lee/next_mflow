@@ -163,6 +163,21 @@ export interface LegacyFutureSpouseInsight {
   readonly currentDay: number
 }
 
+export interface LegacyMarriageTimingTableInsight {
+  readonly sourceTable: "G033"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly focusElement: string
+  readonly text: string
+  readonly entries: readonly {
+    readonly year: number
+    readonly age: number
+    readonly ganji: string
+    readonly score: number
+    readonly percent: number
+  }[]
+}
+
 const BRANCH_INDEX = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
 const STEM_CODE_BY_KOREAN: Record<string, string> = {
   갑: "A",
@@ -231,6 +246,60 @@ const SERIAL_TABLE_TITLES: Record<LegacyFutureSpouseInsight["sourceTable"], stri
   G005: "미래 배우자 성격상",
   G006: "미래 배우자 직업상",
   G007: "미래 배우자 연애타입",
+}
+const STEMS_BY_ELEMENT: Record<string, readonly string[]> = {
+  목: ["甲", "乙"],
+  화: ["丙", "丁"],
+  토: ["戊", "己"],
+  금: ["庚", "辛"],
+  수: ["壬", "癸"],
+}
+const BRANCHES_BY_ELEMENT: Record<string, readonly string[]> = {
+  목: ["寅", "卯"],
+  화: ["巳", "午"],
+  토: ["辰", "戌", "丑", "未"],
+  금: ["申", "酉"],
+  수: ["亥", "子"],
+}
+const STEM_HAP_PARTNER: Record<string, string> = {
+  甲: "己",
+  己: "甲",
+  乙: "庚",
+  庚: "乙",
+  丙: "辛",
+  辛: "丙",
+  丁: "壬",
+  壬: "丁",
+  戊: "癸",
+  癸: "戊",
+}
+const BRANCH_HAP_PARTNER: Record<string, string> = {
+  子: "丑",
+  丑: "子",
+  寅: "亥",
+  亥: "寅",
+  卯: "戌",
+  戌: "卯",
+  辰: "酉",
+  酉: "辰",
+  巳: "申",
+  申: "巳",
+  午: "未",
+  未: "午",
+}
+const BRANCH_CHUNG_PARTNER: Record<string, string> = {
+  子: "午",
+  午: "子",
+  卯: "酉",
+  酉: "卯",
+  寅: "申",
+  申: "寅",
+  巳: "亥",
+  亥: "巳",
+  辰: "戌",
+  戌: "辰",
+  丑: "未",
+  未: "丑",
 }
 
 function toCalculationInput(fortune: FortuneResponse, gender: "M" | "F"): LegacyCompatibilityCalculationInput {
@@ -512,6 +581,31 @@ function getSexagenarySerial(stemCode: string, branchIndex: number): number {
     }
   }
   return 60
+}
+
+function getStemElementLabel(stemHanja: string): string {
+  if (stemHanja === "甲" || stemHanja === "乙") return "목"
+  if (stemHanja === "丙" || stemHanja === "丁") return "화"
+  if (stemHanja === "戊" || stemHanja === "己") return "토"
+  if (stemHanja === "庚" || stemHanja === "辛") return "금"
+  return "수"
+}
+
+function getBranchElementLabel(branchHanja: string): string {
+  if (branchHanja === "寅" || branchHanja === "卯") return "목"
+  if (branchHanja === "巳" || branchHanja === "午") return "화"
+  if (branchHanja === "申" || branchHanja === "酉") return "금"
+  if (branchHanja === "亥" || branchHanja === "子") return "수"
+  return "토"
+}
+
+function normalizeElementLabel(element: string): string {
+  if (element === "木" || element === "목") return "목"
+  if (element === "火" || element === "화") return "화"
+  if (element === "土" || element === "토") return "토"
+  if (element === "金" || element === "金" || element === "금") return "금"
+  if (element === "水" || element === "수") return "수"
+  return element
 }
 
 function resolveLunarYearGanji(
@@ -1074,6 +1168,104 @@ export function buildLegacyFutureSpouseInsight(
     text: record.data,
     currentMonthStem,
     currentDay,
+  }
+}
+
+export function buildLegacyMarriageTimingTableInsight(
+  primaryInfo: LegacyCompatibilityBirthInfo,
+  primaryFortune: FortuneResponse,
+): LegacyMarriageTimingTableInsight | null {
+  const birthYear = Number.parseInt(primaryInfo.birthDate.slice(0, 4), 10)
+  const dayStemHanja = extractHanja(primaryFortune.sajuData.pillars.일.천간)
+  const dayBranchHanja = extractHanja(primaryFortune.sajuData.pillars.일.지지)
+  const monthBranchHanja = extractHanja(primaryFortune.sajuData.pillars.월.지지)
+  if (!Number.isFinite(birthYear)) {
+    return null
+  }
+
+  const roleProfile = getElementRoleProfile(`${dayStemHanja}${monthBranchHanja}`)
+  const usefulElement = normalizeElementLabel(roleProfile.primary.usefulElement)
+  const favorableElement = normalizeElementLabel(roleProfile.primary.favorableElement)
+  const focusElement = resolveSpouseStarElement(dayStemHanja, primaryInfo.gender)
+  if (!focusElement) {
+    return null
+  }
+
+  const normalizedFocusElement = normalizeElementLabel(focusElement)
+  const candidateStems = new Set(STEMS_BY_ELEMENT[normalizedFocusElement] ?? [])
+  const candidateBranches = new Set(BRANCHES_BY_ELEMENT[normalizedFocusElement] ?? [])
+  const entries: Array<{ year: number; age: number; ganji: string; score: number; percent: number }> = []
+
+  for (let year = birthYear + 18; year < birthYear + 50; year += 1) {
+    const ganji = resolveLunarYearGanji(year)
+    if (!ganji) {
+      continue
+    }
+    const stemHanja = ganji.hanjaKey.slice(0, 1)
+    const branchHanja = ganji.hanjaKey.slice(1)
+    if (!candidateStems.has(stemHanja) && !candidateBranches.has(branchHanja)) {
+      continue
+    }
+
+    const stemElement = getStemElementLabel(stemHanja)
+    const branchElement = getBranchElementLabel(branchHanja)
+
+    let total = 0
+    if (stemElement === normalizedFocusElement || branchElement === normalizedFocusElement) {
+      total +=
+        stemElement === normalizedFocusElement && branchElement === normalizedFocusElement
+          ? 150
+          : stemElement === normalizedFocusElement
+            ? 100
+            : 120
+    }
+    if (STEM_HAP_PARTNER[dayStemHanja] === stemHanja) {
+      total += 50
+    }
+    if (BRANCH_HAP_PARTNER[dayBranchHanja] === branchHanja) {
+      total += 70
+    }
+    if (BRANCH_CHUNG_PARTNER[dayBranchHanja] === branchHanja) {
+      total -= 40
+    }
+    if (getStemElementLabel(stemHanja) === usefulElement) {
+      total += 22
+    }
+    if (getBranchElementLabel(branchHanja) === usefulElement) {
+      total += 18
+    }
+    if (getStemElementLabel(stemHanja) === favorableElement) {
+      total += 17
+    }
+    if (getBranchElementLabel(branchHanja) === favorableElement) {
+      total += 13
+    }
+
+    if (primaryInfo.gender === "F" && total === 0) {
+      total = 8
+    }
+
+    const percent = Math.round(Math.abs((total / 340) * 100))
+    entries.push({
+      year,
+      age: year - birthYear + 1,
+      ganji: ganji.koreanKey,
+      score: total,
+      percent,
+    })
+  }
+
+  if (entries.length === 0) {
+    return null
+  }
+
+  return {
+    sourceTable: "G033",
+    title: "혼인·연애 시기표",
+    scoreLabel: "혼인시기",
+    focusElement: normalizeElementLabel(focusElement),
+    text: `귀하는 ${normalizedFocusElement} 운에서 혼인·연애 가능성이 크게 올라가는 흐름으로 봅니다.`,
+    entries,
   }
 }
 

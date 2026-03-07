@@ -101,6 +101,20 @@ interface CompatibilityResult {
     currentMonthStem: string
     currentDay: number
   } | null
+  legacy_marriage_timing_table?: {
+    sourceTable: "G033"
+    title: string
+    scoreLabel: string
+    focusElement: string
+    text: string
+    entries: {
+      year: number
+      age: number
+      ganji: string
+      score: number
+      percent: number
+    }[]
+  } | null
   legacy_relationship_timing?: {
     sourceTable: "G034"
     title: string
@@ -512,6 +526,50 @@ export function CompatibilityScreen() {
                     </div>
                   ) : null
                 )}
+
+                {result.legacy_marriage_timing_table ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_marriage_timing_table.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 synthetic 해설 · {result.legacy_marriage_timing_table.sourceTable} · {result.legacy_marriage_timing_table.focusElement} 배우자성 기준
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_marriage_timing_table.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_marriage_timing_table.text}
+                    </p>
+                    <div className="mt-5 space-y-3">
+                      {result.legacy_marriage_timing_table.entries.slice(0, 10).map((entry) => (
+                        <div key={`${entry.year}-${entry.ganji}`} className="rounded-lg border border-border/80 bg-background/60 p-4">
+                          <div className="flex items-center justify-between gap-4">
+                            <div>
+                              <p className="text-sm font-semibold text-foreground">
+                                {entry.year}년 · {entry.ganji}
+                              </p>
+                              <p className="mt-1 text-xs text-muted-foreground">
+                                만 나이 기준 약 {entry.age}세 · raw {entry.score}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-semibold text-accent">{entry.percent}%</p>
+                            </div>
+                          </div>
+                          <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+                            <div
+                              className="h-full rounded-full bg-accent transition-[width]"
+                              style={{ width: `${Math.max(4, Math.min(entry.percent, 100))}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
 
                 {result.legacy_relationship_timing ? (
                   <div className="rounded-xl border border-border bg-card p-5">

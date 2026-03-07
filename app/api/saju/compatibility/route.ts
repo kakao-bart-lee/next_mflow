@@ -12,6 +12,7 @@ import {
   buildLegacyBedroomInsight,
   buildLegacyFutureSpouseInsight,
   buildLegacyIntimacyInsight,
+  buildLegacyMarriageTimingTableInsight,
   buildLegacyPartnerRoleInsight,
   buildLegacyRelationshipTimingInsight,
   buildLegacyMarriageFlowInsight,
@@ -107,6 +108,7 @@ export async function POST(req: NextRequest) {
     const legacyFutureSpousePersonality = buildLegacyFutureSpouseInsight("G005", personA, fortuneA)
     const legacyFutureSpouseCareer = buildLegacyFutureSpouseInsight("G006", personA, fortuneA)
     const legacyFutureSpouseRomance = buildLegacyFutureSpouseInsight("G007", personA, fortuneA)
+    const legacyMarriageTimingTable = buildLegacyMarriageTimingTableInsight(personA, fortuneA)
     const legacyPartnerRole = buildLegacyPartnerRoleInsight(personA, fortuneA)
     const legacyRelationshipTiming = buildLegacyRelationshipTimingInsight(personA, fortuneA)
     const legacyDestinyCore = buildLegacyDestinyCoreInsight(personA, fortuneA, fortuneB)
@@ -133,6 +135,7 @@ export async function POST(req: NextRequest) {
         legacy_future_spouse_personality: legacyFutureSpousePersonality,
         legacy_future_spouse_career: legacyFutureSpouseCareer,
         legacy_future_spouse_romance: legacyFutureSpouseRomance,
+        legacy_marriage_timing_table: legacyMarriageTimingTable,
         legacy_partner_role: legacyPartnerRole,
         legacy_relationship_timing: legacyRelationshipTiming,
         legacy_destiny_core: legacyDestinyCore,

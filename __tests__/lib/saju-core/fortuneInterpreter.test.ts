@@ -31,6 +31,7 @@ import {
   buildLegacyPartnerRoleInsight,
   buildLegacyRelationshipTimingInsight,
   buildLegacyMarriageFlowInsight,
+  buildLegacyMarriageTimingTableInsight,
   buildLegacyLoveStyleInsight,
   buildLegacyLoveWeakPointInsight,
   buildLegacyDestinyCoreInsight,
@@ -733,6 +734,28 @@ describe("legacyCompatibility", () => {
     expect(legacyRelationshipTiming?.matchedYear).toBeLessThan((legacyRelationshipTiming?.currentYear ?? 0) + 10)
     expect(legacyRelationshipTiming?.matchedGanji).toBe(legacyRelationshipTiming?.lookupKey)
     expect(legacyRelationshipTiming?.text.trim().length).toBeGreaterThan(0)
+  })
+
+  it("builds the synthetic G033 marriage-timing table from spouse-star candidate years", () => {
+    const service = new FortuneTellerService()
+    const primaryInfo = {
+      birthDate: "1990-01-15",
+      birthTime: "14:30",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "M" as const,
+    }
+
+    const primaryFortune = service.calculateSaju(primaryInfo)
+    const legacyMarriageTimingTable = buildLegacyMarriageTimingTableInsight(primaryInfo, primaryFortune)
+
+    expect(legacyMarriageTimingTable).toBeDefined()
+    expect(legacyMarriageTimingTable?.sourceTable).toBe("G033")
+    expect(legacyMarriageTimingTable?.focusElement).toMatch(/^(목|화|토|금|수)$/)
+    expect(legacyMarriageTimingTable?.entries.length).toBeGreaterThan(0)
+    expect(legacyMarriageTimingTable?.entries[0]?.year).toBeGreaterThan(2000)
+    expect(legacyMarriageTimingTable?.entries[0]?.ganji).toMatch(/^[가-힣]{2}$/)
+    expect(legacyMarriageTimingTable?.entries[0]?.percent).toBeGreaterThanOrEqual(0)
   })
 
   it("builds the legacy G031 spouse-role detail from yongsin role and spouse palace", () => {
