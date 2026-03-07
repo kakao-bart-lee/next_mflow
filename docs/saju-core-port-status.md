@@ -4,14 +4,13 @@
 
 ## Overview
 
-`next_mflow`의 내장 `lib/saju-core`는 `saju-core-lib` 3.0.0 방향에 맞춰 structured profile 응답을 내도록 포팅 중이다.
+`next_mflow`의 내장 `lib/saju-core`는 `saju-core-lib` 3.0.0 방향에 맞춰 structured profile 응답을 내도록 포팅했고, 주요 레거시 PHP 흐름 복구도 완료했다.
 
-현재까지는 아래 두 축이 진행됐다.
+현재 기준으로는 “동작 복구” 단계보다 “opaque한 legacy 흐름을 의미 있는 계산 단계로 재배치하는 유지보수성 개선” 단계가 더 중요하다.
 
-1. 응답 구조 포팅
-2. 레거시 계산/조회 호환성 복구
+추가 계획은 아래 문서로 관리한다.
 
-아직 일부 테이블은 원본 수식 또는 원본 데이터가 없어 exact port가 끝나지 않았다.
+- `docs/saju-core-maintenance-roadmap.md`
 
 ## Completed
 
@@ -82,116 +81,38 @@
 - `daily_fortune`: `6/6`
 - `career_fortune`: `6/6`
 - `wealth_fortune`: `6/6`
-- `birth_season_fortune`: `6/7`
-- `five_elements_balance`: `8/10`
-- `life_overview`: `20/24`
-- `detailed_saju_reading`: `10/12`
-- `lifetime_overview`: `11/12`
-- `new_year_fortune`: `15/26`
-- `tojeong_yearly_fortune`: `10/18`
+- `birth_season_fortune`: `7/7`
+- `five_elements_balance`: `10/10`
+- `life_overview`: `24/24`
+- `detailed_saju_reading`: `12/12`
+- `lifetime_overview`: `12/12`
+- `new_year_fortune`: `26/26`
+- `tojeong_yearly_fortune`: `18/18`
+- `early_life_fortune`: `15/15`
+- `midlife_fortune`: `14/14`
+- `later_life_fortune`: `11/11`
+- `misfortune_relief`: `2/2`
 
-남은 실패는 크게 세 범주로 나뉜다.
-
-## Remaining Blockers
-
-### 1. 원본 데이터 손실
-
-현재 로컬 데이터와 `../saju-core-lib/data`는 동일하게 아래 문제가 있다.
-
-- `S095`, `S097`, `S098`, `S099`, `S100`: 테이블이 비어 있음
-- `S101`: 월별 `DB_data_1`~`DB_data_12` 컬럼이 JSON에 남아 있지 않음
-- `S110`: 월별 컬럼이 JSON에 남아 있지 않음
-- `S081`, `S085`: `DB_data_m`, `DB_data_w` 원문이 비어 있음
-- `T022`: `DB_data_m`, `DB_data_w` 원문이 비어 있음
-
-즉, retrieval 계층은 복구됐지만 실제 원문 데이터가 비어 있어 일부 결과는 여전히 `missing_data`다.
-
-### 2. 원본 helper 또는 수식 부재
-
-아래 항목은 참조 PHP는 확인했지만 핵심 계산 함수 또는 include 파일이 로컬 스냅샷에 없다.
-
-- `F_Juyeok_trigram`
-  - 영향: `F011`, `T039`, `J004`, `J005`, `J009`, `J010`
-- `F_woonday`, `F_ohengSearch`
-  - 영향: `S008`, `S009`
-- `yong/hee/kee/goo code` 산출 파이프라인
-  - 영향: `S014`
-- `cut_tot`
-  - 영향: `S103`, `S104`, `S106`, `S107`, `S108`, `S109`, `S110`
-- `temp_03`
-  - 영향: `S095`, `S096`, `S097`, `S098`, `S099`, `S100`, `S101`
-- `result_14jusung_guanrok`, `result_guanrokgung`
-  - 영향: `J023`
-- `S126_sal_data.php`
-  - 영향: `S126`
-
-### 3. 일부 테이블은 config 미등록
-
-현재 일부 실패는 실제 미지원이라기보다 calculator factory에 아직 등록되지 않아 `unsupported_table`로 떨어진다.
-
-대표 항목:
-
-- `S095`, `S097`, `S098`, `S099`, `S100`, `S101`
-- `S103`, `S104`, `S106`, `S107`, `S108`, `S109`, `S110`
-- `J004`, `J005`, `J009`, `J010`, `J023`
-- `S126`
-
-이 항목들은 다음 라운드에서 최소한 “정확한 blocked reason을 드러내는 계산 경로”로 먼저 등록하는 것이 좋다.
+현재 `next_mflow` 기준 남은 대형 기능 blocker는 없다. 남은 일은 결과 정합성을 해치지 않으면서 `temp_03`, `cut_tot`, `serial_no`, `choie_data` 같은 레거시 중간값을 의미 있는 구조로 바꾸는 유지보수성 작업이다.
 
 ## Current Assessment
 
 현재 상태는 다음과 같이 볼 수 있다.
 
 - 3.0.0 응답 구조 포팅은 완료됐다.
-- 주요 사용 경로 중 `basic`, `daily_fortune`, `career_fortune`, `wealth_fortune`는 안정권이다.
-- 일부 레거시 항목은 조용히 잘못 계산되는 상태가 아니라, 대부분 명시적 에러나 `missing_data`로 드러나게 정리됐다.
-- 남은 일의 대부분은 단순 TS 구현이 아니라 원본 수식 또는 원본 데이터 복구 문제다.
+- SQL 기반 원문 데이터와 주요 PHP 계산 흐름은 `next_mflow`와 `saju-core-lib` 양쪽에 반영됐다.
+- profile sweep 기준 사용자 노출 경로는 모두 복구됐다.
+- 다음 단계의 핵심은 “정답을 맞히는 것”이 아니라 “정답을 유지보수 가능하게 설명하는 것”이다.
 
 ## Recommended Next Steps
 
-### Priority 1
+실행 계획은 `docs/saju-core-maintenance-roadmap.md`에서 관리한다.
 
-`unsupported_table`로만 떨어지는 항목을 calculator config에 등록하고, 각 항목별 차단 사유를 명시적으로 노출한다.
+핵심 원칙:
 
-목표:
-
-- sweep 결과가 단순 `unsupported_table`이 아니라
-- `missing_cut_tot_formula`
-- `missing_temp_03_source`
-- `missing_juyeok_trigram_helper`
-- `missing_yongsin_pipeline`
-
-같은 식으로 더 좁혀지게 만들기
-
-### Priority 2
-
-원본 데이터 복구 경로를 찾는다.
-
-우선 대상:
-
-- `S081`, `S085`, `T022`
-- `S101`, `S110`
-
-찾아야 할 것:
-
-- 과거 raw export
-- DB dump
-- 변환 전 intermediate file
-- 생성 스크립트 또는 변환 규칙 누락
-
-### Priority 3
-
-원본 helper 복원 가능성을 계속 조사한다.
-
-우선 대상:
-
-- `F_Juyeok_trigram`
-- `F_woonday`
-- `F_ohengSearch`
-- `cut_tot`
-- `temp_03`
-
-가능하면 `../saju-core-lib` 쪽에서 먼저 exact port를 만들고, 그 후 `next_mflow`로 가져오는 방식이 가장 안전하다.
+- 복구 가능한 데이터와 계산식은 먼저 확보한다.
+- 그 위에서 레거시 중간값을 의미 있는 key builder와 lookup module로 분리한다.
+- `../saju-core-lib`를 정본으로 정리하고, 안정화 후 `next_mflow`로 포팅한다.
 
 ## Notes
 
