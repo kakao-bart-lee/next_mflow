@@ -173,7 +173,7 @@ describe("GenderBasedCalculator", () => {
       {
         tableName: "T022",
         calculatorType: CalculatorType.GENDER_BASED,
-        expressionFields: ["combined_value"],
+        expressionFields: ["western_zodiac_number"],
         genderColumns: { M: "DB_data_m", F: "DB_data_w" },
       },
       retriever
@@ -209,6 +209,46 @@ describe("GenderBasedCalculator", () => {
     expect(femaleResult.text).toBe("여성 전용 텍스트")
     expect(maleResult.text).toBe("남성 전용 텍스트")
     expect(maleResult.numerical).toBe("9")
+  })
+
+  it("supports semantic aliases for day stem keyed tables", () => {
+    const retriever = new DatabaseResultRetriever({
+      S081: {
+        "01": {
+          data: "",
+          DB_data_m: "남성 오행 보완 포인트",
+          DB_data_w: "여성 오행 보완 포인트",
+          numerical: 2,
+        },
+      },
+    })
+
+    const calculator = new GenderBasedCalculator(
+      {
+        tableName: "S081",
+        calculatorType: CalculatorType.GENDER_BASED,
+        expressionFields: ["day_stem_index"],
+        genderColumns: { M: "DB_data_m", F: "DB_data_w" },
+      },
+      retriever
+    )
+
+    const result = calculator.calculate({
+      yearStem: "갑(甲)",
+      yearBranch: "자(子)",
+      monthStem: "갑(甲)",
+      monthBranch: "자(子)",
+      dayStem: "갑(甲)",
+      dayBranch: "자(子)",
+      hourStem: "갑(甲)",
+      hourBranch: "자(子)",
+      gender: "남자",
+      additionalData: { birth_date: "1980-07-30" },
+    })
+
+    expect(result.expression).toBe("01")
+    expect(result.text).toBe("남성 오행 보완 포인트")
+    expect(result.numerical).toBe("2")
   })
 })
 

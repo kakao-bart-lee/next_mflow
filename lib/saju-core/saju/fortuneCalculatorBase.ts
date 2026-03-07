@@ -2181,11 +2181,11 @@ export class GenderBasedCalculator extends AbstractFortuneCalculator {
       throw new Error(`Missing gender-based field for ${this.config.tableName}`);
     }
 
-    if (fieldName === 'combined_value') {
+    if (fieldName === 'combined_value' || fieldName === 'western_zodiac_number') {
       return this.getWesternZodiacNumber(inputData).toString().padStart(2, '0');
     }
 
-    if (fieldName === 'day_stem_num') {
+    if (fieldName === 'day_stem_num' || fieldName === 'day_stem_index') {
       return this.getStemNumber(inputData.dayStem).toString().padStart(2, '0');
     }
 

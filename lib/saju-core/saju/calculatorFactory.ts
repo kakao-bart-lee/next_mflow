@@ -407,7 +407,7 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
   },
   T022: {
     calculator_type: CalculatorType.GENDER_BASED,
-    expression_fields: ['combined_value'],
+    expression_fields: ['western_zodiac_number'],
     gender_columns: { M: 'DB_data_m', F: 'DB_data_w' },
     description: '성별운세',
   },
@@ -465,7 +465,7 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
   },
   S085: {
     calculator_type: CalculatorType.GENDER_BASED,
-    expression_fields: ['day_stem_num'],
+    expression_fields: ['day_stem_index'],
     gender_columns: { M: 'DB_data_m', F: 'DB_data_w' },
     description: '선천적기질운',
   },
@@ -496,7 +496,7 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
   },
   S081: {
     calculator_type: CalculatorType.GENDER_BASED,
-    expression_fields: ['day_stem_num'],
+    expression_fields: ['day_stem_index'],
     gender_columns: { M: 'DB_data_m', F: 'DB_data_w' },
     description: '오행 보완 포인트',
   },
