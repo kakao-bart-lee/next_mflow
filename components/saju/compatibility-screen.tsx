@@ -143,6 +143,18 @@ interface CompatibilityResult {
     score: number | null
     currentMonth: number
   } | null
+  legacy_spouse_core?: {
+    sourceTable: "G030"
+    title: string
+    scoreLabel: string
+    spouseStarLabel: string
+    palaceLabel: string
+    visiblePrimaryCount: number
+    visibleSecondaryCount: number
+    hiddenPrimaryCount: number
+    hiddenSecondaryCount: number
+    text: string
+  } | null
   legacy_type_profile?: {
     sourceTable: "T010"
     title: string
@@ -632,6 +644,33 @@ export function CompatibilityScreen() {
                     </div>
                     <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                       {result.legacy_marriage_flow.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_spouse_core ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_spouse_core.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 synthetic 해설 · {result.legacy_spouse_core.sourceTable}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_spouse_core.scoreLabel}
+                      </div>
+                    </div>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-lg border border-border/80 bg-background/60 p-4 text-sm text-muted-foreground">
+                        보이는 {result.legacy_spouse_core.spouseStarLabel}: {result.legacy_spouse_core.visiblePrimaryCount} / {result.legacy_spouse_core.visibleSecondaryCount}
+                      </div>
+                      <div className="rounded-lg border border-border/80 bg-background/60 p-4 text-sm text-muted-foreground">
+                        숨은 {result.legacy_spouse_core.spouseStarLabel}: {result.legacy_spouse_core.hiddenPrimaryCount} / {result.legacy_spouse_core.hiddenSecondaryCount}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_spouse_core.text}
                     </p>
                   </div>
                 ) : null}

@@ -92,6 +92,19 @@ export interface LegacyMarriageFlowInsight {
   readonly currentMonth: number
 }
 
+export interface LegacySpouseCoreInsight {
+  readonly sourceTable: "G030"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly spouseStarLabel: string
+  readonly palaceLabel: string
+  readonly visiblePrimaryCount: number
+  readonly visibleSecondaryCount: number
+  readonly hiddenPrimaryCount: number
+  readonly hiddenSecondaryCount: number
+  readonly text: string
+}
+
 export interface LegacyTypeProfileInsight {
   readonly sourceTable: "T010"
   readonly title: string
@@ -936,6 +949,64 @@ export function buildLegacyMarriageFlowInsight(
     text: record.data,
     score: Number.isFinite(numericalValue) ? numericalValue : null,
     currentMonth,
+  }
+}
+
+export function buildLegacySpouseCoreInsight(
+  primaryInfo: LegacyCompatibilityBirthInfo,
+  primaryFortune: FortuneResponse,
+): LegacySpouseCoreInsight | null {
+  const dayStemHanja = extractHanja(primaryFortune.sajuData.pillars.일.천간)
+  const dayBranchHanja = extractHanja(primaryFortune.sajuData.pillars.일.지지)
+  const monthBranchHanja = extractHanja(primaryFortune.sajuData.pillars.월.지지)
+  const roleProfile = getElementRoleProfile(`${dayStemHanja}${monthBranchHanja}`)
+  const spouseElement = resolveSpouseStarElement(dayStemHanja, primaryInfo.gender)
+  if (!spouseElement) {
+    return null
+  }
+
+  const isMale = primaryInfo.gender === "M"
+  const primaryLabel = isMale ? "정재" : "정관"
+  const secondaryLabel = isMale ? "편재" : "편관"
+  const spouseStarLabel = isMale ? "처성(妻星)" : "부성(夫星)"
+  const palaceLabel = isMale ? "처궁(妻宮)" : "부궁(夫宮)"
+  const spouseRole = classifyElementRoleLabel(spouseElement, roleProfile.primary) ?? "미상"
+  const palaceRole =
+    (isMale
+      ? classifyBranchRoleLabel(dayBranchHanja, roleProfile)
+      : classifyBranchRoleLabel(monthBranchHanja, roleProfile)) ?? "미상"
+
+  const visiblePositions = Object.values((primaryFortune.sipsin?.positions as Record<string, unknown> | undefined) ?? {})
+    .filter((value): value is string => typeof value === "string")
+  const hiddenPositions = Object.values(primaryFortune.sajuData.pillars)
+    .flatMap((pillar) => pillar.지장간.map((entry) => entry.십신))
+    .filter((value): value is string => typeof value === "string" && value.length > 0)
+
+  const visiblePrimaryCount = visiblePositions.filter((value) => value === primaryLabel).length
+  const visibleSecondaryCount = visiblePositions.filter((value) => value === secondaryLabel).length
+  const hiddenPrimaryCount = hiddenPositions.filter((value) => value === primaryLabel).length
+  const hiddenSecondaryCount = hiddenPositions.filter((value) => value === secondaryLabel).length
+
+  const text = [
+    isMale
+      ? `보이는 ${spouseStarLabel}은 ${primaryLabel} ${visiblePrimaryCount}개, ${secondaryLabel} ${visibleSecondaryCount}개입니다.`
+      : `보이는 ${spouseStarLabel}은 ${primaryLabel} ${visiblePrimaryCount}개, ${secondaryLabel} ${visibleSecondaryCount}개입니다.`,
+    `지장간에 숨은 ${spouseStarLabel}은 ${primaryLabel} ${hiddenPrimaryCount}개, ${secondaryLabel} ${hiddenSecondaryCount}개입니다.`,
+    `${spouseStarLabel} 오행은 ${normalizeElementLabel(spouseElement)}이며 사주에서는 ${spouseRole}으로 해석합니다.`,
+    `${palaceLabel}은 ${isMale ? extractKorean(primaryFortune.sajuData.pillars.일.지지) : extractKorean(primaryFortune.sajuData.pillars.월.지지)}이고 ${palaceRole} 흐름으로 봅니다.`,
+  ].join("\n")
+
+  return {
+    sourceTable: "G030",
+    title: isMale ? "아내 운의 핵심 구조" : "남편 운의 핵심 구조",
+    scoreLabel: "배우자성 요약",
+    spouseStarLabel,
+    palaceLabel,
+    visiblePrimaryCount,
+    visibleSecondaryCount,
+    hiddenPrimaryCount,
+    hiddenSecondaryCount,
+    text,
   }
 }
 

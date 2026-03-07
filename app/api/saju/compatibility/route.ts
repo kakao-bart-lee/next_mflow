@@ -13,6 +13,7 @@ import {
   buildLegacyFutureSpouseInsight,
   buildLegacyIntimacyInsight,
   buildLegacyMarriageTimingTableInsight,
+  buildLegacySpouseCoreInsight,
   buildLegacyPartnerRoleInsight,
   buildLegacyRelationshipTimingInsight,
   buildLegacyMarriageFlowInsight,
@@ -102,6 +103,7 @@ export async function POST(req: NextRequest) {
     const legacyBedroom = buildLegacyBedroomInsight(fortuneA)
     const legacyIntimacy = buildLegacyIntimacyInsight(personA, fortuneA, personB, fortuneB)
     const legacyMarriageFlow = buildLegacyMarriageFlowInsight(personA, fortuneA)
+    const legacySpouseCore = buildLegacySpouseCoreInsight(personA, fortuneA)
     const legacyLoveStyle = buildLegacyLoveStyleInsight(personB, fortuneB)
     const legacyLoveWeakPoint = buildLegacyLoveWeakPointInsight(fortuneA)
     const legacyFutureSpouseFace = buildLegacyFutureSpouseInsight("G004", personA, fortuneA)
@@ -129,6 +131,7 @@ export async function POST(req: NextRequest) {
         legacy_bedroom: legacyBedroom,
         legacy_intimacy: legacyIntimacy,
         legacy_marriage_flow: legacyMarriageFlow,
+        legacy_spouse_core: legacySpouseCore,
         legacy_love_style: legacyLoveStyle,
         legacy_love_weak_point: legacyLoveWeakPoint,
         legacy_future_spouse_face: legacyFutureSpouseFace,

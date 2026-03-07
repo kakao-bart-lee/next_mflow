@@ -32,6 +32,7 @@ import {
   buildLegacyRelationshipTimingInsight,
   buildLegacyMarriageFlowInsight,
   buildLegacyMarriageTimingTableInsight,
+  buildLegacySpouseCoreInsight,
   buildLegacyLoveStyleInsight,
   buildLegacyLoveWeakPointInsight,
   buildLegacyDestinyCoreInsight,
@@ -585,6 +586,26 @@ describe("legacyCompatibility", () => {
     expect(legacyMarriageFlow?.currentMonth).toBeGreaterThanOrEqual(1)
     expect(legacyMarriageFlow?.currentMonth).toBeLessThanOrEqual(12)
     expect(legacyMarriageFlow?.text.trim().length).toBeGreaterThan(0)
+  })
+
+  it("builds the synthetic G030 spouse-core summary from sipsin and jijanggan counts", () => {
+    const service = new FortuneTellerService()
+    const primaryInfo = {
+      birthDate: "1990-01-15",
+      birthTime: "14:30",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "M" as const,
+    }
+
+    const primaryFortune = service.calculateSaju(primaryInfo)
+    const legacySpouseCore = buildLegacySpouseCoreInsight(primaryInfo, primaryFortune)
+
+    expect(legacySpouseCore).toBeDefined()
+    expect(legacySpouseCore?.sourceTable).toBe("G030")
+    expect(legacySpouseCore?.visiblePrimaryCount).toBeGreaterThanOrEqual(0)
+    expect(legacySpouseCore?.hiddenSecondaryCount).toBeGreaterThanOrEqual(0)
+    expect(legacySpouseCore?.text).toContain("처성")
   })
 
   it("builds the legacy T010 type-profile detail from the primary year branch category", () => {
