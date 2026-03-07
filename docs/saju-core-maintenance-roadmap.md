@@ -1,6 +1,6 @@
 # Saju Core Maintenance Roadmap
 
-**Last Updated**: 2026-03-07
+**Last Updated**: 2026-03-08
 
 ## Current Progress
 
@@ -13,11 +13,12 @@
   - `New year signal tables` helper 분리 완료
   - `Tojeong trigram tables` helper 분리 완료
 - `Priority 3`
-  - `S014` semantic role profile 경계 분리 완료
+  - `S014` semantic role profile 경계 분리 및 `find_yong` 결정 트리 포팅 완료
   - `F_Juyeok_trigram` helper 분리 및 family 연결 완료
   - `F_woonday/F_ohengSearch` helper 분리 완료
   - `fortune year marker` rules 및 explanation helper 분리 완료
   - `ten_year_fortune_cycle` synthetic profile 조립 완료
+  - `G003/G012/G019/G026/G028` 궁합 G-code 포팅 완료
 
 ## Goal
 
@@ -132,15 +133,16 @@
 - `F_ohengSearch`
 - `yong/hee/kee/goo` pipeline
 
-여기서 앞의 세 family는 “hard case 연구”에서 “공통 helper로 승격 완료” 단계로 올라왔다. 현재 실질적인 잔여 hard case는 `yong/hee/kee/goo`의 deeper parity와, 필요시 장문 설명층의 추가 확장이다.
+여기서 앞의 세 family는 “hard case 연구”에서 “공통 helper로 승격 완료” 단계로 올라왔다. `yong/hee/kee/goo`의 deeper parity(find_yong 결정 트리) 포팅이 완료되었으며, 이제 실질적인 잔여 작업은 필요시 장문 설명층의 추가 확장이다.
 
 이 그룹은 계산 로직 복원이 우선이며, 의미 있는 명칭 재배치는 그 다음 단계다.
 
 ### Current Research Notes
 
 - `S014`
-  - 전체 `find_yong()`을 바로 포팅할 필요는 없다.
-  - 먼저 `용신/희신/기신/구신`을 semantic role profile로 분리하고, 현재 운세 분류는 `supportive/adverse/neutral` bucket으로 다루는 경계가 적절하다.
+  - 전체 `find_yong()` 포팅 완료 (`yongsinDecisionTree.ts`)
+  - PHP 원본의 fall-through 버그 수정 및 정합성 확보
+  - `용신/희신/기신/구신`을 semantic role profile로 분리하고, 현재 운세 분류는 `supportive/adverse/neutral` bucket으로 다루는 경계가 적절하다.
   - 참조:
     - `/Users/bclaw/workspace/moonlit/db/www/UNSE_DATA/solve/f_Saju.php`
     - `/Users/bclaw/workspace/moonlit/db/www/_db2/toC_yongsin_01.sql`

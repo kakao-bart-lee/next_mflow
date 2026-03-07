@@ -1,6 +1,6 @@
 # Saju Core 3.0 Port Status
 
-**Last Updated**: 2026-03-07
+**Last Updated**: 2026-03-08
 
 ## Overview
 
@@ -81,6 +81,24 @@
 - `aa23dfd` `feat add fortune year marker helper`
 - `a240782` `feat extend fortune year markers`
 - 이번 라운드 커밋 예정: marker `fullText` 해설층 추가
+
+### 6. 궁합 G-code 및 find_yong 결정 트리 포팅
+
+- `yongsinDecisionTree.ts`
+  - PHP `find_yong()` 결정 트리를 TypeScript로 완전히 포팅
+  - PHP 원본의 fall-through 버그(break 누락)를 수정하여 정합성 확보
+- `legacyCompatibility.ts` 확장
+  - `G003` (기본 궁합 성향): 십이운성 기반
+  - `G012` (세부 궁합 분석): 일지 기반
+  - `G019` (별자리 궁합): 서양 별자리 기반
+  - `G026` (띠 궁합): 12×12 띠 조합 역설계
+  - `G028` (사상체질 궁합): 사상체질 pair 정규화
+- `lib/schemas/birth-info.ts`
+  - `sasangConstitution` 필드 추가 (ty, sy, tu, su)
+
+관련 커밋:
+
+- `docs(saju): update handoff, port-status, and roadmap for decision tree and G-codes`
 
 ## Verified
 
