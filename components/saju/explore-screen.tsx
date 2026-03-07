@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import { useFortune } from "@/lib/contexts/fortune-context"
 import type { FortuneResponse } from "@/lib/saju-core"
+import type { GreatFortuneSummary } from "@/lib/saju-core/models/fortuneTeller"
 import { PLANET_LABEL, PLANET_ORDER, SIGN_LABEL_KO } from "@/lib/astrology/static/constants"
 import { computeTransits, type TransitAspect } from "@/lib/astrology/static/transits"
 import type { FutureDayInsight, PlanetId } from "@/lib/astrology/static/types"
@@ -224,7 +225,7 @@ export function ExploreScreen() {
     () => (sajuResult ? buildFiveElements(sajuResult) : null),
     [sajuResult],
   )
-  const greatFortune = sajuResult?.greatFortune as Record<string, Record<string, string>> | undefined
+  const greatFortune = sajuResult?.greatFortune as GreatFortuneSummary | undefined
   const currentGreatFortune = greatFortune?.current_period
   const sinyakSingangData = sajuResult?.sinyakSingang as Record<string, string> | undefined
 

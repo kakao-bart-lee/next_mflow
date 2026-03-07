@@ -163,6 +163,21 @@ export const ThemeInterpretationSummarySchema = z.object({
   grade: z.string(),
 });
 
+export const GreatFortunePeriodSchema = z.object({
+  start_age: z.number(),
+  end_age: z.number(),
+  heavenly_stem: z.string(),
+  earthly_branch: z.string(),
+  sipsin: z.string(),
+  period_number: z.number(),
+});
+
+export const GreatFortuneSummarySchema = z.object({
+  direction: z.string(),
+  current_period: GreatFortunePeriodSchema.nullable(),
+  periods: z.array(GreatFortunePeriodSchema).default([]),
+});
+
 /** 구조화 운세 프로필 응답 스키마 */
 export const FortuneProfileResultSchema = z.object({
   profile: FortuneProfileInfoSchema,
@@ -181,7 +196,7 @@ export const FortuneResponseSchema = z.object({
   /** 신약신강 분석 결과 */
   sinyakSingang: z.record(z.unknown()).optional(),
   /** 대운십신 분석 결과 */
-  greatFortune: z.record(z.unknown()).optional(),
+  greatFortune: GreatFortuneSummarySchema.optional(),
   /** 형충파해 분석 결과 */
   hyungchung: z.record(z.unknown()).optional(),
   /** 구조화 운세 프로필 결과 */
@@ -235,6 +250,12 @@ export type FortuneProfileSection = z.infer<typeof FortuneProfileSectionSchema>;
 /** ThemeInterpretationSummary 타입 */
 export type ThemeInterpretationSummary = z.infer<typeof ThemeInterpretationSummarySchema>;
 
+/** GreatFortunePeriod 타입 */
+export type GreatFortunePeriod = z.infer<typeof GreatFortunePeriodSchema>;
+
+/** GreatFortuneSummary 타입 */
+export type GreatFortuneSummary = z.infer<typeof GreatFortuneSummarySchema>;
+
 /** FortuneProfileResult 타입 */
 export type FortuneProfileResult = z.infer<typeof FortuneProfileResultSchema>;
 
@@ -244,7 +265,7 @@ export interface FortuneResponse {
   sajuData: SajuData;
   sipsin?: Record<string, unknown> | undefined;
   sinyakSingang?: Record<string, unknown> | undefined;
-  greatFortune?: Record<string, unknown> | undefined;
+  greatFortune?: GreatFortuneSummary | undefined;
   hyungchung?: HyungchungResult | undefined;
   fortuneProfileResult?: FortuneProfileResult | undefined;
   timestamp: string | Date;

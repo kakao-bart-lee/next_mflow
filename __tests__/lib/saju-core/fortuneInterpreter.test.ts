@@ -498,6 +498,25 @@ describe("FortuneTellerService.getSajuFortune()", () => {
     expect(j023Entry?.fullText.trim().length).toBeGreaterThan(0)
   })
 
+  it("ten_year_fortune_cycle builds synthetic great-fortune sections", () => {
+    const service = new FortuneTellerService()
+    const result = service.getSajuFortune(BASE_REQUEST, "ten_year_fortune_cycle")
+
+    const sections = result.fortuneProfileResult?.sections ?? []
+    const entries = sections.flatMap((section) => section.entries)
+    const timelineEntry = entries.find((entry) => entry.tableCode === "GF_TIMELINE")
+    const periodsEntry = entries.find((entry) => entry.tableCode === "GF_PERIODS")
+
+    expect(result.fortuneProfileResult?.profile.id).toBe("ten_year_fortune_cycle")
+    expect(sections).toHaveLength(2)
+    expect(timelineEntry?.status).toBe("resolved")
+    expect(timelineEntry?.fullText).toContain("현재 기준")
+    expect(timelineEntry?.fullText).toContain("천간 십성")
+    expect(periodsEntry?.status).toBe("resolved")
+    expect(periodsEntry?.fullText).toContain("진행 방향")
+    expect(periodsEntry?.fullText).toContain("현재 대운")
+  })
+
   it("birth_season_fortune profile returns a result with sections", () => {
     // isSupportedProfileId 경로 → 프로필 ID로 직접 조회
     const service = new FortuneTellerService()

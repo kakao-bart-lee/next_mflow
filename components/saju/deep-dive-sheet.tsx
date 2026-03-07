@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/tooltip"
 import { useFortune } from "@/lib/contexts/fortune-context"
 import type { FortuneResponse } from "@/lib/saju-core"
+import type { GreatFortuneSummary } from "@/lib/saju-core/models/fortuneTeller"
 import type {
   AstrologyStaticResult,
   PlanetId,
@@ -195,7 +196,7 @@ function extractKeyTerms(sajuResult: FortuneResponse | null) {
 function extractGreatFortune(sajuResult: FortuneResponse | null) {
   if (!sajuResult?.greatFortune) return null
 
-  const gf = sajuResult.greatFortune as Record<string, Record<string, string>>
+  const gf = sajuResult.greatFortune as GreatFortuneSummary
   const currentPeriod = gf.current_period
   if (!currentPeriod) return null
 
@@ -203,7 +204,7 @@ function extractGreatFortune(sajuResult: FortuneResponse | null) {
     heavenlyStem: currentPeriod.heavenly_stem ?? "",
     earthlyBranch: currentPeriod.earthly_branch ?? "",
     sipsin: currentPeriod.sipsin ?? "",
-    ageRange: currentPeriod.age_range ?? "",
+    ageRange: `${currentPeriod.start_age}~${currentPeriod.end_age}세`,
   }
 }
 

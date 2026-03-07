@@ -10,6 +10,7 @@ import type { CalculationInput } from './fortuneCalculatorBase';
 import { CALCULATOR_CONFIGS, CalculatorFactory } from './calculatorFactory';
 import { DatabaseResultRetriever } from './fortuneInterpreter';
 import type { FortuneProfileDefinition } from './fortuneProfiles';
+import { buildTenYearFortuneCycleSections } from './greatFortuneProfiles';
 import { ThemeInterpreterManager } from './interpreters';
 import { getTableCatalogEntry } from './tableCatalog';
 import { buildTextVariants, resolveTextVariants } from './textVariants';
@@ -35,9 +36,12 @@ export class FortuneProfileInterpreter {
         title: profileDefinition.titleKo,
         description: profileDefinition.description,
       },
-      sections: profileDefinition.sections.map((section) =>
-        this.buildSection(section.id, section.title, section.tableCodes, calculationInput)
-      ),
+      sections:
+        profileDefinition.id === 'ten_year_fortune_cycle'
+          ? buildTenYearFortuneCycleSections(request, fortuneResponse, profileDefinition.sections)
+          : profileDefinition.sections.map((section) =>
+              this.buildSection(section.id, section.title, section.tableCodes, calculationInput)
+            ),
       theme: this.buildThemeSummary(fortuneResponse, profileDefinition),
     };
   }
