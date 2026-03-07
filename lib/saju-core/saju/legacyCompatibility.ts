@@ -1677,3 +1677,69 @@ export function buildLegacyAnimalCompatibilityInsight(
     score: Number.isFinite(numericalValue) ? numericalValue : null,
   }
 }
+
+// ============================================================
+// G028: 사상체질 궁합 (Sasang Constitution Compatibility)
+// ============================================================
+
+/** 사상체질 타입: ty=태양인, sy=소양인, tu=태음인, su=소음인 */
+export type SasangConstitution = "ty" | "sy" | "tu" | "su"
+
+/** 정규화 우선순위: ty(0) > sy(1) > tu(2) > su(3) */
+const SASANG_PRIORITY: Record<SasangConstitution, number> = {
+  ty: 0,
+  sy: 1,
+  tu: 2,
+  su: 3,
+}
+
+// PHP G028.php 16개 조건 → 10개 대칭 키 정규화: ("su","ty") → "tysu"
+function normalizeSasangPair(a: SasangConstitution, b: SasangConstitution): string {
+  return SASANG_PRIORITY[a] <= SASANG_PRIORITY[b] ? a + b : b + a
+}
+
+export interface LegacySasangCompatibilityInsight {
+  readonly sourceTable: "G028"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+}
+
+function readLegacyG028Record(lookupKey: string): { readonly data?: string } | null {
+  const gTables = getDataLoader().loadGTables() as Record<string, Record<string, Record<string, unknown>>>
+  const record = gTables.G028?.[lookupKey]
+  if (!record || typeof record !== "object") {
+    return null
+  }
+  return record as { readonly data?: string }
+}
+
+export function buildLegacySasangCompatibilityInsight(
+  primarySasang: SasangConstitution | null | undefined,
+  partnerSasang: SasangConstitution | null | undefined,
+): LegacySasangCompatibilityInsight | null {
+  if (!primarySasang || !partnerSasang) {
+    return null
+  }
+
+  const lookupKey = normalizeSasangPair(primarySasang, partnerSasang)
+  const record = readLegacyG028Record(lookupKey)
+
+  if (!record?.data || typeof record.data !== "string") {
+    return null
+  }
+
+  const text = record.data.replace(/<[^>]*>/g, "").trim()
+  if (!text) {
+    return null
+  }
+
+  return {
+    sourceTable: "G028",
+    title: "사상체질 궁합",
+    scoreLabel: "사상체질 궁합",
+    lookupKey,
+    text,
+  }
+}
