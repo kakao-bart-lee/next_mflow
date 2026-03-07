@@ -38,7 +38,9 @@ import {
   getAllFortuneTypes,
 } from './models/sajuFortuneTypes';
 import {
+  getFortuneProfile,
   getFortuneProfileByFortuneType,
+  isSupportedProfileId,
 } from './saju/fortuneProfiles';
 import { extractHanja, extractKorean } from './utils';
 import { calculateHyungchung, type HyungchungResult } from './saju/hyungchung';
@@ -63,7 +65,7 @@ export class FortuneTellerService {
    */
   constructor(dataLoader?: SajuDataLoader) {
     this.dataLoader = dataLoader ?? getDataLoader();
-    this.sData = this.dataLoader.loadSTables() as STablesData;
+    this.sData = this.dataLoader.loadFortuneTables() as STablesData;
     this.fourPillarsCalculator = new FourPillarsCalculator(this.dataLoader);
     this.lifecycleCalculator = new LifecycleStageCalculator();
     this.sipsinCalculator = new SipsinCalculator();
@@ -420,6 +422,7 @@ export class FortuneTellerService {
         gender: request.gender,
         timezone: request.timezone,
         current_age: effectiveAge,
+        jumno: fourPillarsResult.jumno,
       },
     };
 
@@ -431,13 +434,18 @@ export class FortuneTellerService {
    */
   getSajuFortune(
     request: FortuneRequest,
-    fortuneType: string,
+    fortuneTypeOrProfileId: string,
     currentAge?: number
   ): FortuneResponse {
     const fr = this.calculateSaju(request, currentAge);
-    const normalizedFortuneType = fortuneType.trim().toLowerCase();
-    const applyCompatibilityFields = (resolvedFortuneType: string): void => {
-      const profileDefinition = getFortuneProfileByFortuneType(resolvedFortuneType);
+    const normalizedRequestedKey = fortuneTypeOrProfileId.trim().toLowerCase();
+    const applyCompatibilityFields = (mode: {
+      fortuneType?: string;
+      profileId?: string;
+    }): void => {
+      const profileDefinition = mode.profileId
+        ? getFortuneProfile(mode.profileId)
+        : getFortuneProfileByFortuneType(mode.fortuneType ?? 'basic');
       fr.fortuneProfileResult = this.fortuneProfileInterpreter.buildProfileResult(
         request,
         fr,
@@ -465,8 +473,8 @@ export class FortuneTellerService {
     };
 
     try {
-      if (normalizedFortuneType === 'basic') {
-        applyCompatibilityFields('basic');
+      if (normalizedRequestedKey === 'basic') {
+        applyCompatibilityFields({ profileId: 'basic' });
         const interpretations = this.fortuneInterpreter.getCategoryInterpretations(
           request,
           fr,
@@ -478,10 +486,17 @@ export class FortuneTellerService {
         return fr;
       }
 
+      if (isSupportedProfileId(normalizedRequestedKey)) {
+        applyCompatibilityFields({ profileId: normalizedRequestedKey });
+        fr.inputData.fortune_type = null;
+        fr.inputData.fortune_type_description = fr.fortuneProfileResult?.profile.description ?? '';
+        return fr;
+      }
+
       // Enum 기반 fortune type 처리
-      const parsedFortuneType = getFortuneTypeFromString(normalizedFortuneType);
+      const parsedFortuneType = getFortuneTypeFromString(normalizedRequestedKey);
       const combinationName = parsedFortuneType;
-      applyCompatibilityFields(combinationName);
+      applyCompatibilityFields({ fortuneType: combinationName });
 
       // 기존 해석도 유지 (호환성을 위해)
       if (isValidCombination(combinationName)) {
@@ -499,7 +514,7 @@ export class FortuneTellerService {
           '';
       } else {
         // 기본: 기본 해설만
-        applyCompatibilityFields('basic');
+        applyCompatibilityFields({ profileId: 'basic' });
         const interpretations = this.fortuneInterpreter.getCategoryInterpretations(
           request,
           fr,
@@ -512,7 +527,7 @@ export class FortuneTellerService {
     } catch (error) {
       // 무효한 타입의 경우 기본 해설로 폴백
       console.warn('Fortune type interpretation failed, falling back to basic:', error);
-      applyCompatibilityFields('basic');
+      applyCompatibilityFields({ profileId: 'basic' });
       const interpretations = this.fortuneInterpreter.getCategoryInterpretations(request, fr, 'basic');
       fr.inputData.fortune_interpretations = interpretations;
       fr.inputData.fortune_type = 'basic';

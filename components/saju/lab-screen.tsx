@@ -1016,11 +1016,19 @@ export function LabScreen() {
       : "-"
   const profileEntries =
     fortuneProfileResult?.sections.flatMap((section) => section.entries) ?? []
+  const resolvedProfileEntries = profileEntries.filter(
+    (entry) =>
+      entry.status === "resolved" &&
+      Boolean(entry.fullText || entry.briefText || entry.oneLineSummary),
+  )
+  const unresolvedProfileEntries = profileEntries.filter(
+    (entry) => entry.status !== "resolved",
+  )
   const interpretationCount = fortuneProfileResult
-    ? profileEntries.length
+    ? resolvedProfileEntries.length
     : countInterpretationItems(normalizedFortuneInterpretations)
   const interpretationSampleKeys = fortuneProfileResult
-    ? profileEntries.map((entry) => entry.title).filter(Boolean).slice(0, 3)
+    ? resolvedProfileEntries.map((entry) => entry.title).filter(Boolean).slice(0, 3)
     : Object.keys(normalizedFortuneInterpretations ?? {}).slice(0, 3)
   const themeSummary =
     fortuneProfileResult?.theme?.oneLineSummary ??
@@ -1178,6 +1186,7 @@ export function LabScreen() {
                   <li>테마 해설 존재: {themeInterpretation ? "Y" : "N"}</li>
                   <li>테마 한줄 요약: {themeSummary}</li>
                   <li>해설 항목 수: {interpretationCount}</li>
+                  <li>미해결 항목 수: {fortuneProfileResult ? unresolvedProfileEntries.length : 0}</li>
                   <li>대표 항목: {interpretationSampleKeys.length > 0 ? interpretationSampleKeys.join(", ") : "-"}</li>
                 </ul>
               ) : (

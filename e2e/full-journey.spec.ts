@@ -64,7 +64,8 @@ test.describe("풀 저니 테스트", () => {
     await expect(page.getByText(/성장|시작|열정|표현|정리|안정|결단|집중|지혜|성찰/).first()).toBeVisible()
     await expect(page.getByText("오늘의 실천")).toBeVisible()
     await expect(page.getByRole("checkbox").first()).toBeVisible()
-    await expect(page.locator('section[aria-label="오늘의 실천"] svg.lucide-alert-triangle')).toBeVisible()
+    // lucide-react v0.5+ 에서 AlertTriangle의 실제 CSS 클래스는 lucide-triangle-alert
+    await expect(page.locator('section[aria-label="오늘의 실천"] svg.lucide-triangle-alert')).toBeVisible()
     await expect(page.getByRole("button", { name: "왜 이렇게 나왔나요?" })).toBeVisible()
     await expect(page.getByRole("button", { name: "이 내용에 대해 더 이야기하기" })).toBeVisible()
   })
@@ -102,7 +103,8 @@ test.describe("풀 저니 테스트", () => {
 
     const dayCards = page.locator('section[aria-label="7일 예보"] button[aria-expanded]')
     await expect(dayCards).toHaveCount(7)
-    await expect(page.getByPlaceholder("30초만 적어보세요...")).toBeVisible()
+    // 모바일/데스크톱 레이아웃 중복 렌더링 방어
+    await expect(page.getByPlaceholder("30초만 적어보세요...").first()).toBeVisible()
     await expect(page.getByText("AI 주간 리캡")).toBeVisible()
 
     await dayCards.first().click()
@@ -134,11 +136,12 @@ test.describe("풀 저니 테스트", () => {
 
     const calmChip = page.getByRole("button", { name: "차분해요" })
     await expect(calmChip).toHaveAttribute("aria-pressed", "true")
-    await expect(page.getByText("오늘의 체크인이 저장되었어요")).toBeVisible()
+    // 모바일/데스크톱 레이아웃 중복 렌더링 방어
+    await expect(page.getByText("오늘의 체크인이 저장되었어요").first()).toBeVisible()
 
     await page.reload()
     await expect(page).toHaveURL("/today", { timeout: 5000 })
     await expect(page.getByRole("button", { name: "차분해요" })).toHaveAttribute("aria-pressed", "true")
-    await expect(page.getByText("오늘의 체크인이 저장되었어요")).toBeVisible()
+    await expect(page.getByText("오늘의 체크인이 저장되었어요").first()).toBeVisible()
   })
 })

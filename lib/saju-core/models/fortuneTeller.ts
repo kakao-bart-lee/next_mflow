@@ -101,12 +101,22 @@ export const SajuFortuneRequestSchema = z.object({
     .regex(/^[MFmf]$/, 'Gender must be M or F')
     .transform((v) => v.toUpperCase()),
   /** 운세 타입 (예: saju_4, saju_5, basic) */
-  fortuneType: z.string(),
+  fortuneType: z.string().optional(),
   /** 구조화 프로필 ID (예: life_overview, daily_fortune) */
   profileId: z.string().optional(),
   /** 타임존 */
   timezone: z.string().default('Asia/Seoul'),
+}).refine((value) => Boolean(value.fortuneType || value.profileId), {
+  message: 'fortuneType or profileId is required',
+  path: ['fortuneType'],
 });
+
+export const FortuneProfileEntryStatusSchema = z.enum([
+  'resolved',
+  'unsupported_table',
+  'missing_data',
+  'error',
+]);
 
 /** 운세 프로필 메타데이터 스키마 */
 export const FortuneProfileInfoSchema = z.object({
@@ -118,11 +128,15 @@ export const FortuneProfileInfoSchema = z.object({
 /** 구조화 해설 엔트리 스키마 */
 export const FortuneProfileEntrySchema = z.object({
   id: z.string(),
+  tableCode: z.string(),
   title: z.string(),
   fullText: z.string(),
   briefText: z.string(),
   oneLineSummary: z.string(),
   score: z.number().nullable().optional(),
+  status: FortuneProfileEntryStatusSchema.default('resolved'),
+  lookupKey: z.string().nullable().optional(),
+  missingReason: z.string().nullable().optional(),
 });
 
 /** 구조화 해설 섹션 스키마 */
@@ -211,6 +225,9 @@ export type FortuneProfileInfo = z.infer<typeof FortuneProfileInfoSchema>;
 
 /** FortuneProfileEntry 타입 */
 export type FortuneProfileEntry = z.infer<typeof FortuneProfileEntrySchema>;
+
+/** FortuneProfileEntryStatus 타입 */
+export type FortuneProfileEntryStatus = z.infer<typeof FortuneProfileEntryStatusSchema>;
 
 /** FortuneProfileSection 타입 */
 export type FortuneProfileSection = z.infer<typeof FortuneProfileSectionSchema>;

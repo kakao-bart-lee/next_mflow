@@ -58,7 +58,10 @@ export class FortuneProfileInterpreter {
   private buildEntry(tableCode: string, calculationInput: CalculationInput): FortuneProfileEntry {
     const catalogEntry = getTableCatalogEntry(tableCode);
     if (!(tableCode in CALCULATOR_CONFIGS)) {
-      return this.buildEmptyEntry(catalogEntry.entryId, catalogEntry.title);
+      return this.buildEmptyEntry(tableCode, catalogEntry.entryId, catalogEntry.title, {
+        status: 'unsupported_table',
+        missingReason: `Calculator config is missing for ${tableCode}`,
+      });
     }
 
     try {
@@ -70,16 +73,32 @@ export class FortuneProfileInterpreter {
         rowKey: result.expression,
       });
 
+      const hasContent = Boolean(
+        textVariants.fullText || textVariants.briefText || textVariants.oneLineSummary
+      );
+
       return {
         id: catalogEntry.entryId,
+        tableCode,
         title: catalogEntry.title,
         fullText: textVariants.fullText,
         briefText: textVariants.briefText,
         oneLineSummary: textVariants.oneLineSummary,
         score: catalogEntry.showScore ? this.parseScoreValue(result.numerical) : null,
+        status: hasContent ? 'resolved' : 'missing_data',
+        lookupKey: result.expression,
+        missingReason: hasContent
+          ? null
+          : `No matching interpretation text found for ${tableCode}:${result.expression}`,
       };
-    } catch {
-      return this.buildEmptyEntry(catalogEntry.entryId, catalogEntry.title);
+    } catch (error) {
+      return this.buildEmptyEntry(tableCode, catalogEntry.entryId, catalogEntry.title, {
+        status: 'error',
+        missingReason:
+          error instanceof Error
+            ? error.message
+            : `Interpretation build failed for ${tableCode}`,
+      });
     }
   }
 
@@ -121,14 +140,24 @@ export class FortuneProfileInterpreter {
     };
   }
 
-  private buildEmptyEntry(id: string, title: string): FortuneProfileEntry {
+  private buildEmptyEntry(
+    tableCode: string,
+    id: string,
+    title: string,
+    overrides?: Partial<FortuneProfileEntry>
+  ): FortuneProfileEntry {
     return {
       id,
+      tableCode,
       title,
       fullText: '',
       briefText: '',
       oneLineSummary: '',
       score: null,
+      status: 'missing_data',
+      lookupKey: null,
+      missingReason: null,
+      ...overrides,
     };
   }
 
@@ -154,15 +183,18 @@ export class FortuneProfileInterpreter {
     return {
       yearStem: pillars.년.천간,
       yearBranch: pillars.년.지지,
+      monthStem: pillars.월.천간,
       monthBranch: pillars.월.지지,
       dayStem: pillars.일.천간,
       dayBranch: pillars.일.지지,
+      hourStem: pillars.시.천간,
       hourBranch: pillars.시.지지,
       gender: request.gender,
       additionalData: {
         birth_date: request.birthDate,
         birth_time: request.birthTime,
         timezone: request.timezone,
+        jumno: fortuneResponse.inputData['jumno'] ?? null,
       },
     };
   }

@@ -115,6 +115,56 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
     expression_fields: ['year_branch_num'],
     description: '천생연분',
   },
+  S015: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['year_lifecycle_num'],
+    description: '직업 방향',
+  },
+  S018: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['year_branch_org_num'],
+    description: '초년운',
+  },
+  S019: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['month_lifecycle_num'],
+    description: '중년운',
+  },
+  S020: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_lifecycle_num'],
+    description: '말년운',
+  },
+  S021: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['hour_lifecycle_num'],
+    description: '수명운',
+  },
+  S027: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['month_branch_sipsin_num'],
+    description: '타고난 재물운',
+  },
+  S026: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_stem_num'],
+    description: '직업에 따른 길',
+  },
+  S029: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_stem_num'],
+    description: '타고난 성격 장점',
+  },
+  S030: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_branch_sipsin_num'],
+    description: '잠재된 성격 긍정 요소',
+  },
+  S023: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['personality_core_index'],
+    description: '성격 핵심 성향',
+  },
 
   // 추가 지원 테이블 (간단 매핑)
   S062: {
@@ -124,17 +174,17 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
   },
   S064: {
     calculator_type: CalculatorType.SIMPLE_QUERY,
-    expression_fields: ['day_branch_num'],
+    expression_fields: ['day_ganzhi_code'],
     description: '보조설명2',
   },
   S065: {
     calculator_type: CalculatorType.SIMPLE_QUERY,
-    expression_fields: ['hour_branch_num'],
+    expression_fields: ['day_ganzhi_code'],
     description: '보조설명3',
   },
   S066: {
     calculator_type: CalculatorType.SIMPLE_QUERY,
-    expression_fields: ['year_branch_num'],
+    expression_fields: ['day_ganzhi_code'],
     description: '보조설명4',
   },
   S067: {
@@ -220,6 +270,31 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
     expression_fields: ['serial_number'],
     description: '나에게 맞는 숫자운',
   },
+  T056: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_stem_name'],
+    description: '오행 기운과 건강',
+  },
+  T057: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_stem_name'],
+    description: '건강 리스크',
+  },
+  T058: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_branch_name'],
+    description: '건강 체질',
+  },
+  T060: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_ganzhi_code'],
+    description: '심리적 특성',
+  },
+  T061: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_stem_name'],
+    description: '포텐 터지기 좋은 날짜',
+  },
   T010: {
     calculator_type: CalculatorType.COMPLEX_CALCULATION,
     expression_fields: ['year_branch'],
@@ -232,6 +307,21 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
     gender_columns: { M: 'DB_data_m', F: 'DB_data_w' },
     description: '성별운세',
   },
+  T026: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['year_lifecycle_num'],
+    description: '입신양명',
+  },
+  T028: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_stem_element_num'],
+    description: '행운의 색상',
+  },
+  T035: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_branch_element_num'],
+    description: '심리 보완 포인트',
+  },
 
   // === saju_5 조합에 필요한 누락된 테이블들 ===
   S113: {
@@ -240,32 +330,48 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
     description: '기본운세',
   },
   S070: {
-    calculator_type: CalculatorType.COMPLEX_CALCULATION,
-    expression_fields: ['birth_season'],
-    calculation_method: 's070_season_calculation',
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_ganzhi_code'],
     description: '계절운',
   },
   S071: {
-    calculator_type: CalculatorType.COMPLEX_CALCULATION,
-    expression_fields: ['five_elements_strength'],
-    calculation_method: 's071_ohang_calculation',
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_ganzhi_code'],
     description: '오행운',
   },
   S072: {
     calculator_type: CalculatorType.SIMPLE_QUERY,
-    expression_fields: ['yin_yang_balance'],
+    expression_fields: ['day_ganzhi_code'],
     description: '음양운',
   },
+  S077: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['social_element'],
+    description: '기질 DNA',
+  },
+  S082: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_stem_num'],
+    description: '재물 DNA',
+  },
+  S083: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_stem_num'],
+    description: '신체 DNA',
+  },
+  S085: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_stem_num'],
+    description: '선천적기질운',
+  },
   S073: {
-    calculator_type: CalculatorType.COMPLEX_CALCULATION,
-    expression_fields: ['sipsin_dominant'],
-    calculation_method: 's073_sipsin_calculation',
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_ganzhi_code'],
     description: '십성운1',
   },
   S074: {
-    calculator_type: CalculatorType.COMPLEX_CALCULATION,
-    expression_fields: ['sipsin_secondary'],
-    calculation_method: 's074_sipsin_calculation',
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_ganzhi_code'],
     description: '십성운2',
   },
   S078: {
@@ -273,9 +379,29 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
     expression_fields: ['social_element'],
     description: '사교운',
   },
+  S079: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_stem_num'],
+    description: '럭키룩',
+  },
+  S080: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_stem_num'],
+    description: '성격 리스크',
+  },
+  S081: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_stem_num'],
+    description: '오행 보완 포인트',
+  },
+  S084: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_stem_num'],
+    description: '직업과 명예',
+  },
   S031: {
     calculator_type: CalculatorType.SIMPLE_QUERY,
-    expression_fields: ['cooperation_index'],
+    expression_fields: ['month_branch_sipsin_num'],
     description: '협력운',
   },
   S028: {
@@ -288,10 +414,140 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
     expression_fields: ['conflict_pattern'],
     description: '갈등운',
   },
+  S010: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_branch_num'],
+    description: '기타운세2',
+  },
   S040: {
     calculator_type: CalculatorType.SIMPLE_QUERY,
-    expression_fields: ['harmony_index'],
+    expression_fields: ['year_branch_num'],
     description: '화합운',
+  },
+  S042: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['current_wealth_index'],
+    description: '현재 재물 흐름',
+  },
+  S022: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['year_branch_org_num'],
+    description: '시주 성격 보완',
+  },
+  S068: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['day_ganzhi_code'],
+    description: '찰떡궁합 띠',
+  },
+  S129: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['year_branch_code_05'],
+    description: '전생운',
+  },
+  S116: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['western_zodiac_num'],
+    description: '재물운 유리 계절',
+  },
+  S117: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['western_zodiac_num'],
+    description: '재물 누수 패턴',
+  },
+  S118: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['western_zodiac_num'],
+    description: '최적 재테크 분야',
+  },
+  S119: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['month_stem_num'],
+    description: '타고난 학업운',
+  },
+  S121: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['current_state_index'],
+    description: '현재 운명의 흐름',
+  },
+  S130: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['dangsaju_early_life_index'],
+    description: '당사주 초년운',
+  },
+  S128: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['dangsaju_lifetime_index'],
+    description: '당사주 평생총운',
+  },
+  S131: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['dangsaju_middle_life_index'],
+    description: '당사주 중년운',
+  },
+  S132: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['dangsaju_late_life_index'],
+    description: '당사주 말년운',
+  },
+  S133: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['dangsaju_spouse_index'],
+    description: '당사주 배우자운',
+  },
+  S134: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['dangsaju_children_index'],
+    description: '당사주 자식운',
+  },
+  S135: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['dangsaju_sibling_index'],
+    description: '당사주 형제운',
+  },
+  S142: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['current_half_year_index'],
+    description: '상반기 흐름',
+  },
+  S143: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['current_end_year_index'],
+    description: '하반기 흐름',
+  },
+  S144: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['current_sinsal_key'],
+    description: '현재 살운 흐름',
+  },
+  S145: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['month_stem_num'],
+    description: '인연이 따르는 캠퍼스',
+  },
+  S146: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['month_stem_num'],
+    description: '유학운 국가',
+  },
+  J037: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['jumno_legacy'],
+    description: '현재 길운 방향',
+  },
+  J044: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['jumno_legacy'],
+    description: '자식운 길흉',
+  },
+  J047: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['current_direction_serial'],
+    description: '현재 괘 대길 방향',
+  },
+  J048: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['current_direction_serial_plus_one'],
+    description: '현재 괘 차선 방향',
   },
   S014: {
     calculator_type: CalculatorType.COMPLEX_CALCULATION,

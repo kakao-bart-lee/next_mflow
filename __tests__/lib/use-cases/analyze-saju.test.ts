@@ -3,13 +3,13 @@ import type { BirthInfo } from "@/lib/schemas/birth-info"
 
 // vi.hoisted() 안에서 생성자 mock과 메서드 mock을 함께 만들어야
 // mock factory 호이스팅 시점에 참조 가능
-const { mockCalculateSaju } = vi.hoisted(() => ({
-  mockCalculateSaju: vi.fn(),
+const { mockGetSajuFortune } = vi.hoisted(() => ({
+  mockGetSajuFortune: vi.fn(),
 }))
 
 vi.mock("@/lib/saju-core/facade", () => {
   class FortuneTellerService {
-    calculateSaju = mockCalculateSaju
+    getSajuFortune = mockGetSajuFortune
   }
   return { FortuneTellerService }
 })
@@ -44,7 +44,7 @@ describe("analyzeSaju use-case", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockIsCreditEnabled.mockReturnValue(false)
-    mockCalculateSaju.mockReturnValue(SAMPLE_SAJU_RESULT)
+    mockGetSajuFortune.mockReturnValue(SAMPLE_SAJU_RESULT)
   })
 
   it("계산 성공 시 success=true와 데이터 반환", async () => {
@@ -62,14 +62,15 @@ describe("analyzeSaju use-case", () => {
       isTimeUnknown: true,
     }
     await analyzeSaju(birthInfo)
-    expect(mockCalculateSaju).toHaveBeenCalledWith(
+    expect(mockGetSajuFortune).toHaveBeenCalledWith(
       expect.objectContaining({ birthTime: "12:00" }),
+      "basic",
       undefined
     )
   })
 
   it("계산 실패 시 CALCULATION_ERROR 반환", async () => {
-    mockCalculateSaju.mockImplementation(() => {
+    mockGetSajuFortune.mockImplementation(() => {
       throw new Error("계산 오류")
     })
 

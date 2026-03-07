@@ -123,6 +123,29 @@ export class SajuDataLoader {
   }
 
   /**
+   * Load and merge all fortune lookup tables used by interpreters.
+   */
+  loadFortuneTables(): Record<string, unknown> {
+    const cacheKey = 'fortune_tables';
+    if (this.cache.has(cacheKey)) {
+      return this.cache.get(cacheKey) as Record<string, unknown>;
+    }
+
+    const merged = {
+      ...this.loadSTables(),
+      ...this.loadFTables(),
+      ...this.loadGTables(),
+      ...this.loadJTables(),
+      ...this.loadNTables(),
+      ...this.loadTTables(),
+      ...this.loadYTables(),
+    };
+
+    this.cache.set(cacheKey, merged);
+    return merged;
+  }
+
+  /**
    * Generic loader for any table file.
    *
    * @param tableName - Name of the table file (without .json extension)
@@ -140,6 +163,7 @@ export class SajuDataLoader {
       n_tables: () => this.loadNTables(),
       t_tables: () => this.loadTTables(),
       y_tables: () => this.loadYTables(),
+      fortune_tables: () => this.loadFortuneTables(),
       solar_term_entry: () => this.loadSolarTermEntry(),
       yukhyo_data: () => this.loadYukhyoData(),
     };
@@ -233,6 +257,8 @@ export class DataLoader {
         return this.loader.loadJTables();
       case 'mansedata':
         return this.loader.loadMansedata();
+      case 'fortune_tables':
+        return this.loader.loadFortuneTables();
       default:
         return this.loader.loadTable(tableName);
     }
