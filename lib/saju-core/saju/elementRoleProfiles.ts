@@ -19,6 +19,17 @@ export interface ElementRoleSnapshot {
 
 export type ElementRoleLabel = "용신" | "희신" | "기신" | "구신" | "한신" | null
 
+export interface PillarRoleSummary {
+  readonly yearStemRole: ElementRoleLabel
+  readonly yearBranchRole: ElementRoleLabel
+  readonly monthStemRole: ElementRoleLabel
+  readonly monthBranchRole: ElementRoleLabel
+  readonly dayStemRole: ElementRoleLabel
+  readonly dayBranchRole: ElementRoleLabel
+  readonly hourStemRole: ElementRoleLabel
+  readonly hourBranchRole: ElementRoleLabel
+}
+
 export interface ElementRoleProfile {
   readonly sourceTitleKey: string
   readonly sourceNumber: string
@@ -123,4 +134,31 @@ export function classifyStemRoleLabel(stemHanja: string, roleProfile: ElementRol
 export function classifyBranchRoleLabel(branchHanja: string, roleProfile: ElementRoleProfile): ElementRoleLabel {
   const element = getBranchElement(branchHanja)
   return element ? classifyElementRoleLabel(element, roleProfile.primary) : null
+}
+
+export function summarizePillarRoleLabels(
+  stems: {
+    readonly year: string
+    readonly month: string
+    readonly day: string
+    readonly hour: string
+  },
+  branches: {
+    readonly year: string
+    readonly month: string
+    readonly day: string
+    readonly hour: string
+  },
+  roleProfile: ElementRoleProfile
+): PillarRoleSummary {
+  return {
+    yearStemRole: classifyStemRoleLabel(stems.year, roleProfile),
+    yearBranchRole: classifyBranchRoleLabel(branches.year, roleProfile),
+    monthStemRole: classifyStemRoleLabel(stems.month, roleProfile),
+    monthBranchRole: classifyBranchRoleLabel(branches.month, roleProfile),
+    dayStemRole: classifyStemRoleLabel(stems.day, roleProfile),
+    dayBranchRole: classifyBranchRoleLabel(branches.day, roleProfile),
+    hourStemRole: classifyStemRoleLabel(stems.hour, roleProfile),
+    hourBranchRole: classifyBranchRoleLabel(branches.hour, roleProfile),
+  }
 }

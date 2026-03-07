@@ -5,6 +5,7 @@ import {
   classifyCurrentFortuneElement,
   classifyStemRoleLabel,
   getElementRoleProfile,
+  summarizePillarRoleLabels,
 } from "@/lib/saju-core/saju/elementRoleProfiles"
 import {
   getFortuneYearMarkerFullText,
@@ -375,6 +376,32 @@ describe("elementRoleProfiles", () => {
     expect(profile.secondary.favorableElement).toBeTruthy()
     expect(classifyStemRoleLabel("丙", profile)).toBe("용신")
     expect(classifyBranchRoleLabel("辰", profile)).toBe("한신")
+    expect(
+      summarizePillarRoleLabels(
+        {
+          year: "甲",
+          month: "乙",
+          day: "丙",
+          hour: "丁",
+        },
+        {
+          year: "子",
+          month: "丑",
+          day: "寅",
+          hour: "卯",
+        },
+        profile
+      )
+    ).toEqual({
+      yearStemRole: "희신",
+      yearBranchRole: "기신",
+      monthStemRole: "희신",
+      monthBranchRole: "한신",
+      dayStemRole: "용신",
+      dayBranchRole: "희신",
+      hourStemRole: "용신",
+      hourBranchRole: "희신",
+    })
   })
 })
 
