@@ -270,6 +270,26 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
     expression_fields: ['serial_number'],
     description: '나에게 맞는 숫자운',
   },
+  J004: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['juyeok_pair_serial'],
+    description: '현재의 건강운',
+  },
+  J005: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['juyeok_pair_serial'],
+    description: '현재의 대인관계운',
+  },
+  J009: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['juyeok_pair_serial'],
+    description: '현재의 행운방위',
+  },
+  J010: {
+    calculator_type: CalculatorType.SIMPLE_QUERY,
+    expression_fields: ['juyeok_pair_serial'],
+    description: '현재의 학업운',
+  },
   T056: {
     calculator_type: CalculatorType.SIMPLE_QUERY,
     expression_fields: ['day_stem_name'],
@@ -520,6 +540,12 @@ export const CALCULATOR_CONFIGS: Readonly<Record<string, CalculatorConfigDict>> 
     calculator_type: CalculatorType.SIMPLE_QUERY,
     expression_fields: ['current_sinsal_key'],
     description: '현재 살운 흐름',
+  },
+  S126: {
+    calculator_type: CalculatorType.COMPLEX_CALCULATION,
+    expression_fields: ['s126_relief'],
+    calculation_method: 's126_misfortune_relief',
+    description: '살풀이',
   },
   S145: {
     calculator_type: CalculatorType.SIMPLE_QUERY,

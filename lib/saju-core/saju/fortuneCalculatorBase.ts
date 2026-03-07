@@ -86,6 +86,66 @@ const SINSAL_TABLE_KEY_BY_LABEL: Record<string, string> = {
   '육해살(六害殺)': '육해',
   '화개살(華蓋殺)': '화개',
 };
+const SINSAL_DISP_TABLE_KEY_BY_LABEL: Record<string, string> = {
+  '겁살(劫殺)': '겁살_disp',
+  '재살(災殺)': '재살_disp',
+  '천살(天殺)': '천살_disp',
+  '지살(地殺)': '지살_disp',
+  '도화살(桃花殺)': '연살_disp',
+  '월살(月殺)': '월살_disp',
+  '망신살(亡身殺)': '망신살_disp',
+  '장성살(將星殺)': '장성살_disp',
+  '반안살(攀鞍殺)': '반안살_disp',
+  '역마살(驛馬殺)': '역마살_disp',
+  '육해살(六害殺)': '육해살_disp',
+  '화개살(華蓋殺)': '화개살_disp',
+};
+const JUYEOK_TRIGRAM_GAN_GROUPS: Record<string, readonly string[]> = {
+  건: ['갑인', '갑오', '갑술', '병신', '병자', '병진', '무해', '무묘', '무미', '경사', '임인', '경유', '경축', '임오', '임술'],
+  태: ['을인', '을오', '을술', '정신', '기묘', '정진', '기해', '정자', '기미', '신사', '계오', '계인', '신유', '신축', '계술'],
+  이: ['갑사', '갑유', '갑축', '병인', '병오', '병술', '무신', '무자', '무진', '경해', '경묘', '경미', '임사', '임유', '임축'],
+  진: ['을사', '을유', '을축', '정오', '정인', '정술', '기신', '기자', '기진', '신해', '신묘', '신미', '계사', '계유', '계축'],
+  손: ['갑해', '갑묘', '갑미', '병사', '병유', '병축', '경신', '무인', '무오', '경자', '무술', '임해', '임묘', '임미', '경진'],
+  감: ['을해', '을묘', '정사', '을미', '정유', '정축', '기인', '기오', '기술', '신신', '계해', '신진', '신자', '계묘', '계미'],
+  간: ['갑신', '갑자', '갑진', '병해', '병묘', '임신', '무축', '무사', '병미', '경술', '경오', '경인', '무유', '임진', '임자'],
+  곤: ['을신', '을자', '을진', '정해', '정묘', '기사', '정미', '기유', '신오', '신술', '신인', '계신', '기축', '계진', '계자'],
+};
+const JUYEOK_TRIGRAM_JI_GROUPS: Record<string, readonly string[]> = {
+  건: ['자인', '자오', '자술', '묘신', '묘자', '묘진', '진사', '미묘', '진유', '미미', '해자', '진축', '미해', '신인', '신오', '신술', '해신', '해진'],
+  태: ['축인', '축오', '인신', '축술', '사유', '인자', '인진', '오해', '오미', '사사', '술신', '유술', '오묘', '유오', '유인', '술진', '술자', '사축'],
+  이: ['축신', '축자', '축진', '인인', '인오', '인술', '사해', '사묘', '사미', '유진', '오사', '오축', '오유', '유신', '유자', '술인', '술술', '술오'],
+  진: ['자신', '자자', '자진', '해술', '묘인', '묘술', '진해', '진묘', '미유', '신진', '진미', '미축', '신자', '해인', '미사', '묘오', '신신', '해오'],
+  손: ['자사', '자유', '해미', '자축', '묘해', '묘묘', '묘미', '진인', '진오', '진술', '미신', '미자', '미진', '신사', '신유', '신축', '해해', '해묘'],
+  감: ['축사', '축유', '축축', '인해', '인묘', '사인', '인미', '사오', '사술', '오신', '오자', '오진', '술해', '유축', '유유', '유사', '술미', '술묘'],
+  간: ['축해', '축묘', '축미', '인사', '인유', '인축', '사신', '사자', '사진', '오인', '오오', '오술', '유해', '유묘', '유미', '술사', '술축', '술유'],
+  곤: ['자해', '자묘', '자미', '묘사', '묘유', '묘축', '진신', '진자', '진진', '미인', '미오', '미술', '신해', '신묘', '신미', '해사', '해축', '해유'],
+};
+const TRIGRAM_TO_SERIAL: Record<string, number> = {
+  건: 1,
+  태: 2,
+  이: 3,
+  진: 4,
+  손: 5,
+  감: 6,
+  간: 7,
+  곤: 8,
+};
+const BRANCHES_FROM_IN_DISPLAY = ['인', '묘', '진', '사', '오', '미', '신', '유', '술', '해', '자', '축'] as const;
+
+function resolveJuyeokTrigram(mode: 'Gan' | 'Ji', first: string, second: string): string | null {
+  const groups = mode === 'Gan' ? JUYEOK_TRIGRAM_GAN_GROUPS : JUYEOK_TRIGRAM_JI_GROUPS;
+  const key = `${first}${second}`;
+  for (const [trigram, combos] of Object.entries(groups)) {
+    if (combos.includes(key)) {
+      return trigram;
+    }
+  }
+  return null;
+}
+
+function trigramToSerial(trigram: string | null): number {
+  return TRIGRAM_TO_SERIAL[trigram ?? ''] ?? 8;
+}
 type CurrentDateContext = {
   readonly year: number;
   readonly month: number;
@@ -291,11 +351,15 @@ export class SimpleQueryCalculator extends AbstractFortuneCalculator {
     }
 
     if (fieldName === 'conflict_pattern') {
-      throw new Error(`Missing legacy F_woonday conflict lookup for ${this.config.tableName}`);
+      return this.calculateConflictPattern(inputData);
     }
 
     if (fieldName === 'serial_number') {
-      throw new Error(`Missing legacy F_Juyeok_trigram serial derivation for ${this.config.tableName}`);
+      return this.calculateSerialNumber(inputData);
+    }
+
+    if (fieldName === 'juyeok_pair_serial') {
+      return this.calculateJuyeokPairSerial(inputData);
     }
 
     throw new Error(`Unsupported calculation field: ${fieldName} for ${this.config.tableName}`);
@@ -334,6 +398,80 @@ export class SimpleQueryCalculator extends AbstractFortuneCalculator {
   private getStemKorean(stem: string): string {
     const match = /^([가-힣]+)/.exec(stem);
     return match ? match[1] ?? '갑' : stem || '갑';
+  }
+
+  private calculateConflictPattern(inputData: CalculationInput): string {
+    const currentManse = this.getCurrentManseRow(inputData);
+    const todayStemCode = typeof currentManse?.day_h === 'string' ? currentManse.day_h : '';
+    const todayStemNumber = this.getStemNumberFromCode(todayStemCode);
+
+    let todayStemGroup = 5;
+    if (todayStemNumber === 1 || todayStemNumber === 2) todayStemGroup = 1;
+    if (todayStemNumber === 3 || todayStemNumber === 4) todayStemGroup = 2;
+    if (todayStemNumber === 5 || todayStemNumber === 6) todayStemGroup = 3;
+    if (todayStemNumber === 7 || todayStemNumber === 8) todayStemGroup = 4;
+
+    const currentYearBranchNumber = this.parseNumberField(currentManse?.year_e) ?? 1;
+    const baseValue = Number.parseInt(`1${todayStemGroup}`, 10);
+    const resolved = this.applyWoonday(baseValue, currentYearBranchNumber, 12);
+    return resolved.toString().padStart(2, '0');
+  }
+
+  private applyWoonday(baseValue: number, currentYearBranchNumber: number, modulo: number): number {
+    let value = (baseValue + currentYearBranchNumber) % modulo;
+    if (value === 0) {
+      value = 1;
+    }
+    return value;
+  }
+
+  private getCurrentManseRow(inputData: CalculationInput): Record<string, unknown> | null {
+    const currentDate = this.getCurrentDateContext(inputData);
+    if (!currentDate) {
+      return null;
+    }
+
+    const mansedata = getDataLoader().loadMansedata() as Record<string, Record<string, unknown>>;
+    return mansedata[currentDate.dateCode] ?? null;
+  }
+
+  private getStemNumberFromCode(stemCode: string): number {
+    const codes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+    const index = codes.indexOf(String(stemCode ?? '').trim());
+    return index >= 0 ? index + 1 : 10;
+  }
+
+  private calculateSerialNumber(inputData: CalculationInput): string {
+    const currentManse = this.getCurrentManseRow(inputData);
+    const currentDayBranchNumber = this.parseNumberField(currentManse?.day_e);
+    if (!currentDayBranchNumber) {
+      throw new Error(`Current day branch number is unavailable for ${this.config.tableName}`);
+    }
+
+    const birthDayBranch = this.branchOrgCodeToKorean(this.getBranchOrgNumber(inputData.dayBranch));
+    const currentDayBranch = this.branchOrgCodeToKorean(currentDayBranchNumber);
+    const trigram = resolveJuyeokTrigram('Ji', birthDayBranch, currentDayBranch);
+    return String(trigramToSerial(trigram));
+  }
+
+  private branchOrgCodeToKorean(value: number): string {
+    return BRANCHES_FROM_IN_DISPLAY[value - 1] ?? '축';
+  }
+
+  private calculateJuyeokPairSerial(inputData: CalculationInput): string {
+    const currentManse = this.getCurrentManseRow(inputData);
+    const currentDayBranchNumber = this.parseNumberField(currentManse?.day_e);
+    if (!currentDayBranchNumber) {
+      throw new Error(`Current day branch number is unavailable for ${this.config.tableName}`);
+    }
+
+    const birthDayStem = extractKorean(inputData.dayStem);
+    const birthDayBranch = this.branchOrgCodeToKorean(this.getBranchOrgNumber(inputData.dayBranch));
+    const currentDayBranch = this.branchOrgCodeToKorean(currentDayBranchNumber);
+
+    const ganSerial = trigramToSerial(resolveJuyeokTrigram('Gan', birthDayStem, currentDayBranch));
+    const jiSerial = trigramToSerial(resolveJuyeokTrigram('Ji', birthDayBranch, currentDayBranch));
+    return `${ganSerial}${jiSerial}`;
   }
 
   private getBranchKorean(branch: string): string {
@@ -806,6 +944,14 @@ export class SimpleQueryCalculator extends AbstractFortuneCalculator {
  * 복합 계산형 계산기 (S007, S063 등)
  */
 export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
+  override calculate(inputData: CalculationInput): CalculationResult {
+    if (this.config.calculationMethod === 's126_misfortune_relief') {
+      return this.calculateS126Result(inputData);
+    }
+
+    return super.calculate(inputData);
+  }
+
   calculateExpression(inputData: CalculationInput): string {
     const methodName = this.config.calculationMethod;
 
@@ -821,15 +967,19 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     }
 
     if (methodName === 's008_calculation') {
-      throw new Error(`Missing legacy F_woonday/F_ohengSearch pipeline for ${this.config.tableName}`);
+      return this.calculateS008(inputData);
     }
 
     if (methodName === 's014_current_fortune') {
       throw new Error(`Missing yong/hee/kee/goo code pipeline for ${this.config.tableName}`);
     }
 
+    if (methodName === 's126_misfortune_relief') {
+      return this.calculateS126Expression(inputData);
+    }
+
     if (methodName === 'f011_trigram') {
-      throw new Error(`Missing legacy F_Juyeok_trigram helper for ${this.config.tableName}`);
+      return this.calculateF011(inputData);
     }
 
     throw new Error(`Unsupported calculation method: ${methodName ?? 'unknown'} for ${this.config.tableName}`);
@@ -918,6 +1068,130 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     return String(yearBranchOrgNumber * multiplier);
   }
 
+  private calculateS008(inputData: CalculationInput): string {
+    const currentDate = this.getCurrentDateContext(inputData);
+    if (!currentDate) {
+      throw new Error(`Current date is unavailable for ${this.config.tableName}`);
+    }
+
+    const mansedata = getDataLoader().loadMansedata() as Record<string, Record<string, unknown>>;
+    const manse = mansedata[currentDate.dateCode];
+    if (!manse || typeof manse !== 'object') {
+      throw new Error(`Current mansedata row is unavailable for ${this.config.tableName}`);
+    }
+
+    const currentDayBranchNumber = this.parseNumberField(manse.day_e);
+    if (!currentDayBranchNumber) {
+      throw new Error(`Current day branch number is unavailable for ${this.config.tableName}`);
+    }
+
+    const currentYearBranchNumber = this.parseNumberField(manse.year_e) ?? 1;
+    const birthDayBranchNumber = this.getBranchOrgNumber(inputData.dayBranch);
+    const birthOheng = this.ohengSearch(birthDayBranchNumber.toString().padStart(2, '0'));
+    const currentOheng = this.ohengSearch(currentDayBranchNumber.toString().padStart(2, '0'));
+    const baseValue = birthOheng * currentOheng;
+    const resolved = this.applyWoonday(baseValue, currentYearBranchNumber, 10);
+    return resolved.toString().padStart(2, '0');
+  }
+
+  private calculateF011(inputData: CalculationInput): string {
+    const currentDate = this.getCurrentDateContext(inputData);
+    if (!currentDate) {
+      throw new Error(`Current date is unavailable for ${this.config.tableName}`);
+    }
+
+    const mansedata = getDataLoader().loadMansedata() as Record<string, Record<string, unknown>>;
+    const manse = mansedata[currentDate.dateCode];
+    if (!manse || typeof manse !== 'object') {
+      throw new Error(`Current mansedata row is unavailable for ${this.config.tableName}`);
+    }
+
+    const currentDayBranchNumber = this.parseNumberField(manse.day_e);
+    if (!currentDayBranchNumber) {
+      throw new Error(`Current day branch number is unavailable for ${this.config.tableName}`);
+    }
+
+    const birthDayStem = extractKorean(inputData.dayStem);
+    const currentDayBranch = this.branchOrgCodeToKorean(currentDayBranchNumber);
+    const trigram = resolveJuyeokTrigram('Gan', birthDayStem, currentDayBranch);
+    return String(trigramToSerial(trigram));
+  }
+
+  private calculateS126Expression(inputData: CalculationInput): string {
+    const birthYearBranch = extractKorean(inputData.yearBranch);
+    const currentYearBranch = this.getCurrentManseBranch(inputData, 'year_e') ?? '미상';
+    return `${birthYearBranch}-${currentYearBranch}`;
+  }
+
+  private calculateS126Result(inputData: CalculationInput): CalculationResult {
+    const expression = this.calculateS126Expression(inputData);
+    const textBlocks = this.buildS126TextBlocks(inputData);
+
+    return {
+      tableName: this.config.tableName,
+      expression,
+      text: textBlocks.join('\n\n'),
+      numerical: null,
+      metadata: {
+        ...this.getMetadata(inputData),
+        block_count: textBlocks.length,
+      },
+    };
+  }
+
+  private buildS126TextBlocks(inputData: CalculationInput): string[] {
+    const blocks: string[] = [];
+    const seen = new Set<string>();
+    const addText = (text: string) => {
+      const normalized = text.trim();
+      if (!normalized || seen.has(normalized)) {
+        return;
+      }
+      seen.add(normalized);
+      blocks.push(`■ ${normalized}`);
+    };
+    const addTableEntry = (key: string) => {
+      const [text] = this.retrieveData(key);
+      addText(text);
+    };
+
+    const birthDayBranch = extractKorean(inputData.dayBranch);
+    const birthYearBranch = extractKorean(inputData.yearBranch);
+    const monthBranch = extractKorean(inputData.monthBranch);
+    const hourBranch = extractKorean(inputData.hourBranch);
+
+    const pillarLabels = [
+      calculateSinsal(birthDayBranch, monthBranch),
+      calculateSinsal(birthDayBranch, birthYearBranch),
+      calculateSinsal(birthDayBranch, hourBranch),
+      calculateSinsal(birthYearBranch, birthDayBranch),
+    ];
+
+    for (const label of pillarLabels) {
+      if (!label) {
+        continue;
+      }
+      const tableKey = SINSAL_TABLE_KEY_BY_LABEL[label];
+      if (tableKey) {
+        addTableEntry(tableKey);
+      }
+      if (label === '도화살(桃花殺)') {
+        addTableEntry('도화살');
+      }
+    }
+
+    const currentYearBranch = this.getCurrentManseBranch(inputData, 'year_e');
+    if (currentYearBranch) {
+      const annualLabel = calculateSinsal(birthYearBranch, currentYearBranch);
+      const annualTableKey = annualLabel ? SINSAL_DISP_TABLE_KEY_BY_LABEL[annualLabel] : null;
+      if (annualTableKey) {
+        addTableEntry(annualTableKey);
+      }
+    }
+
+    return blocks;
+  }
+
 
   /**
    * 천간 번호 추출
@@ -932,6 +1206,41 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     const codes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
     const index = codes.indexOf(stemCode);
     return index >= 0 ? index + 1 : 1;
+  }
+
+  private ohengSearch(value: string): number {
+    switch (value) {
+      case '03':
+      case '04':
+        return 1;
+      case '06':
+      case '07':
+        return 2;
+      case '05':
+      case '11':
+      case '08':
+      case '02':
+        return 3;
+      case '09':
+      case '10':
+        return 4;
+      case '12':
+      case '01':
+      default:
+        return 5;
+    }
+  }
+
+  private applyWoonday(baseValue: number, currentYearBranchNumber: number, modulo: number): number {
+    let value = (baseValue + currentYearBranchNumber) % modulo;
+    if (value === 0) {
+      value = 1;
+    }
+    return value;
+  }
+
+  private branchOrgCodeToKorean(value: number): string {
+    return BRANCHES_FROM_IN_DISPLAY[value - 1] ?? '축';
   }
 
   /**
@@ -1011,6 +1320,33 @@ export class ComplexCalculationCalculator extends AbstractFortuneCalculator {
     } catch {
       return null;
     }
+  }
+
+  private parseNumberField(value: unknown): number | null {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const parsed = Number.parseInt(value, 10);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+    return null;
+  }
+
+  private getCurrentManseBranch(inputData: CalculationInput, fieldName: 'year_e' | 'month_e' | 'day_e' | 'hour_e'): string | null {
+    const currentDate = this.getCurrentDateContext(inputData);
+    if (!currentDate) {
+      return null;
+    }
+
+    const mansedata = getDataLoader().loadMansedata() as Record<string, Record<string, unknown>>;
+    const manse = mansedata[currentDate.dateCode];
+    const branchNumber = this.parseNumberField(manse?.[fieldName]);
+    if (!branchNumber) {
+      return null;
+    }
+
+    return this.branchOrgCodeToKorean(branchNumber);
   }
 }
 

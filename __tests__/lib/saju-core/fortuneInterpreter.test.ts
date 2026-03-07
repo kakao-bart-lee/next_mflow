@@ -260,6 +260,17 @@ describe("FortuneTellerService.getSajuFortune()", () => {
     expect(targetEntries.every((entry) => entry.fullText.trim().length > 0)).toBe(true)
   })
 
+  it("misfortune_relief populates the S126 sal풀이 entry", () => {
+    const service = new FortuneTellerService()
+    const result = service.getSajuFortune(BASE_REQUEST, "misfortune_relief")
+
+    const entries = result.fortuneProfileResult?.sections.flatMap((section) => section.entries) ?? []
+    const s126Entry = entries.find((entry) => entry.tableCode === "S126")
+
+    expect(s126Entry).toBeDefined()
+    expect(s126Entry?.fullText.trim().length).toBeGreaterThan(0)
+  })
+
   it("birth_season_fortune profile returns a result with sections", () => {
     // isSupportedProfileId 경로 → 프로필 ID로 직접 조회
     const service = new FortuneTellerService()
