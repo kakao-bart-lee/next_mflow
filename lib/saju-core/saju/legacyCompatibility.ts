@@ -9,6 +9,7 @@
 import type { FortuneResponse } from "../models/fortuneTeller"
 import { getDataLoader } from "./dataLoader"
 import { calculateWoon12Daygi } from "./yongsinFlows"
+import { extractKorean } from "../utils"
 
 interface LegacyCompatibilityBirthInfo {
   readonly birthDate: string
@@ -31,6 +32,15 @@ interface LegacyCompatibilityCalculationInput {
 
 export interface LegacyIntimacyInsight {
   readonly sourceTable: "G016"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+  readonly score: number | null
+}
+
+export interface LegacyLoveStyleInsight {
+  readonly sourceTable: "Y003"
   readonly title: string
   readonly scoreLabel: string
   readonly lookupKey: string
@@ -73,6 +83,15 @@ function readLegacyG016Record(lookupKey: string): { readonly data?: string; read
   return record as { readonly data?: string; readonly numerical?: number | string | null }
 }
 
+function readLegacyY003Record(lookupKey: string): { readonly DB_data_m?: string; readonly DB_data_w?: string; readonly numerical?: number | string | null } | null {
+  const yTables = getDataLoader().loadYTables() as Record<string, Record<string, Record<string, unknown>>>
+  const record = yTables.Y003?.[lookupKey]
+  if (!record || typeof record !== "object") {
+    return null
+  }
+  return record as { readonly DB_data_m?: string; readonly DB_data_w?: string; readonly numerical?: number | string | null }
+}
+
 export function buildLegacyIntimacyInsight(
   primaryInfo: LegacyCompatibilityBirthInfo,
   primaryFortune: FortuneResponse,
@@ -102,6 +121,38 @@ export function buildLegacyIntimacyInsight(
     scoreLabel: "섹스궁합",
     lookupKey,
     text: record.data,
+    score: Number.isFinite(numericalValue) ? numericalValue : null,
+  }
+}
+
+export function buildLegacyLoveStyleInsight(
+  partnerInfo: LegacyCompatibilityBirthInfo,
+  partnerFortune: FortuneResponse,
+): LegacyLoveStyleInsight | null {
+  const lookupKey = extractKorean(partnerFortune.sajuData.pillars.일.지지)
+  const record = readLegacyY003Record(lookupKey)
+  if (!record) {
+    return null
+  }
+  const text = partnerInfo.gender === "M" ? record?.DB_data_m : record?.DB_data_w
+
+  if (!text || !text.trim()) {
+    return null
+  }
+
+  const numericalValue =
+    typeof record.numerical === "number"
+      ? record.numerical
+      : typeof record.numerical === "string"
+        ? Number.parseInt(record.numerical, 10)
+        : null
+
+  return {
+    sourceTable: "Y003",
+    title: "그이의 러브스타일",
+    scoreLabel: "러브스타일",
+    lookupKey,
+    text,
     score: Number.isFinite(numericalValue) ? numericalValue : null,
   }
 }

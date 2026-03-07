@@ -24,7 +24,7 @@ import {
 } from "@/lib/saju-core/saju/juyeokTrigrams"
 import { advanceLegacyCycle, getFiveElementGroup } from "@/lib/saju-core/saju/legacyCycles"
 import { DatabaseResultRetriever } from "@/lib/saju-core/saju/fortuneInterpreter"
-import { buildLegacyIntimacyInsight } from "@/lib/saju-core/saju/legacyCompatibility"
+import { buildLegacyIntimacyInsight, buildLegacyLoveStyleInsight } from "@/lib/saju-core/saju/legacyCompatibility"
 import {
   CalculatorType,
   GenderBasedCalculator,
@@ -469,6 +469,25 @@ describe("legacyCompatibility", () => {
     expect(legacyIntimacy?.sourceTable).toBe("G016")
     expect(legacyIntimacy?.lookupKey).toMatch(/^\d{2}-\d{2}$/)
     expect(legacyIntimacy?.text.trim().length).toBeGreaterThan(0)
+  })
+
+  it("builds the legacy Y003 love-style detail from the partner day branch", () => {
+    const service = new FortuneTellerService()
+    const partnerInfo = {
+      birthDate: "1992-08-03",
+      birthTime: "09:10",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "F" as const,
+    }
+
+    const partnerFortune = service.calculateSaju(partnerInfo)
+    const legacyLoveStyle = buildLegacyLoveStyleInsight(partnerInfo, partnerFortune)
+
+    expect(legacyLoveStyle).toBeDefined()
+    expect(legacyLoveStyle?.sourceTable).toBe("Y003")
+    expect(legacyLoveStyle?.lookupKey).toMatch(/^[가-힣]+$/)
+    expect(legacyLoveStyle?.text.trim().length).toBeGreaterThan(0)
   })
 })
 
