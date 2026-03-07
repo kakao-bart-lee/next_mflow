@@ -77,6 +77,16 @@ export interface LegacyLoveWeakPointInsight {
   readonly text: string
 }
 
+export interface LegacyMarriageFlowInsight {
+  readonly sourceTable: "G001"
+  readonly title: string
+  readonly scoreLabel: string
+  readonly lookupKey: string
+  readonly text: string
+  readonly score: number | null
+  readonly currentMonth: number
+}
+
 const BRANCH_INDEX = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
 
 function toCalculationInput(fortune: FortuneResponse, gender: "M" | "F"): LegacyCompatibilityCalculationInput {
@@ -123,6 +133,19 @@ function readLegacyG020Record(lookupKey: string): { readonly data?: string; read
   return record as { readonly data?: string; readonly numerical?: number | string | null }
 }
 
+function readLegacyG001Record(lookupKey: string): { readonly data?: string; readonly numerical?: number | string | null } | null {
+  const gTables = getDataLoader().loadGTables() as Record<string, Record<string, Record<string, unknown>>>
+  const table = gTables.G001
+  const candidates = [lookupKey, lookupKey.trim(), `${Number.parseInt(lookupKey, 10)} `, String(Number.parseInt(lookupKey, 10))]
+  for (const candidate of candidates) {
+    const record = table?.[candidate]
+    if (record && typeof record === "object") {
+      return record as { readonly data?: string; readonly numerical?: number | string | null }
+    }
+  }
+  return null
+}
+
 function readLegacyY003Record(lookupKey: string): { readonly DB_data_m?: string; readonly DB_data_w?: string; readonly numerical?: number | string | null } | null {
   const yTables = getDataLoader().loadYTables() as Record<string, Record<string, Record<string, unknown>>>
   const record = yTables.Y003?.[lookupKey]
@@ -162,6 +185,25 @@ function readLegacyY001Record(
   return record as {
     readonly data?: string
   }
+}
+
+function getCurrentMonthInTimezone(timezone: string): number {
+  const monthPart = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    month: "numeric",
+  })
+    .formatToParts(new Date())
+    .find((part) => part.type === "month")?.value
+  const numericMonth = Number.parseInt(monthPart ?? "", 10)
+  return Number.isFinite(numericMonth) && numericMonth >= 1 && numericMonth <= 12 ? numericMonth : new Date().getMonth() + 1
+}
+
+function getYearBranchIndex(fortune: FortuneResponse): number {
+  return BRANCH_INDEX.indexOf(extractKorean(fortune.sajuData.pillars.년.지지)) + 1
+}
+
+function getDayBranchIndex(fortune: FortuneResponse): number {
+  return BRANCH_INDEX.indexOf(extractKorean(fortune.sajuData.pillars.일.지지)) + 1
 }
 
 export function buildLegacyIntimacyInsight(
@@ -258,12 +300,50 @@ export function buildLegacyBedroomInsight(
   }
 }
 
+export function buildLegacyMarriageFlowInsight(
+  primaryInfo: LegacyCompatibilityBirthInfo,
+  primaryFortune: FortuneResponse,
+): LegacyMarriageFlowInsight | null {
+  const yearBranchIndex = getYearBranchIndex(primaryFortune)
+  if (yearBranchIndex < 1) {
+    return null
+  }
+  const currentMonth = getCurrentMonthInTimezone(primaryInfo.timezone)
+  const seed = 14 - yearBranchIndex
+  const baseValue = seed > 12 ? seed - 12 : seed
+  let lookupNumber = (baseValue + currentMonth) - 1 + 6
+  if (lookupNumber > 12) {
+    lookupNumber -= 12
+  }
+  const lookupKey = String(lookupNumber).padStart(2, "0")
+  const record = readLegacyG001Record(lookupKey)
+
+  if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {
+    return null
+  }
+
+  const numericalValue =
+    typeof record.numerical === "number"
+      ? record.numerical
+      : typeof record.numerical === "string"
+        ? Number.parseInt(record.numerical, 10)
+        : null
+
+  return {
+    sourceTable: "G001",
+    title: "결혼 후 사랑 흐름",
+    scoreLabel: "결혼궁합",
+    lookupKey,
+    text: record.data,
+    score: Number.isFinite(numericalValue) ? numericalValue : null,
+    currentMonth,
+  }
+}
+
 export function buildLegacyYearlyLoveCycleInsight(
   primaryFortune: FortuneResponse,
 ): LegacyYearlyLoveCycleInsight | null {
-  const lookupKey = String(
-    BRANCH_INDEX.indexOf(extractKorean(primaryFortune.sajuData.pillars.일.지지)) + 1
-  ).padStart(2, "0")
+  const lookupKey = String(getDayBranchIndex(primaryFortune)).padStart(2, "0")
   const record = readLegacyY004Record(lookupKey)
 
   if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {
@@ -296,9 +376,7 @@ export function buildLegacyYearlyLoveCycleInsight(
 export function buildLegacyLoveWeakPointInsight(
   primaryFortune: FortuneResponse,
 ): LegacyLoveWeakPointInsight | null {
-  const lookupKey = String(
-    BRANCH_INDEX.indexOf(extractKorean(primaryFortune.sajuData.pillars.년.지지)) + 1
-  ).padStart(2, "0")
+  const lookupKey = String(getYearBranchIndex(primaryFortune)).padStart(2, "0")
   const record = readLegacyY001Record(lookupKey)
 
   if (!record?.data || typeof record.data !== "string" || !record.data.trim()) {

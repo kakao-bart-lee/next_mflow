@@ -65,6 +65,15 @@ interface CompatibilityResult {
     lookupKey: string
     text: string
   } | null
+  legacy_marriage_flow?: {
+    sourceTable: "G001"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    score: number | null
+    currentMonth: number
+  } | null
   overall_interpretation: string
   recommendations: string[]
 }
@@ -384,6 +393,27 @@ export function CompatibilityScreen() {
                     </div>
                     <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                       {result.legacy_love_weak_point.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_marriage_flow ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_marriage_flow.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_marriage_flow.sourceTable} · key {result.legacy_marriage_flow.lookupKey} · {result.legacy_marriage_flow.currentMonth}월 기준
+                        </p>
+                      </div>
+                      {typeof result.legacy_marriage_flow.score === "number" ? (
+                        <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                          {result.legacy_marriage_flow.scoreLabel} {result.legacy_marriage_flow.score}
+                        </div>
+                      ) : null}
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_marriage_flow.text}
                     </p>
                   </div>
                 ) : null}

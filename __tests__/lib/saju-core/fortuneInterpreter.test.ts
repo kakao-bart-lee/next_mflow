@@ -27,6 +27,7 @@ import { DatabaseResultRetriever } from "@/lib/saju-core/saju/fortuneInterpreter
 import {
   buildLegacyBedroomInsight,
   buildLegacyIntimacyInsight,
+  buildLegacyMarriageFlowInsight,
   buildLegacyLoveStyleInsight,
   buildLegacyLoveWeakPointInsight,
   buildLegacyYearlyLoveCycleInsight,
@@ -554,6 +555,27 @@ describe("legacyCompatibility", () => {
     expect(legacyLoveWeakPoint?.sourceTable).toBe("Y001")
     expect(legacyLoveWeakPoint?.lookupKey).toMatch(/^\d{2}$/)
     expect(legacyLoveWeakPoint?.text.trim().length).toBeGreaterThan(0)
+  })
+
+  it("builds the legacy G001 marriage-flow detail from the primary year branch and current month", () => {
+    const service = new FortuneTellerService()
+    const primaryInfo = {
+      birthDate: "1990-01-15",
+      birthTime: "14:30",
+      isTimeUnknown: false,
+      timezone: "Asia/Seoul",
+      gender: "M" as const,
+    }
+
+    const primaryFortune = service.calculateSaju(primaryInfo)
+    const legacyMarriageFlow = buildLegacyMarriageFlowInsight(primaryInfo, primaryFortune)
+
+    expect(legacyMarriageFlow).toBeDefined()
+    expect(legacyMarriageFlow?.sourceTable).toBe("G001")
+    expect(legacyMarriageFlow?.lookupKey).toMatch(/^\d{1,2}$/)
+    expect(legacyMarriageFlow?.currentMonth).toBeGreaterThanOrEqual(1)
+    expect(legacyMarriageFlow?.currentMonth).toBeLessThanOrEqual(12)
+    expect(legacyMarriageFlow?.text.trim().length).toBeGreaterThan(0)
   })
 })
 

@@ -11,6 +11,7 @@ import {
 import {
   buildLegacyBedroomInsight,
   buildLegacyIntimacyInsight,
+  buildLegacyMarriageFlowInsight,
   buildLegacyLoveStyleInsight,
   buildLegacyLoveWeakPointInsight,
   buildLegacyYearlyLoveCycleInsight,
@@ -91,6 +92,7 @@ export async function POST(req: NextRequest) {
     const result = gunghap.analyzeCompatibility(sajuA, sajuB, compatType)
     const legacyBedroom = buildLegacyBedroomInsight(fortuneA)
     const legacyIntimacy = buildLegacyIntimacyInsight(personA, fortuneA, personB, fortuneB)
+    const legacyMarriageFlow = buildLegacyMarriageFlowInsight(personA, fortuneA)
     const legacyLoveStyle = buildLegacyLoveStyleInsight(personB, fortuneB)
     const legacyLoveWeakPoint = buildLegacyLoveWeakPointInsight(fortuneA)
     const legacyYearlyLoveCycle = buildLegacyYearlyLoveCycleInsight(fortuneA)
@@ -105,6 +107,7 @@ export async function POST(req: NextRequest) {
         career_match: result.career_match,
         legacy_bedroom: legacyBedroom,
         legacy_intimacy: legacyIntimacy,
+        legacy_marriage_flow: legacyMarriageFlow,
         legacy_love_style: legacyLoveStyle,
         legacy_love_weak_point: legacyLoveWeakPoint,
         legacy_yearly_love_cycle: legacyYearlyLoveCycle,
