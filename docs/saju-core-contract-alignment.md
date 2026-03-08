@@ -1,7 +1,7 @@
 # Saju Core Contract Alignment (next_mflow vs saju-core-lib)
 
 Last updated: 2026-03-08
-Baseline: `saju-core-lib@cdbd4c77147395d1fc757a6069635ae3633c8ed1`
+Baseline: `saju-core-lib@1e57848e115b2bee38149c76c63b3d4a487254d2`
 
 ## Scope
 
@@ -69,3 +69,4 @@ pnpm run test:saju-sync
 
 - `G003/G012/G019/G026/G028`의 upstream baseline parity 기준 정식화
 - 다음 upstream 변경 시 baseline SHA 재고정 + `test:saju-sync` 재실행
+- parity fixture 확장 범위 유지: `marriage/business/friendship`, `isTimeUnknown`, 자정 경계, `sasangConstitution` null

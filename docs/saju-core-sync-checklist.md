@@ -5,7 +5,7 @@ Last updated: 2026-03-08
 ## 1) Baseline Pin
 
 - Baseline repo: `saju-core-lib`
-- Baseline SHA: `cdbd4c77147395d1fc757a6069635ae3633c8ed1` (`cdbd4c7`)
+- Baseline SHA: `1e57848e115b2bee38149c76c63b3d4a487254d2` (`1e57848`)
 - Sync policy: `SYNC_POLICY.md` (copied from upstream policy)
 - Commit message rule: `port(saju-core-lib@<sha>): ...`
 
@@ -27,7 +27,7 @@ Last updated: 2026-03-08
 
 현재 확인된 차이(2026-03-08):
 
-| 항목 | next_mflow | saju-core-lib@cdbd4c7 | 처리 방향 |
+| 항목 | next_mflow | saju-core-lib@1e57848 | 처리 방향 |
 |---|---|---|---|
 | `inputData.jumno` | 있음 | 있음 | aligned 유지 |
 | `fortuneProfileResult` (`basic`) | 구조화 결과 있음 | 구조화 결과 있음 | drift 0 유지 |
@@ -75,8 +75,11 @@ pnpm run build
 - 기본 비교 범위: pillars, 지장간, 신살, hyungchung, greatFortune (core contract)
 - 확장 해석 payload(`fortuneProfileResult`, `inputData` 세부)도 drift 0을 기본값으로 관리한다.
 - compatibility parity: `__tests__/lib/integrations/saju-core-compatibility.parity.test.ts`
+  - 케이스: `general/love/marriage/business/friendship`
+  - 경계: `isTimeUnknown=true`, `23:59/00:01` 자정 경계
 - legacy G-code parity: `__tests__/lib/integrations/saju-core-legacy-gcodes.parity.test.ts`
   - fixture: `__tests__/fixtures/saju-legacy-gcode-parity-cases.json`
+  - 경계: `sasangConstitution` null 케이스 포함 (`G028 => null`)
 - 계약표: `docs/saju-core-contract-alignment.md`
 
 ## 8) Completion Criteria

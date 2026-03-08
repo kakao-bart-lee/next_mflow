@@ -16,7 +16,7 @@
 - compatibility parity 게이트 `__tests__/lib/integrations/saju-core-compatibility.parity.test.ts` 추가
 - adapter boundary 게이트 `__tests__/lib/integrations/saju-core-adapter.boundary.test.ts` 추가
 - upstream 승격 제안서 `docs/saju-core-upstream-extension-proposal.md` 추가
-- upstream 확장 계약 승격 반영(`saju-core-lib@cdbd4c7`) 및 drift 0 정렬 완료
+- upstream 확장 계약 승격/legacy 분해 반영(`saju-core-lib@1e57848`) 및 drift 0 정렬 완료
 
 현재 기준으로는 “동작 복구” 단계보다 “opaque한 legacy 흐름을 의미 있는 계산 단계로 재배치하는 유지보수성 개선” 단계가 더 중요하다.
 
