@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
-import { FortuneTellerService } from "@/lib/saju-core/facade";
+import type { FortuneResponse } from "@/lib/saju-core";
 import { BirthInfoSchema } from "@/lib/schemas/birth-info";
 import { interpretSaju } from "@/lib/use-cases/interpret-saju";
+import { calculateSajuFromBirthInfo } from "@/lib/integrations/saju-core-adapter";
 import {
   getCachedFortune,
   cacheFortune,
@@ -40,8 +41,6 @@ const InterpretRequestSchema = z.object({
     });
   }
 });
-
-const service = new FortuneTellerService();
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -111,17 +110,9 @@ export async function POST(req: NextRequest) {
   }
 
   // ── 사주 계산 ──
-  let sajuData: ReturnType<FortuneTellerService["calculateSaju"]>;
+  let sajuData: FortuneResponse;
   try {
-    const birthTime = birthInfo.isTimeUnknown
-      ? "12:00"
-      : (birthInfo.birthTime ?? "12:00");
-    sajuData = service.calculateSaju({
-      birthDate: birthInfo.birthDate,
-      birthTime,
-      gender: birthInfo.gender,
-      timezone: birthInfo.timezone,
-    });
+    sajuData = calculateSajuFromBirthInfo(birthInfo);
   } catch {
     return NextResponse.json(
       { error: "사주 계산 중 오류가 발생했습니다", code: "CALCULATION_ERROR" },

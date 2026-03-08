@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { BirthInfoSchema } from "@/lib/schemas/birth-info"
-import { FortuneTellerService } from "@/lib/saju-core/facade"
 import {
   GunghapAnalyzer,
   CompatibilityType,
@@ -32,6 +31,7 @@ import {
   buildLegacySasangCompatibilityInsight,
 } from "@/lib/saju-core/saju/legacyCompatibility"
 import type { FortuneResponse } from "@/lib/saju-core"
+import { calculateSajuFromBirthInfo } from "@/lib/integrations/saju-core-adapter"
 
 const CompatibilityRequestSchema = z.object({
   personA: BirthInfoSchema,
@@ -60,7 +60,6 @@ function toGunghapSajuData(fortune: FortuneResponse): SajuData {
   }
 }
 
-const service = new FortuneTellerService()
 const gunghap = new GunghapAnalyzer()
 
 export async function POST(req: NextRequest) {
@@ -85,19 +84,8 @@ export async function POST(req: NextRequest) {
 
   try {
     // 양쪽 사주 계산
-    const fortuneA = service.calculateSaju({
-      birthDate: personA.birthDate,
-      birthTime: personA.isTimeUnknown ? "12:00" : (personA.birthTime ?? "12:00"),
-      gender: personA.gender,
-      timezone: personA.timezone,
-    })
-
-    const fortuneB = service.calculateSaju({
-      birthDate: personB.birthDate,
-      birthTime: personB.isTimeUnknown ? "12:00" : (personB.birthTime ?? "12:00"),
-      gender: personB.gender,
-      timezone: personB.timezone,
-    })
+    const fortuneA = calculateSajuFromBirthInfo(personA)
+    const fortuneB = calculateSajuFromBirthInfo(personB)
 
     // 궁합 분석
     const sajuA = toGunghapSajuData(fortuneA)
