@@ -36,6 +36,7 @@ Baseline: `saju-core-lib@cdbd4c77147395d1fc757a6069635ae3633c8ed1`
 | core | `지장간`, `신살` | aligned | `saju-core-adapter.parity.test.ts` |
 | core | `hyungchung`, `greatFortune` | aligned | `saju-core-adapter.parity.test.ts` |
 | compatibility core | `total_score`, `*_match`, `overall_interpretation`, `recommendations` | aligned | `saju-core-compatibility.parity.test.ts` |
+| compatibility legacy | `G003/G012/G019/G026/G028` lookup/score/text snapshot | aligned | `saju-core-legacy-gcodes.parity.test.ts` |
 | extended | `fortuneProfileResult` (basic) | aligned | `saju-core-contract-drift.test.ts` |
 | extended | `inputData.theme_interpretation` | aligned | `saju-core-contract-drift.test.ts` |
 | extended | `inputData.profile_id` | aligned | `saju-core-contract-drift.test.ts` |

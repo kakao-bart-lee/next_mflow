@@ -75,6 +75,8 @@ pnpm run build
 - 기본 비교 범위: pillars, 지장간, 신살, hyungchung, greatFortune (core contract)
 - 확장 해석 payload(`fortuneProfileResult`, `inputData` 세부)도 drift 0을 기본값으로 관리한다.
 - compatibility parity: `__tests__/lib/integrations/saju-core-compatibility.parity.test.ts`
+- legacy G-code parity: `__tests__/lib/integrations/saju-core-legacy-gcodes.parity.test.ts`
+  - fixture: `__tests__/fixtures/saju-legacy-gcode-parity-cases.json`
 - 계약표: `docs/saju-core-contract-alignment.md`
 
 ## 8) Completion Criteria
