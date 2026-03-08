@@ -1,9 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
-const { mockAuth, mockCalculateSajuFromBirthInfo, mockAnalyzeCompatibility } = vi.hoisted(() => ({
+const {
+  mockAuth,
+  mockCalculateSajuFromBirthInfo,
+  mockGetSajuCoreEngineMetadata,
+  mockAnalyzeCompatibility,
+} = vi.hoisted(() => ({
   mockAuth: vi.fn(),
   mockCalculateSajuFromBirthInfo: vi.fn(),
+  mockGetSajuCoreEngineMetadata: vi.fn(),
   mockAnalyzeCompatibility: vi.fn(),
 }));
 
@@ -13,6 +19,7 @@ vi.mock("@/lib/auth", () => ({
 
 vi.mock("@/lib/integrations/saju-core-adapter", () => ({
   calculateSajuFromBirthInfo: mockCalculateSajuFromBirthInfo,
+  getSajuCoreEngineMetadata: mockGetSajuCoreEngineMetadata,
 }));
 
 vi.mock("@/lib/saju-core/saju/gunghap", () => {
@@ -93,6 +100,11 @@ describe("POST /api/saju/compatibility", () => {
     vi.clearAllMocks();
     mockAuth.mockResolvedValue({ user: { id: "user-1" } });
     mockCalculateSajuFromBirthInfo.mockReturnValue(MOCK_FORTUNE);
+    mockGetSajuCoreEngineMetadata.mockReturnValue({
+      source: "saju-core-lib",
+      baselineSha: "1e57848e115b2bee38149c76c63b3d4a487254d2",
+      adapter: "next_mflow/lib/integrations/saju-core-adapter",
+    });
     mockAnalyzeCompatibility.mockReturnValue({
       total_score: 82,
       personality_match: 80,
@@ -118,6 +130,12 @@ describe("POST /api/saju/compatibility", () => {
     const json = await response.json();
     expect(json.data.total_score).toBe(82);
     expect(json.data.overall_interpretation).toBe("compat summary");
+    expect(json.data.legacy_provenance?.source).toBe("saju-core-lib");
+    expect(json.data.legacy_provenance?.baselineSha).toBe(
+      "1e57848e115b2bee38149c76c63b3d4a487254d2"
+    );
+    expect(json.data.legacy_provenance?.entries?.legacy_bedroom?.status).toBe("lookup_not_found");
+    expect(json.data.legacy_provenance?.entries?.legacy_sasang_compat?.status).toBe("missing_input");
     expect(mockCalculateSajuFromBirthInfo).toHaveBeenCalledTimes(2);
   });
 
