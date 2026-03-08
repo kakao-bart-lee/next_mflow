@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { existsSync } from "node:fs";
-import path from "node:path";
 import { pathToFileURL } from "node:url";
+import {
+  assertSajuSyncPreconditions,
+  getRequiredArtifactPath,
+} from "../../../scripts/saju-sync-preconditions";
 import type { BirthInfo } from "@/lib/schemas/birth-info";
 import type { FortuneResponse } from "@/lib/saju-core";
 import {
@@ -46,12 +48,9 @@ const TYPE_MAP: Record<Case["type"], CompatibilityType> = {
 };
 
 const cases = casesJson as Case[];
-const upstreamRoot = process.env.SAJU_CORE_LIB_PATH
-  ? path.resolve(process.env.SAJU_CORE_LIB_PATH)
-  : path.resolve(process.cwd(), "../saju-core-lib");
-const upstreamFacadePath = path.resolve(upstreamRoot, "dist/esm/facade.js");
-const upstreamGunghapPath = path.resolve(upstreamRoot, "dist/esm/saju/gunghap.js");
-const parityEnabled = existsSync(upstreamFacadePath) && existsSync(upstreamGunghapPath);
+const preconditions = assertSajuSyncPreconditions(["facade-dist", "gunghap-dist"]);
+const upstreamFacadePath = getRequiredArtifactPath(preconditions, "facade-dist");
+const upstreamGunghapPath = getRequiredArtifactPath(preconditions, "gunghap-dist");
 
 let upstreamFacade: UpstreamFacadeService | null = null;
 let UpstreamGunghapAnalyzer: (new () => UpstreamGunghapAnalyzerType) | null = null;
@@ -89,9 +88,7 @@ function toGunghapSajuData(fortune: FortuneResponse): SajuData {
   };
 }
 
-const parityDescribe = parityEnabled ? describe : describe.skip;
-
-parityDescribe("saju compatibility parity (next_mflow vs saju-core-lib baseline)", () => {
+describe("saju compatibility parity (next_mflow vs saju-core-lib baseline)", () => {
   for (const testCase of cases) {
     it(`compatibility parity: ${testCase.id}`, async () => {
       const { facade, GunghapAnalyzerClass } = await loadUpstreamModules();

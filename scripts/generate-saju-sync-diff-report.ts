@@ -27,6 +27,11 @@ import {
 import coreCasesJson from "../__tests__/fixtures/saju-core-parity-cases.json"
 import compatibilityCasesJson from "../__tests__/fixtures/saju-compatibility-parity-cases.json"
 import legacyCasesJson from "../__tests__/fixtures/saju-legacy-gcode-parity-cases.json"
+import {
+  assertSajuSyncPreconditions,
+  formatSajuSyncPreconditionStatus,
+  getRequiredArtifactPath,
+} from "./saju-sync-preconditions"
 
 type CoreCase = {
   id: string
@@ -97,12 +102,15 @@ const TYPE_MAP: Record<CompatibilityCase["type"], CompatibilityType> = {
   general: CompatibilityType.GENERAL,
 }
 
-const upstreamRoot = process.env.SAJU_CORE_LIB_PATH
-  ? path.resolve(process.env.SAJU_CORE_LIB_PATH)
-  : path.resolve(process.cwd(), "../saju-core-lib")
-const upstreamFacadePath = path.resolve(upstreamRoot, "ts-src/facade.ts")
-const upstreamGunghapPath = path.resolve(upstreamRoot, "ts-src/saju/gunghap.ts")
-const upstreamDataLoaderPath = path.resolve(upstreamRoot, "ts-src/saju/dataLoader.ts")
+const sourcePreconditions = assertSajuSyncPreconditions([
+  "facade-src",
+  "gunghap-src",
+  "data-loader-src",
+])
+const upstreamRoot = sourcePreconditions.upstreamRoot
+const upstreamFacadePath = getRequiredArtifactPath(sourcePreconditions, "facade-src")
+const upstreamGunghapPath = getRequiredArtifactPath(sourcePreconditions, "gunghap-src")
+const upstreamDataLoaderPath = getRequiredArtifactPath(sourcePreconditions, "data-loader-src")
 
 function toFortuneRequest(value: CoreCase): FortuneRequest {
   return {
@@ -191,12 +199,6 @@ async function loadUpstream(): Promise<{
   service: UpstreamService
   GunghapAnalyzerClass: new () => UpstreamGunghapAnalyzerType
 }> {
-  if (!existsSync(upstreamFacadePath) || !existsSync(upstreamGunghapPath) || !existsSync(upstreamDataLoaderPath)) {
-    throw new Error(
-      `upstream source path not found. expected: ${upstreamFacadePath}, ${upstreamGunghapPath}, ${upstreamDataLoaderPath}`,
-    )
-  }
-
   const facadeModule = (await import(pathToFileURL(upstreamFacadePath).href)) as {
     FortuneTellerService: new (dataLoader?: unknown) => UpstreamService
   }
@@ -216,6 +218,7 @@ async function loadUpstream(): Promise<{
 
 async function main(): Promise<void> {
   const startedAt = new Date().toISOString()
+  console.log(`[saju-sync:diff] preconditions ok: ${formatSajuSyncPreconditionStatus(sourcePreconditions)}`)
   const upstream = await loadUpstream()
   const failures: DiffFailure[] = []
 

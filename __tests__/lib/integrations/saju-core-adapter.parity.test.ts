@@ -1,7 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { existsSync } from "node:fs";
-import path from "node:path";
 import { pathToFileURL } from "node:url";
+import {
+  assertSajuSyncPreconditions,
+  getRequiredArtifactPath,
+} from "../../../scripts/saju-sync-preconditions";
 import type { FortuneRequest, FortuneResponse } from "@/lib/saju-core";
 import {
   SAJU_CORE_BASELINE_SHORT_SHA,
@@ -24,11 +26,8 @@ type UpstreamService = {
 };
 
 const cases = parityCases as ParityCase[];
-const upstreamRoot = process.env.SAJU_CORE_LIB_PATH
-  ? path.resolve(process.env.SAJU_CORE_LIB_PATH)
-  : path.resolve(process.cwd(), "../saju-core-lib");
-const upstreamFacadePath = path.resolve(upstreamRoot, "dist/esm/facade.js");
-const parityEnabled = existsSync(upstreamFacadePath);
+const preconditions = assertSajuSyncPreconditions(["facade-dist"]);
+const upstreamFacadePath = getRequiredArtifactPath(preconditions, "facade-dist");
 
 let upstreamService: UpstreamService | null = null;
 
@@ -80,9 +79,7 @@ function normalizeCoreFortune(result: FortuneResponse): unknown {
   };
 }
 
-const parityDescribe = parityEnabled ? describe : describe.skip;
-
-parityDescribe("saju-core parity (next_mflow adapter vs saju-core-lib baseline)", () => {
+describe("saju-core parity (next_mflow adapter vs saju-core-lib baseline)", () => {
   let warnSpy: ReturnType<typeof vi.spyOn> | null = null;
 
   beforeAll(() => {

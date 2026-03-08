@@ -1,7 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { existsSync } from "node:fs";
-import path from "node:path";
 import { pathToFileURL } from "node:url";
+import {
+  assertSajuSyncPreconditions,
+  getRequiredArtifactPath,
+} from "../../../scripts/saju-sync-preconditions";
 import type { FortuneRequest, FortuneResponse } from "@/lib/saju-core";
 import {
   SAJU_CORE_BASELINE_SHORT_SHA,
@@ -24,11 +26,8 @@ type UpstreamService = {
 };
 
 const coreCase = (parityCases as ParityCase[])[0];
-const upstreamRoot = process.env.SAJU_CORE_LIB_PATH
-  ? path.resolve(process.env.SAJU_CORE_LIB_PATH)
-  : path.resolve(process.cwd(), "../saju-core-lib");
-const upstreamFacadePath = path.resolve(upstreamRoot, "dist/esm/facade.js");
-const driftEnabled = existsSync(upstreamFacadePath);
+const preconditions = assertSajuSyncPreconditions(["facade-dist"]);
+const upstreamFacadePath = getRequiredArtifactPath(preconditions, "facade-dist");
 
 let upstreamService: UpstreamService | null = null;
 
@@ -53,9 +52,7 @@ function toRequest(input: ParityCase): FortuneRequest {
   };
 }
 
-const driftDescribe = driftEnabled ? describe : describe.skip;
-
-driftDescribe(
+describe(
   `saju contract drift snapshot (next_mflow vs saju-core-lib@${SAJU_CORE_BASELINE_SHORT_SHA})`,
   () => {
     let warnSpy: ReturnType<typeof vi.spyOn> | null = null;
