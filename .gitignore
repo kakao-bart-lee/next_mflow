@@ -22,6 +22,7 @@ mastra-memory.db-wal
 # Agent / tool artifacts
 .agent/
 .agents/
+.codex/
 .omx/
 .claude/worktrees/
 dogfood-output/
