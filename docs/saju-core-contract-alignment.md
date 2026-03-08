@@ -67,4 +67,5 @@ pnpm run test:saju-sync
 ## Open Follow-ups
 
 - `fortuneProfileResult` 및 `theme_interpretation`를 upstream 계약으로 승격할지 결정
+  - 제안서: `docs/saju-core-upstream-extension-proposal.md`
 - `G003/G012/G019/G026/G028`의 upstream baseline parity 기준 정식화

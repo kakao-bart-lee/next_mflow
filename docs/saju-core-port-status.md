@@ -15,6 +15,7 @@
 - 계약 정렬 문서 `docs/saju-core-contract-alignment.md` 추가
 - compatibility parity 게이트 `__tests__/lib/integrations/saju-core-compatibility.parity.test.ts` 추가
 - adapter boundary 게이트 `__tests__/lib/integrations/saju-core-adapter.boundary.test.ts` 추가
+- upstream 승격 제안서 `docs/saju-core-upstream-extension-proposal.md` 추가
 
 현재 기준으로는 “동작 복구” 단계보다 “opaque한 legacy 흐름을 의미 있는 계산 단계로 재배치하는 유지보수성 개선” 단계가 더 중요하다.
 

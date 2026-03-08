@@ -21,7 +21,7 @@ Last updated: 2026-03-08
 
 - [x] **사주 원국 결과**: `sajuData.basicInfo`, `sajuData.pillars.{년,월,일,시}` 필드 구조 고정
 - [x] **확장 해석 payload**: `fortuneProfileResult`, `inputData.fortune_interpretations` 호환성 점검
-- [ ] **오류/예외 계약**: `CALCULATION_ERROR`, `LLM_ERROR`, `INSUFFICIENT_CREDITS` 코드 유지
+- [x] **오류/예외 계약**: `CALCULATION_ERROR`, `LLM_ERROR`, `INSUFFICIENT_CREDITS` 코드 유지
 - [x] **midnight policy**: `23:xx`, `00:xx` 경계 케이스 fixture parity 통과
 - [x] **engine/source metadata**: adapter 기준 SHA/출처 추적 가능 상태 유지
 
