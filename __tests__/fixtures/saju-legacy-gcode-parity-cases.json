@@ -1,0 +1,114 @@
+[
+  {
+    "id": "compat-general-1990-1992",
+    "personA": {
+      "birthDate": "1990-01-15",
+      "birthTime": "14:30",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "M",
+      "sasangConstitution": "su"
+    },
+    "personB": {
+      "birthDate": "1992-08-03",
+      "birthTime": "09:10",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "F",
+      "sasangConstitution": "ty"
+    },
+    "expected": {
+      "g003": {
+        "sourceTable": "G003",
+        "lookupKey": "12",
+        "score": 0,
+        "textLength": 1970,
+        "textSha256": "fb38d4222fe3679cb13c634efa9b5bf26dcf073e325cb33b95cc6d6719617136"
+      },
+      "g012": {
+        "sourceTable": "G012",
+        "lookupKey": "54",
+        "score": 8,
+        "textLength": 1745,
+        "textSha256": "1a6afe24b0837fcc012fca6ad489d2f48fc29fabbf7984af9f5f16a6f70920b8"
+      },
+      "g019": {
+        "sourceTable": "G019",
+        "lookupKey": "염소자리",
+        "score": null,
+        "textLength": 1826,
+        "textSha256": "81a78f900a5b01c36dc365724eb95370f8911aa2ffbe9fb9e5693d06507b64ee"
+      },
+      "g026": {
+        "sourceTable": "G026",
+        "lookupKey": "69",
+        "score": 3,
+        "textLength": 401,
+        "textSha256": "de5bf48f5a09a1ff81624056086ddd4574bbb2aa1d26757b1bb71484d786ec49"
+      },
+      "g028": {
+        "sourceTable": "G028",
+        "lookupKey": "tysu",
+        "score": null,
+        "textLength": 2151,
+        "textSha256": "34978af2d134e08b7f7f3ff2e107f2af490f3e48cbf3f67dc93cb786c27b4b37"
+      }
+    }
+  },
+  {
+    "id": "compat-love-1988-1993-midnight-edge",
+    "personA": {
+      "birthDate": "1988-04-10",
+      "birthTime": "04:00",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "F",
+      "sasangConstitution": "sy"
+    },
+    "personB": {
+      "birthDate": "1993-10-09",
+      "birthTime": "00:30",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "M",
+      "sasangConstitution": "tu"
+    },
+    "expected": {
+      "g003": {
+        "sourceTable": "G003",
+        "lookupKey": "12",
+        "score": 0,
+        "textLength": 1970,
+        "textSha256": "fb38d4222fe3679cb13c634efa9b5bf26dcf073e325cb33b95cc6d6719617136"
+      },
+      "g012": {
+        "sourceTable": "G012",
+        "lookupKey": "59",
+        "score": 7,
+        "textLength": 1786,
+        "textSha256": "dc2028fc9decf5cda57f9af638b781c055aaeea20ae3f8ae486d8753f7afef88"
+      },
+      "g019": {
+        "sourceTable": "G019",
+        "lookupKey": "양자리",
+        "score": null,
+        "textLength": 1792,
+        "textSha256": "adfa27ed05f3e4f66bea3e925dfc78a82a9bb4f8a4afa5fea88741127a0ac508"
+      },
+      "g026": {
+        "sourceTable": "G026",
+        "lookupKey": "58",
+        "score": 4,
+        "textLength": 366,
+        "textSha256": "06a51cdf122197cc1e17a28cf84a415437090f3e8f95012f4b3188d300e521c2"
+      },
+      "g028": {
+        "sourceTable": "G028",
+        "lookupKey": "sytu",
+        "score": null,
+        "textLength": 2278,
+        "textSha256": "2c177687a6d0991df204d390a6bf4a19970f906cdf48fe1c1ec993cf4d2a6031"
+      }
+    }
+  }
+]
