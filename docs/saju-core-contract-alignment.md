@@ -1,7 +1,7 @@
 # Saju Core Contract Alignment (next_mflow vs saju-core-lib)
 
 Last updated: 2026-03-08
-Baseline: `saju-core-lib@6aac047c7ff92bec1a388edfc108ba2441e7c8fb`
+Baseline: `saju-core-lib@cdbd4c77147395d1fc757a6069635ae3633c8ed1`
 
 ## Scope
 
@@ -36,17 +36,17 @@ Baseline: `saju-core-lib@6aac047c7ff92bec1a388edfc108ba2441e7c8fb`
 | core | `지장간`, `신살` | aligned | `saju-core-adapter.parity.test.ts` |
 | core | `hyungchung`, `greatFortune` | aligned | `saju-core-adapter.parity.test.ts` |
 | compatibility core | `total_score`, `*_match`, `overall_interpretation`, `recommendations` | aligned | `saju-core-compatibility.parity.test.ts` |
-| extended | `fortuneProfileResult` (basic) | drift | `saju-core-contract-drift.test.ts` |
-| extended | `inputData.theme_interpretation` | drift | `saju-core-contract-drift.test.ts` |
-| extended | `inputData.profile_id` | drift | `saju-core-contract-drift.test.ts` |
-| extended | `inputData.fortune_type_description` | drift | `saju-core-contract-drift.test.ts` |
-| extended | `inputData.jumno` | drift | `saju-core-contract-drift.test.ts` |
+| extended | `fortuneProfileResult` (basic) | aligned | `saju-core-contract-drift.test.ts` |
+| extended | `inputData.theme_interpretation` | aligned | `saju-core-contract-drift.test.ts` |
+| extended | `inputData.profile_id` | aligned | `saju-core-contract-drift.test.ts` |
+| extended | `inputData.fortune_type_description` | aligned | `saju-core-contract-drift.test.ts` |
+| extended | `inputData.jumno` | aligned | `saju-core-contract-drift.test.ts` |
 
 ## Drift Policy
 
 1. core contract drift는 허용하지 않는다.
-2. extended contract drift는 문서 + drift test로 추적한다.
-3. extended 필드를 upstream 계약으로 승격할지 여부는 `saju-core-lib` 선행 변경으로만 결정한다.
+2. extended contract drift도 기본적으로 허용하지 않는다.
+3. drift가 발생하면 upstream(`saju-core-lib`) 선행 수정 후 baseline 재고정으로 해소한다.
 
 ## Verification Commands
 
@@ -66,6 +66,5 @@ pnpm run test:saju-sync
 
 ## Open Follow-ups
 
-- `fortuneProfileResult` 및 `theme_interpretation`를 upstream 계약으로 승격할지 결정
-  - 제안서: `docs/saju-core-upstream-extension-proposal.md`
 - `G003/G012/G019/G026/G028`의 upstream baseline parity 기준 정식화
+- 다음 upstream 변경 시 baseline SHA 재고정 + `test:saju-sync` 재실행

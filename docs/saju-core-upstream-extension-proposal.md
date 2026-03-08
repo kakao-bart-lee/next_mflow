@@ -1,9 +1,10 @@
 # Proposal: Promote Extended Saju Payload Contract Upstream
 
 Last updated: 2026-03-08
-Target baseline: `saju-core-lib@6aac047c7ff92bec1a388edfc108ba2441e7c8fb`
+Target baseline: `saju-core-lib@cdbd4c77147395d1fc757a6069635ae3633c8ed1`
 Owner repo (proposed change): `saju-core-lib`
 Consumer repo: `next_mflow`
+Status: accepted and implemented (`saju-core-lib` commit `cdbd4c7`)
 
 ## Decision Goal
 
@@ -20,8 +21,8 @@ Consumer repo: `next_mflow`
 ## Current State (2026-03-08)
 
 - `next_mflow`는 위 필드를 런타임에서 사용/노출 중이다.
-- `saju-core-lib@6aac047`는 동일 입력에서 core 계산은 일치하나, 위 필드는 미노출 또는 일부 누락이다.
-- core parity는 녹색이며 drift는 extended 범위에 국한됨.
+- `saju-core-lib@cdbd4c7`에서 동일 필드가 계약에 승격되었다.
+- core/extended parity 모두 녹색이며 drift 항목은 0개다.
 
 참조:
 
@@ -57,6 +58,10 @@ Consumer repo: `next_mflow`
 
 - drift 영구화
 - 소비자별 계약 분기 누적
+
+결론:
+
+- `Option A`를 적용해 계약 승격을 완료했다.
 
 ## Recommended Contract Shape (Upstream)
 

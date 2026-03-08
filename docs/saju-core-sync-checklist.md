@@ -5,7 +5,7 @@ Last updated: 2026-03-08
 ## 1) Baseline Pin
 
 - Baseline repo: `saju-core-lib`
-- Baseline SHA: `6aac047c7ff92bec1a388edfc108ba2441e7c8fb` (`6aac047`)
+- Baseline SHA: `cdbd4c77147395d1fc757a6069635ae3633c8ed1` (`cdbd4c7`)
 - Sync policy: `SYNC_POLICY.md` (copied from upstream policy)
 - Commit message rule: `port(saju-core-lib@<sha>): ...`
 
@@ -27,11 +27,11 @@ Last updated: 2026-03-08
 
 현재 확인된 차이(2026-03-08):
 
-| 항목 | next_mflow | saju-core-lib@6aac047 | 처리 방향 |
+| 항목 | next_mflow | saju-core-lib@cdbd4c7 | 처리 방향 |
 |---|---|---|---|
-| `inputData.jumno` | 있음 | 없음 | adapter에서 optional 필드로 흡수 |
-| `fortuneProfileResult` (`basic`) | 구조화 결과 있음 | 없음 | 계약 상향 여부를 upstream 우선 검토 |
-| `inputData.theme_interpretation` | 있음 | 없음 | parity fail 대상에서 제외, drift 추적 |
+| `inputData.jumno` | 있음 | 있음 | aligned 유지 |
+| `fortuneProfileResult` (`basic`) | 구조화 결과 있음 | 구조화 결과 있음 | drift 0 유지 |
+| `inputData.theme_interpretation` | 있음 | 있음 | drift 0 유지 |
 
 ## 4) Porting Unit Order
 
@@ -73,7 +73,7 @@ pnpm run build
 - Parity test: `__tests__/lib/integrations/saju-core-adapter.parity.test.ts`
 - 비교 대상: `next_mflow adapter` vs `../saju-core-lib/dist/esm/facade.js`
 - 기본 비교 범위: pillars, 지장간, 신살, hyungchung, greatFortune (core contract)
-- 확장 해석 payload(`fortuneProfileResult`, `inputData` 세부)는 별도 계약표에서 drift를 추적한다.
+- 확장 해석 payload(`fortuneProfileResult`, `inputData` 세부)도 drift 0을 기본값으로 관리한다.
 - compatibility parity: `__tests__/lib/integrations/saju-core-compatibility.parity.test.ts`
 - 계약표: `docs/saju-core-contract-alignment.md`
 
