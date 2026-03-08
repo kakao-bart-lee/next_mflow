@@ -17,6 +17,8 @@
 - adapter boundary 게이트 `__tests__/lib/integrations/saju-core-adapter.boundary.test.ts` 추가
 - upstream 승격 제안서 `docs/saju-core-upstream-extension-proposal.md` 추가
 - upstream 확장 계약 승격/legacy 분해 반영(`saju-core-lib@1e57848`) 및 drift 0 정렬 완료
+- compatibility API `legacy_provenance` 표준 메타데이터(`status/sourceTable/lookupKey + baselineSha`) 반영
+- drift 자동 리포트 스크립트 `pnpm run saju:sync:diff` 및 산출물 `docs/generated/saju-sync-diff-report.{md,json}` 추가
 
 현재 기준으로는 “동작 복구” 단계보다 “opaque한 legacy 흐름을 의미 있는 계산 단계로 재배치하는 유지보수성 개선” 단계가 더 중요하다.
 

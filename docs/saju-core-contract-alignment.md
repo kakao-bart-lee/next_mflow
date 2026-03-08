@@ -36,6 +36,7 @@ Baseline: `saju-core-lib@1e57848e115b2bee38149c76c63b3d4a487254d2`
 | core | `지장간`, `신살` | aligned | `saju-core-adapter.parity.test.ts` |
 | core | `hyungchung`, `greatFortune` | aligned | `saju-core-adapter.parity.test.ts` |
 | compatibility core | `total_score`, `*_match`, `overall_interpretation`, `recommendations` | aligned | `saju-core-compatibility.parity.test.ts` |
+| compatibility metadata | `legacy_provenance.{source,baselineSha,adapter,entries.*}` | aligned | `__tests__/api/saju-compatibility.test.ts` |
 | compatibility legacy | `G003/G012/G019/G026/G028` lookup/score/text snapshot | aligned | `saju-core-legacy-gcodes.parity.test.ts` |
 | extended | `fortuneProfileResult` (basic) | aligned | `saju-core-contract-drift.test.ts` |
 | extended | `inputData.theme_interpretation` | aligned | `saju-core-contract-drift.test.ts` |
@@ -54,6 +55,7 @@ Baseline: `saju-core-lib@1e57848e115b2bee38149c76c63b3d4a487254d2`
 ```bash
 cd /Users/bclaw/workspace/moonlit/next_mflow
 pnpm run test:saju-sync
+pnpm run saju:sync:diff
 ```
 
 `test:saju-sync`는 아래를 포함한다.
@@ -64,6 +66,7 @@ pnpm run test:saju-sync
 - drift snapshot
 - API/use-case 영향 테스트
 - TypeScript typecheck
+- diff report output (`docs/generated/saju-sync-diff-report.{md,json}`)
 
 ## Open Follow-ups
 

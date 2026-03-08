@@ -54,6 +54,7 @@ Last updated: 2026-03-08
 
 ```bash
 cd /Users/bclaw/workspace/moonlit/saju-core-lib
+npm run fixture:legacy-gcode
 uv run pytest -q
 npm run typecheck
 npx vitest run
@@ -64,6 +65,7 @@ npx vitest run
 ```bash
 cd /Users/bclaw/workspace/moonlit/next_mflow
 pnpm run test:saju-sync
+pnpm run saju:sync:diff
 pnpm run build
 ```
 
@@ -81,6 +83,7 @@ pnpm run build
   - fixture: `__tests__/fixtures/saju-legacy-gcode-parity-cases.json`
   - 경계: `sasangConstitution` null 케이스 포함 (`G028 => null`)
 - 계약표: `docs/saju-core-contract-alignment.md`
+- drift diff report: `docs/generated/saju-sync-diff-report.{md,json}`
 
 ## 8) Completion Criteria
 
