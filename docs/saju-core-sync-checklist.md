@@ -20,7 +20,7 @@ Last updated: 2026-03-08
 ## 3) Contract Alignment Checklist
 
 - [x] **사주 원국 결과**: `sajuData.basicInfo`, `sajuData.pillars.{년,월,일,시}` 필드 구조 고정
-- [ ] **확장 해석 payload**: `fortuneProfileResult`, `inputData.fortune_interpretations` 호환성 점검
+- [x] **확장 해석 payload**: `fortuneProfileResult`, `inputData.fortune_interpretations` 호환성 점검
 - [ ] **오류/예외 계약**: `CALCULATION_ERROR`, `LLM_ERROR`, `INSUFFICIENT_CREDITS` 코드 유지
 - [x] **midnight policy**: `23:xx`, `00:xx` 경계 케이스 fixture parity 통과
 - [x] **engine/source metadata**: adapter 기준 SHA/출처 추적 가능 상태 유지
@@ -36,9 +36,9 @@ Last updated: 2026-03-08
 ## 4) Porting Unit Order
 
 - [x] Unit 1: core calculation
-- [ ] Unit 2: extended interpretation
-- [ ] Unit 3: comparison/compat shim
-- [ ] Unit 4: batch/reporting needed paths
+- [x] Unit 2: extended interpretation
+- [x] Unit 3: comparison/compat shim
+- [x] Unit 4: batch/reporting needed paths
 
 각 Unit은 `next_mflow`에서 PR 또는 커밋 묶음 1개로 종료한다.
 
@@ -63,9 +63,7 @@ npx vitest run
 
 ```bash
 cd /Users/bclaw/workspace/moonlit/next_mflow
-pnpm run test:run -- __tests__/lib/integrations/saju-core-adapter.test.ts
-pnpm run test:saju-parity
-pnpm run test:run -- __tests__/api/saju-interpret.test.ts __tests__/lib/use-cases/analyze-saju.test.ts
+pnpm run test:saju-sync
 pnpm run build
 ```
 
@@ -76,10 +74,12 @@ pnpm run build
 - 비교 대상: `next_mflow adapter` vs `../saju-core-lib/dist/esm/facade.js`
 - 기본 비교 범위: pillars, 지장간, 신살, hyungchung, greatFortune (core contract)
 - 확장 해석 payload(`fortuneProfileResult`, `inputData` 세부)는 별도 계약표에서 drift를 추적한다.
+- compatibility parity: `__tests__/lib/integrations/saju-core-compatibility.parity.test.ts`
+- 계약표: `docs/saju-core-contract-alignment.md`
 
 ## 8) Completion Criteria
 
 - [x] `next_mflow` 사주 호출 경로가 adapter 경유로 통일됨
 - [x] parity fixture에서 adapter 출력과 baseline 출력 일치
-- [ ] 포팅 커밋에 `saju-core-lib@<sha>`가 기록됨
+- [x] 포팅 커밋에 `saju-core-lib@<sha>`가 기록됨
 - [x] 양 저장소 게이트 통과 로그 확보
