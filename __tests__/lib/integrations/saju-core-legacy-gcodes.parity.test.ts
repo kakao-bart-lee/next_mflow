@@ -25,8 +25,9 @@ type InsightSummary = {
 
 type Case = {
   id: string;
-  personA: BirthInfo & { sasangConstitution?: SasangConstitution };
-  personB: BirthInfo & { sasangConstitution?: SasangConstitution };
+  type: "general" | "love" | "marriage" | "business" | "friendship";
+  personA: BirthInfo & { sasangConstitution?: SasangConstitution | null };
+  personB: BirthInfo & { sasangConstitution?: SasangConstitution | null };
   expected: {
     g003: InsightSummary;
     g012: InsightSummary;
@@ -59,11 +60,11 @@ function summarizeInsight(value: {
 
 describe("saju legacy G-code parity snapshot", () => {
   it("uses pinned baseline short sha", () => {
-    expect(SAJU_CORE_BASELINE_SHORT_SHA).toBe("cdbd4c7");
+    expect(SAJU_CORE_BASELINE_SHORT_SHA).toBe("1e57848");
   });
 
   for (const testCase of cases) {
-    it(`matches fixture snapshot for ${testCase.id}`, () => {
+    it(`matches fixture snapshot for ${testCase.id} (${testCase.type})`, () => {
       const fortuneA = calculateSajuFromBirthInfo(testCase.personA);
       const fortuneB = calculateSajuFromBirthInfo(testCase.personB);
 
