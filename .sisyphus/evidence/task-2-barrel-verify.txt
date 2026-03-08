@@ -1,0 +1,3 @@
+Date: 2026-03-08
+Commands: ls lib/saju-core/saju/legacyCompatibility; npx vitest run; npx tsc --noEmit
+Observed: legacyCompatibility folder/barrel present; full tests and typecheck pass.

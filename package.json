@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "pnpm catalog:generate && next build",
     "start": "next start",
+    "catalog:generate": "tsx scripts/generate-api-catalog.ts",
     "lint": "eslint .",
     "test": "vitest",
     "test:run": "vitest run",

@@ -22,13 +22,14 @@ export async function analyzeSaju(
   try {
     // 시간 미상일 경우 정오(12:00)로 대체 — FortuneRequest는 string 타입 필수
     const birthTime = birthInfo.isTimeUnknown ? "12:00" : (birthInfo.birthTime ?? "12:00");
-    data = service.calculateSaju(
+    data = service.getSajuFortune(
       {
         birthDate: birthInfo.birthDate,
         birthTime,
         gender: birthInfo.gender,
         timezone: birthInfo.timezone,
       },
+      "basic",
       currentAge
     );
   } catch (err) {

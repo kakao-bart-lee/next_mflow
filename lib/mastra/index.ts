@@ -4,6 +4,7 @@ import { sajuMasterAgent } from "./agents/saju-master-agent"
 import { astrologerAgent } from "./agents/astrologer-agent"
 import { fortuneOrchestrator } from "./agents/fortune-orchestrator"
 import { chatAgent } from "./agents/chat-agent"
+import { runFortuneWorkflow } from "./workflows/fortune-workflow"
 import { getStorage } from "./storage"
 
 const storage = getStorage()
@@ -19,4 +20,5 @@ export {
   astrologerAgent,
   fortuneOrchestrator,
   chatAgent,
+  runFortuneWorkflow,
 }

@@ -4,7 +4,9 @@ import { SKIP_AUTH, DEV_USER } from "@/lib/auth/auth.config"
 import { isCreditEnabled, consumeCredit, CREDIT_COSTS } from "@/lib/credit-service"
 import { getStringSystemSetting } from "@/lib/system-settings"
 import { logLlmUsage } from "@/lib/llm-usage"
-import { chatAgent } from "@/lib/mastra"
+import { chatAgent, runFortuneWorkflow } from "@/lib/mastra"
+import { classifyIntentByKeywords } from "@/lib/mastra/context-bundles"
+import type { BirthInfo } from "@/lib/schemas/birth-info"
 
 interface ChatRequestBody {
   messages: Array<{ role: "user" | "assistant" | "system"; content: string }>
@@ -100,6 +102,37 @@ export async function POST(req: NextRequest) {
   const userId = session?.user?.id ?? (SKIP_AUTH ? DEV_USER.id : "anonymous")
   const modelId = process.env.MASTRA_ASTROLOGY_MODEL || process.env.MASTRA_SAJU_MODEL || "gpt-4o-mini"
   const startTime = Date.now()
+
+  const intent = classifyIntentByKeywords(lastUserMessage.content)
+  const useWorkflow = context?.birthInfo && intent.confidence >= 0.5
+
+  if (useWorkflow) {
+    try {
+      const workflowResult = await runFortuneWorkflow({
+        userMessage: lastUserMessage.content,
+        birthInfo: context.birthInfo as BirthInfo,
+      })
+
+      const encoder = new TextEncoder()
+      const readable = new ReadableStream({
+        start(controller) {
+          controller.enqueue(encoder.encode(workflowResult.response))
+          controller.close()
+        },
+      })
+
+      return new Response(readable, {
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Transfer-Encoding": "chunked",
+          "X-Workflow-Mode": "true",
+          "X-Bundle-Id": workflowResult.bundleId,
+        },
+      })
+    } catch (err) {
+      console.error("Fortune workflow failed, falling back to chat:", err)
+    }
+  }
 
   try {
     const result = await chatAgent.stream(lastUserMessage.content, {

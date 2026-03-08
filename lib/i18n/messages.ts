@@ -22,6 +22,7 @@ const messages = {
       debate: "토론",
       decision: "결정",
       explore: "탐색",
+      lab: "실험실",
     },
     onboarding: {
       brand: "moonlit",
@@ -79,6 +80,7 @@ const messages = {
       debate: "Debate",
       decision: "Decision",
       explore: "Explore",
+      lab: "Lab",
     },
     onboarding: {
       brand: "moonlit",
@@ -136,6 +138,7 @@ const messages = {
       debate: "討論",
       decision: "決断",
       explore: "探索",
+      lab: "ラボ",
     },
     onboarding: {
       brand: "moonlit",

@@ -143,15 +143,18 @@ export class ExtendedFortuneInterpreter extends FortuneInterpreter {
     return {
       yearStem: pillars.년.천간,
       yearBranch: pillars.년.지지,
+      monthStem: pillars.월.천간,
       monthBranch: pillars.월.지지,
       dayStem: pillars.일.천간,
       dayBranch: pillars.일.지지,
+      hourStem: pillars.시.천간,
       hourBranch: pillars.시.지지,
       gender: request.gender,
       additionalData: {
         birth_date: request.birthDate,
         birth_time: request.birthTime,
         timezone: request.timezone,
+        jumno: fortuneResponse.inputData['jumno'] ?? null,
       },
     };
   }

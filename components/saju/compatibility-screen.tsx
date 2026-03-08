@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AlertCircle, ArrowRight, Heart, Sparkles } from "lucide-react"
-import { useSaju } from "@/lib/contexts/saju-context"
+import { useFortune } from "@/lib/contexts/fortune-context"
 import { DeepDiveSheet } from "./deep-dive-sheet"
 import { WhyThisResult } from "./why-this-result"
 
@@ -26,6 +26,206 @@ interface CompatibilityResult {
   health_match: { score: number; description: string }
   wealth_match: { score: number; description: string }
   career_match: { score: number; description: string }
+  legacy_intimacy?: {
+    sourceTable: "G016"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    score: number | null
+  } | null
+  legacy_bedroom?: {
+    sourceTable: "G020"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    score: number | null
+  } | null
+  legacy_love_style?: {
+    sourceTable: "Y003"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    score: number | null
+  } | null
+  legacy_yearly_love_cycle?: {
+    sourceTable: "Y004"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    intro: string
+    months: { month: number; text: string }[]
+  } | null
+  legacy_love_weak_point?: {
+    sourceTable: "Y001"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
+  legacy_future_spouse_face?: {
+    sourceTable: "G004"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    currentMonthStem: string
+    currentDay: number
+  } | null
+  legacy_future_spouse_personality?: {
+    sourceTable: "G005"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    currentMonthStem: string
+    currentDay: number
+  } | null
+  legacy_future_spouse_career?: {
+    sourceTable: "G006"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    currentMonthStem: string
+    currentDay: number
+  } | null
+  legacy_future_spouse_romance?: {
+    sourceTable: "G007"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    currentMonthStem: string
+    currentDay: number
+  } | null
+  legacy_marriage_timing_table?: {
+    sourceTable: "G033"
+    title: string
+    scoreLabel: string
+    focusElement: string
+    text: string
+    entries: {
+      year: number
+      age: number
+      ganji: string
+      score: number
+      percent: number
+    }[]
+  } | null
+  legacy_relationship_timing?: {
+    sourceTable: "G034"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    currentYear: number
+    matchedYear: number
+    matchedGanji: string
+  } | null
+  legacy_partner_role?: {
+    sourceTable: "G031"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    spouseRole: string
+    palaceRole: string
+    text: string
+  } | null
+  legacy_marriage_flow?: {
+    sourceTable: "G001"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    score: number | null
+    currentMonth: number
+  } | null
+  legacy_spouse_core?: {
+    sourceTable: "G030"
+    title: string
+    scoreLabel: string
+    spouseStarLabel: string
+    palaceLabel: string
+    visiblePrimaryCount: number
+    visibleSecondaryCount: number
+    hiddenPrimaryCount: number
+    hiddenSecondaryCount: number
+    text: string
+  } | null
+  legacy_type_profile?: {
+    sourceTable: "T010"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
+  legacy_outer_compatibility?: {
+    sourceTable: "G023"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
+  legacy_traditional_compatibility?: {
+    sourceTable: "G022"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
+  legacy_destiny_core?: {
+    sourceTable: "G024"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
+  legacy_partner_personality?: {
+    sourceTable: "G032"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
+  legacy_basic_compat?: {
+    sourceTable: "G003"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
+  legacy_detailed_compat?: {
+    sourceTable: "G012"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
+  legacy_zodiac_compat?: {
+    sourceTable: "G019"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
+  legacy_animal_compat?: {
+    sourceTable: "G026"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+    score: number | null
+  } | null
+  legacy_sasang_compat?: {
+    sourceTable: "G028"
+    title: string
+    scoreLabel: string
+    lookupKey: string
+    text: string
+  } | null
   overall_interpretation: string
   recommendations: string[]
 }
@@ -33,11 +233,13 @@ interface CompatibilityResult {
 type Step = "input" | "result"
 
 export function CompatibilityScreen() {
-  const { birthInfo } = useSaju()
+  const { birthInfo } = useFortune()
   const [step, setStep] = useState<Step>("input")
   const [partnerDate, setPartnerDate] = useState("")
   const [partnerTime, setPartnerTime] = useState("")
   const [partnerGender, setPartnerGender] = useState<"M" | "F">("F")
+  const [mySasang, setMySasang] = useState<string>("")
+  const [partnerSasang, setPartnerSasang] = useState<string>("")
   const [compatType, setCompatType] = useState<CompatibilityType>("love")
   const [result, setResult] = useState<CompatibilityResult | null>(null)
   const [loading, setLoading] = useState(false)
@@ -58,13 +260,17 @@ export function CompatibilityScreen() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          personA: birthInfo,
+          personA: {
+            ...birthInfo,
+            sasangConstitution: mySasang || undefined,
+          },
           personB: {
             birthDate: partnerDate,
             birthTime: partnerTime || null,
             isTimeUnknown: !partnerTime,
             timezone: birthInfo.timezone,
             gender: partnerGender,
+            sasangConstitution: partnerSasang || undefined,
           },
           type: compatType,
         }),
@@ -165,6 +371,42 @@ export function CompatibilityScreen() {
               </div>
             </div>
 
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground">
+                  나의 사상체질 <span className="text-muted-foreground">(선택)</span>
+                </Label>
+                <select
+                  value={mySasang}
+                  onChange={(e) => setMySasang(e.target.value)}
+                  className="flex h-12 w-full items-center justify-between rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">선택안함</option>
+                  <option value="ty">태양인(太陽人)</option>
+                  <option value="sy">소양인(少陽人)</option>
+                  <option value="tu">태음인(太陰人)</option>
+                  <option value="su">소음인(少陰人)</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground">
+                  상대방 사상체질 <span className="text-muted-foreground">(선택)</span>
+                </Label>
+                <select
+                  value={partnerSasang}
+                  onChange={(e) => setPartnerSasang(e.target.value)}
+                  className="flex h-12 w-full items-center justify-between rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">선택안함</option>
+                  <option value="ty">태양인(太陽人)</option>
+                  <option value="sy">소양인(少陽人)</option>
+                  <option value="tu">태음인(太陰人)</option>
+                  <option value="su">소음인(少陰人)</option>
+                </select>
+              </div>
+            </div>
+
             <Button
               onClick={handleAnalyze}
               disabled={!canSubmit}
@@ -235,6 +477,477 @@ export function CompatibilityScreen() {
                     </div>
                   ))}
                 </div>
+
+                {result.legacy_intimacy ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_intimacy.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_intimacy.sourceTable} · key {result.legacy_intimacy.lookupKey}
+                        </p>
+                      </div>
+                      {typeof result.legacy_intimacy.score === "number" ? (
+                        <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                          {result.legacy_intimacy.scoreLabel} {result.legacy_intimacy.score}
+                        </div>
+                      ) : null}
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_intimacy.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_bedroom ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_bedroom.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_bedroom.sourceTable} · key {result.legacy_bedroom.lookupKey}
+                        </p>
+                      </div>
+                      {typeof result.legacy_bedroom.score === "number" ? (
+                        <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                          {result.legacy_bedroom.scoreLabel} {result.legacy_bedroom.score}
+                        </div>
+                      ) : null}
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_bedroom.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_love_style ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_love_style.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_love_style.sourceTable} · key {result.legacy_love_style.lookupKey}
+                        </p>
+                      </div>
+                      {typeof result.legacy_love_style.score === "number" ? (
+                        <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                          {result.legacy_love_style.scoreLabel} {result.legacy_love_style.score}
+                        </div>
+                      ) : null}
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_love_style.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_yearly_love_cycle ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_yearly_love_cycle.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 월별 해설 · {result.legacy_yearly_love_cycle.sourceTable} · key {result.legacy_yearly_love_cycle.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_yearly_love_cycle.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_yearly_love_cycle.intro}
+                    </p>
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                      {result.legacy_yearly_love_cycle.months.map((entry) => (
+                        <div key={entry.month} className="rounded-lg border border-border/80 bg-background/60 p-4">
+                          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            {entry.month}월
+                          </p>
+                          <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                            {entry.text}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {result.legacy_love_weak_point ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_love_weak_point.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_love_weak_point.sourceTable} · key {result.legacy_love_weak_point.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_love_weak_point.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_love_weak_point.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {([
+                  result.legacy_future_spouse_face,
+                  result.legacy_future_spouse_personality,
+                  result.legacy_future_spouse_career,
+                  result.legacy_future_spouse_romance,
+                ] as const).map((entry) =>
+                  entry ? (
+                    <div key={`${entry.sourceTable}-${entry.lookupKey}`} className="rounded-xl border border-border bg-card p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="text-sm font-semibold text-foreground">{entry.title}</h3>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            PHP 레거시 상세 해설 · {entry.sourceTable} · key {entry.lookupKey} · month_h {entry.currentMonthStem}
+                          </p>
+                        </div>
+                        <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                          {entry.scoreLabel}
+                        </div>
+                      </div>
+                      <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                        {entry.text}
+                      </p>
+                    </div>
+                  ) : null
+                )}
+
+                {result.legacy_marriage_timing_table ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_marriage_timing_table.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 synthetic 해설 · {result.legacy_marriage_timing_table.sourceTable} · {result.legacy_marriage_timing_table.focusElement} 배우자성 기준
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_marriage_timing_table.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_marriage_timing_table.text}
+                    </p>
+                    <div className="mt-5 space-y-3">
+                      {result.legacy_marriage_timing_table.entries.slice(0, 10).map((entry) => (
+                        <div key={`${entry.year}-${entry.ganji}`} className="rounded-lg border border-border/80 bg-background/60 p-4">
+                          <div className="flex items-center justify-between gap-4">
+                            <div>
+                              <p className="text-sm font-semibold text-foreground">
+                                {entry.year}년 · {entry.ganji}
+                              </p>
+                              <p className="mt-1 text-xs text-muted-foreground">
+                                만 나이 기준 약 {entry.age}세 · raw {entry.score}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-semibold text-accent">{entry.percent}%</p>
+                            </div>
+                          </div>
+                          <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+                            <div
+                              className="h-full rounded-full bg-accent transition-[width]"
+                              style={{ width: `${Math.max(4, Math.min(entry.percent, 100))}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {result.legacy_relationship_timing ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_relationship_timing.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_relationship_timing.sourceTable} · key {result.legacy_relationship_timing.lookupKey} · {result.legacy_relationship_timing.currentYear}년 기준
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_relationship_timing.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      선택된 인연 해석: {result.legacy_relationship_timing.matchedYear}년생 {result.legacy_relationship_timing.matchedGanji}
+                    </p>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_relationship_timing.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_partner_role ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_partner_role.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_partner_role.sourceTable} · key {result.legacy_partner_role.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_partner_role.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      배우자성 {result.legacy_partner_role.spouseRole} · 배우자궁 {result.legacy_partner_role.palaceRole}
+                    </p>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_partner_role.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_marriage_flow ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_marriage_flow.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_marriage_flow.sourceTable} · key {result.legacy_marriage_flow.lookupKey} · {result.legacy_marriage_flow.currentMonth}월 기준
+                        </p>
+                      </div>
+                      {typeof result.legacy_marriage_flow.score === "number" ? (
+                        <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                          {result.legacy_marriage_flow.scoreLabel} {result.legacy_marriage_flow.score}
+                        </div>
+                      ) : null}
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_marriage_flow.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_spouse_core ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_spouse_core.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 synthetic 해설 · {result.legacy_spouse_core.sourceTable}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_spouse_core.scoreLabel}
+                      </div>
+                    </div>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-lg border border-border/80 bg-background/60 p-4 text-sm text-muted-foreground">
+                        보이는 {result.legacy_spouse_core.spouseStarLabel}: {result.legacy_spouse_core.visiblePrimaryCount} / {result.legacy_spouse_core.visibleSecondaryCount}
+                      </div>
+                      <div className="rounded-lg border border-border/80 bg-background/60 p-4 text-sm text-muted-foreground">
+                        숨은 {result.legacy_spouse_core.spouseStarLabel}: {result.legacy_spouse_core.hiddenPrimaryCount} / {result.legacy_spouse_core.hiddenSecondaryCount}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_spouse_core.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_type_profile ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_type_profile.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_type_profile.sourceTable} · key {result.legacy_type_profile.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_type_profile.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_type_profile.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_outer_compatibility ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_outer_compatibility.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_outer_compatibility.sourceTable} · key {result.legacy_outer_compatibility.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_outer_compatibility.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_outer_compatibility.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_traditional_compatibility ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_traditional_compatibility.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_traditional_compatibility.sourceTable} · key {result.legacy_traditional_compatibility.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_traditional_compatibility.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_traditional_compatibility.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_destiny_core ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_destiny_core.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_destiny_core.sourceTable} · key {result.legacy_destiny_core.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_destiny_core.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_destiny_core.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_partner_personality ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_partner_personality.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_partner_personality.sourceTable} · key {result.legacy_partner_personality.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_partner_personality.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_partner_personality.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_basic_compat ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_basic_compat.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_basic_compat.sourceTable} · key {result.legacy_basic_compat.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_basic_compat.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_basic_compat.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_detailed_compat ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_detailed_compat.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_detailed_compat.sourceTable} · key {result.legacy_detailed_compat.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_detailed_compat.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_detailed_compat.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_zodiac_compat ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_zodiac_compat.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_zodiac_compat.sourceTable} · key {result.legacy_zodiac_compat.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_zodiac_compat.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_zodiac_compat.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_animal_compat ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_animal_compat.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_animal_compat.sourceTable} · key {result.legacy_animal_compat.lookupKey}
+                        </p>
+                      </div>
+                      {typeof result.legacy_animal_compat.score === "number" ? (
+                        <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                          {result.legacy_animal_compat.scoreLabel} {result.legacy_animal_compat.score}점
+                        </div>
+                      ) : (
+                        <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                          {result.legacy_animal_compat.scoreLabel}
+                        </div>
+                      )}
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_animal_compat.text}
+                    </p>
+                  </div>
+                ) : null}
+
+                {result.legacy_sasang_compat ? (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{result.legacy_sasang_compat.title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PHP 레거시 상세 해설 · {result.legacy_sasang_compat.sourceTable} · key {result.legacy_sasang_compat.lookupKey}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent">
+                        {result.legacy_sasang_compat.scoreLabel}
+                      </div>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {result.legacy_sasang_compat.text}
+                    </p>
+                  </div>
+                ) : null}
 
                 {/* 강점/약점/조언 */}
                 {result.total_score.strengths.length > 0 && (

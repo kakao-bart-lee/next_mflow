@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { fetchHorizonsEphemeris, HorizonsClientError } from "@/lib/astrology/horizons-client"
+import { fetchHorizonsEphemeris, fetchVimshottari, HorizonsClientError } from "@/lib/astrology/horizons-client"
 import type { BirthInfo } from "@/lib/schemas/birth-info"
 
 const BASE_INPUT: BirthInfo = {
@@ -141,5 +141,110 @@ describe("fetchHorizonsEphemeris", () => {
       code: "HORIZONS_TIMEOUT",
       status: 504,
     })
+  })
+})
+
+describe("fetchVimshottari", () => {
+  beforeEach(() => {
+    vi.unstubAllEnvs()
+    vi.stubEnv("HARUNA_HORIZONS_BASE_URL", "https://horizons.example.com")
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("신규 periods/sub_periods 포맷을 파싱한다", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        observation_time_utc: "1992-08-17T05:35:00Z",
+        periods: [
+          {
+            lord: "SATURN",
+            start_utc: "1992-08-17T05:35:00Z",
+            end_utc: "1998-08-05T10:59:44Z",
+            sub_periods: [
+              {
+                lord: "SATURN",
+                start_utc: "1992-08-17T05:35:00Z",
+                end_utc: "1993-07-28T06:38:25Z",
+              },
+              {
+                lord: "MERCURY",
+                start_utc: "1993-07-28T06:38:25Z",
+                end_utc: "1994-06-02T00:00:25Z",
+              },
+            ],
+          },
+          {
+            lord: "MERCURY",
+            start_utc: "1998-08-05T10:59:44Z",
+            end_utc: "2015-08-05T13:56:08Z",
+          },
+        ],
+      }),
+    } as Response)
+
+    const result = await fetchVimshottari(BASE_INPUT)
+    expect(result.currentMahaDasha).toMatchObject({
+      lord: "SATURN",
+      level: "maha",
+    })
+    expect(result.currentAntarDasha).toMatchObject({
+      lord: "SATURN",
+      level: "antar",
+    })
+    expect(result.currentPratyantarDasha).toMatchObject({
+      lord: "SATURN",
+      level: "pratyantar",
+    })
+    expect(result.upcoming[0]).toMatchObject({
+      lord: "MERCURY",
+      level: "maha",
+    })
+  })
+
+  it("기존 current/upcoming 포맷도 파싱한다", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        observation_time_utc: "1992-08-17T05:35:00Z",
+        currentMahaDasha: {
+          lord: "SATURN",
+          startDate: "1992-08-17T05:35:00Z",
+          endDate: "1998-08-05T10:59:44Z",
+          level: "maha",
+        },
+        currentAntarDasha: {
+          lord: "SATURN",
+          startDate: "1992-08-17T05:35:00Z",
+          endDate: "1993-07-28T06:38:25Z",
+          level: "antar",
+        },
+        currentPratyantarDasha: {
+          lord: "SATURN",
+          startDate: "1992-08-17T05:35:00Z",
+          endDate: "1992-09-01T00:00:00Z",
+          level: "pratyantar",
+        },
+        upcoming: [
+          {
+            lord: "MERCURY",
+            startDate: "1998-08-05T10:59:44Z",
+            endDate: "2015-08-05T13:56:08Z",
+            level: "maha",
+          },
+        ],
+      }),
+    } as Response)
+
+    const result = await fetchVimshottari(BASE_INPUT)
+    expect(result.currentMahaDasha.lord).toBe("SATURN")
+    expect(result.currentAntarDasha.lord).toBe("SATURN")
+    expect(result.currentPratyantarDasha.lord).toBe("SATURN")
+    expect(result.upcoming).toHaveLength(1)
   })
 })

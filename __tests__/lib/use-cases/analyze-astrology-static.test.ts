@@ -18,13 +18,11 @@ vi.mock("@/lib/astrology/horizons-client", () => ({
   },
 }))
 
-const { mockCalculateAstrologyWithOptions, mockCalculateStaticAstrology } = vi.hoisted(() => ({
+const { mockCalculateAstrologyWithOptions } = vi.hoisted(() => ({
   mockCalculateAstrologyWithOptions: vi.fn(),
-  mockCalculateStaticAstrology: vi.fn(),
 }))
 vi.mock("@/lib/astrology/static/calculator", () => ({
   calculateAstrologyWithOptions: mockCalculateAstrologyWithOptions,
-  calculateStaticAstrology: mockCalculateStaticAstrology,
 }))
 
 import { analyzeAstrologyStatic } from "@/lib/use-cases/analyze-astrology-static"
@@ -44,7 +42,6 @@ describe("analyzeAstrologyStatic", () => {
     vi.clearAllMocks()
     vi.unstubAllEnvs()
     mockCalculateAstrologyWithOptions.mockReturnValue({ version: "static-v1" })
-    mockCalculateStaticAstrology.mockReturnValue({ version: "static-v1" })
   })
 
   it("HARUNA_HORIZONS_BASE_URL이 있으면 외부 ephemeris 결과를 사용한다", async () => {
@@ -66,7 +63,6 @@ describe("analyzeAstrologyStatic", () => {
     expect(result.success).toBe(true)
     expect(mockFetchHorizonsEphemeris).toHaveBeenCalled()
     expect(mockCalculateAstrologyWithOptions).toHaveBeenCalled()
-    expect(mockCalculateStaticAstrology).not.toHaveBeenCalled()
   })
 
   it("ASTROLOGY_USE_HORIZONS=false면 로컬 정적 계산으로 폴백", async () => {
@@ -76,7 +72,8 @@ describe("analyzeAstrologyStatic", () => {
     const result = await analyzeAstrologyStatic(BASE_INPUT)
     expect(result.success).toBe(true)
     expect(mockFetchHorizonsEphemeris).not.toHaveBeenCalled()
-    expect(mockCalculateStaticAstrology).toHaveBeenCalled()
+    // 폴백도 calculateAstrologyWithOptions 사용 (Horizons 없이)
+    expect(mockCalculateAstrologyWithOptions).toHaveBeenCalled()
   })
 
   it("외부 네트워크 오류면 로컬 정적 계산으로 폴백", async () => {
@@ -87,7 +84,8 @@ describe("analyzeAstrologyStatic", () => {
 
     const result = await analyzeAstrologyStatic(BASE_INPUT)
     expect(result.success).toBe(true)
-    expect(mockCalculateStaticAstrology).toHaveBeenCalled()
+    // 폴백도 calculateAstrologyWithOptions 사용
+    expect(mockCalculateAstrologyWithOptions).toHaveBeenCalledTimes(1)
   })
 
   it("위치 누락 오류면 로컬 정적 계산으로 폴백", async () => {
@@ -102,7 +100,8 @@ describe("analyzeAstrologyStatic", () => {
       longitude: undefined,
     })
     expect(result.success).toBe(true)
-    expect(mockCalculateStaticAstrology).toHaveBeenCalled()
+    // 폴백도 calculateAstrologyWithOptions 사용
+    expect(mockCalculateAstrologyWithOptions).toHaveBeenCalledTimes(1)
   })
 
   it("입력/옵션 오류는 fail-fast로 실패 반환", async () => {
@@ -117,6 +116,7 @@ describe("analyzeAstrologyStatic", () => {
       expect(result.code).toBe("HORIZONS_INVALID_REQUEST")
       expect(result.status).toBe(400)
     }
-    expect(mockCalculateStaticAstrology).not.toHaveBeenCalled()
+    // fail-fast: 폴백 계산도 호출되지 않아야 함
+    expect(mockCalculateAstrologyWithOptions).not.toHaveBeenCalled()
   })
 })

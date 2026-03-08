@@ -27,6 +27,7 @@ import { SinyakSingangAnalyzer } from './saju/sinyakSingang';
 import { calculateComprehensiveSinsal } from './saju/twelveSinsal';
 import { createJijangganCalculator } from './saju/jijanggan';
 import { ExtendedFortuneInterpreter } from './saju/interpreter';
+import { FortuneProfileInterpreter } from './saju/profileInterpreter';
 import {
   getSajuCombination,
   isValidCombination,
@@ -37,10 +38,10 @@ import {
   getAllFortuneTypes,
 } from './models/sajuFortuneTypes';
 import {
-  ThemeInterpreterManager,
-  getInterpretationTypeFromSaju,
-  type InterpretationType,
-} from './saju/interpreters';
+  getFortuneProfile,
+  getFortuneProfileByFortuneType,
+  isSupportedProfileId,
+} from './saju/fortuneProfiles';
 import { extractHanja, extractKorean } from './utils';
 import { calculateHyungchung, type HyungchungResult } from './saju/hyungchung';
 
@@ -57,21 +58,21 @@ export class FortuneTellerService {
   private readonly sinyakSingangAnalyzer: SinyakSingangAnalyzer;
   private readonly jijangganCalculator: ReturnType<typeof createJijangganCalculator>;
   private readonly fortuneInterpreter: ExtendedFortuneInterpreter;
-  private readonly themeInterpreterManager: ThemeInterpreterManager;
+  private readonly fortuneProfileInterpreter: FortuneProfileInterpreter;
 
   /**
    * SajuDataLoader를 통해 데이터 로드 (기본: 싱글톤 인스턴스 사용)
    */
   constructor(dataLoader?: SajuDataLoader) {
     this.dataLoader = dataLoader ?? getDataLoader();
-    this.sData = this.dataLoader.loadSTables() as STablesData;
+    this.sData = this.dataLoader.loadFortuneTables() as STablesData;
     this.fourPillarsCalculator = new FourPillarsCalculator(this.dataLoader);
     this.lifecycleCalculator = new LifecycleStageCalculator();
     this.sipsinCalculator = new SipsinCalculator();
     this.sinyakSingangAnalyzer = new SinyakSingangAnalyzer();
     this.jijangganCalculator = createJijangganCalculator();
     this.fortuneInterpreter = new ExtendedFortuneInterpreter(this.sData);
-    this.themeInterpreterManager = new ThemeInterpreterManager();
+    this.fortuneProfileInterpreter = new FortuneProfileInterpreter(this.sData);
   }
 
   /**
@@ -421,6 +422,7 @@ export class FortuneTellerService {
         gender: request.gender,
         timezone: request.timezone,
         current_age: effectiveAge,
+        jumno: fourPillarsResult.jumno,
       },
     };
 
@@ -432,61 +434,69 @@ export class FortuneTellerService {
    */
   getSajuFortune(
     request: FortuneRequest,
-    fortuneType: string,
+    fortuneTypeOrProfileId: string,
     currentAge?: number
   ): FortuneResponse {
     const fr = this.calculateSaju(request, currentAge);
+    const normalizedRequestedKey = fortuneTypeOrProfileId.trim().toLowerCase();
+    const applyCompatibilityFields = (mode: {
+      fortuneType?: string;
+      profileId?: string;
+    }): void => {
+      const profileDefinition = mode.profileId
+        ? getFortuneProfile(mode.profileId)
+        : getFortuneProfileByFortuneType(mode.fortuneType ?? 'basic');
+      fr.fortuneProfileResult = this.fortuneProfileInterpreter.buildProfileResult(
+        request,
+        fr,
+        profileDefinition
+      );
+      fr.inputData.profile_id = profileDefinition.id;
+
+      if (fr.fortuneProfileResult.theme) {
+        fr.inputData.theme_interpretation = {
+          type: fr.fortuneProfileResult.theme.id,
+          title: fr.fortuneProfileResult.theme.title,
+          summary: fr.fortuneProfileResult.theme.summary,
+          one_line_summary: fr.fortuneProfileResult.theme.oneLineSummary,
+          brief_analysis: fr.fortuneProfileResult.theme.briefAnalysis,
+          detailed_analysis: fr.fortuneProfileResult.theme.detailedAnalysis,
+          strengths: fr.fortuneProfileResult.theme.strengths,
+          weaknesses: fr.fortuneProfileResult.theme.weaknesses,
+          advice: fr.fortuneProfileResult.theme.advice,
+          lucky_elements: fr.fortuneProfileResult.theme.luckyElements,
+          unlucky_elements: fr.fortuneProfileResult.theme.unluckyElements,
+          score: fr.fortuneProfileResult.theme.score,
+          grade: fr.fortuneProfileResult.theme.grade,
+        };
+      }
+    };
 
     try {
+      if (normalizedRequestedKey === 'basic') {
+        applyCompatibilityFields({ profileId: 'basic' });
+        const interpretations = this.fortuneInterpreter.getCategoryInterpretations(
+          request,
+          fr,
+          'basic'
+        );
+        fr.inputData.fortune_interpretations = interpretations;
+        fr.inputData.fortune_type = 'basic';
+        fr.inputData.fortune_type_description = fr.fortuneProfileResult?.profile.description ?? '';
+        return fr;
+      }
+
+      if (isSupportedProfileId(normalizedRequestedKey)) {
+        applyCompatibilityFields({ profileId: normalizedRequestedKey });
+        fr.inputData.fortune_type = null;
+        fr.inputData.fortune_type_description = fr.fortuneProfileResult?.profile.description ?? '';
+        return fr;
+      }
+
       // Enum 기반 fortune type 처리
-      const parsedFortuneType = getFortuneTypeFromString(fortuneType);
+      const parsedFortuneType = getFortuneTypeFromString(normalizedRequestedKey);
       const combinationName = parsedFortuneType;
-
-      // 새로운 해석기 시스템 사용
-      const interpretationType = getInterpretationTypeFromSaju(combinationName);
-
-      // 사주 데이터를 딕셔너리로 변환 (해석기가 사용할 수 있도록)
-      const sajuDict = {
-        four_pillars: {
-          년주: {
-            천간: fr.sajuData.pillars.년.천간,
-            지지: fr.sajuData.pillars.년.지지,
-          },
-          월주: {
-            천간: fr.sajuData.pillars.월.천간,
-            지지: fr.sajuData.pillars.월.지지,
-          },
-          일주: {
-            천간: fr.sajuData.pillars.일.천간,
-            지지: fr.sajuData.pillars.일.지지,
-          },
-          시주: {
-            천간: fr.sajuData.pillars.시.천간,
-            지지: fr.sajuData.pillars.시.지지,
-          },
-        },
-      };
-
-      // 새로운 해석기로 해석 수행
-      const interpretationResult = this.themeInterpreterManager.getInterpretation(
-        sajuDict,
-        interpretationType
-      );
-
-      // 해석 결과를 응답에 추가
-      fr.inputData.theme_interpretation = {
-        type: interpretationResult.interpretation_type,
-        title: interpretationResult.title,
-        summary: interpretationResult.summary,
-        detailed_analysis: interpretationResult.detailed_analysis,
-        strengths: interpretationResult.strengths,
-        weaknesses: interpretationResult.weaknesses,
-        advice: interpretationResult.advice,
-        lucky_elements: interpretationResult.lucky_elements,
-        unlucky_elements: interpretationResult.unlucky_elements,
-        score: interpretationResult.score,
-        grade: interpretationResult.grade,
-      };
+      applyCompatibilityFields({ fortuneType: combinationName });
 
       // 기존 해석도 유지 (호환성을 위해)
       if (isValidCombination(combinationName)) {
@@ -498,9 +508,13 @@ export class FortuneTellerService {
         );
         fr.inputData.fortune_interpretations = interpretations;
         fr.inputData.fortune_type = combinationName;
-        fr.inputData.fortune_type_description = getAvailableCombinations()[combinationName] ?? '';
+        fr.inputData.fortune_type_description =
+          getAvailableCombinations()[combinationName] ??
+          fr.fortuneProfileResult?.profile.description ??
+          '';
       } else {
         // 기본: 기본 해설만
+        applyCompatibilityFields({ profileId: 'basic' });
         const interpretations = this.fortuneInterpreter.getCategoryInterpretations(
           request,
           fr,
@@ -508,13 +522,16 @@ export class FortuneTellerService {
         );
         fr.inputData.fortune_interpretations = interpretations;
         fr.inputData.fortune_type = 'basic';
+        fr.inputData.fortune_type_description = fr.fortuneProfileResult?.profile.description ?? '';
       }
     } catch (error) {
       // 무효한 타입의 경우 기본 해설로 폴백
       console.warn('Fortune type interpretation failed, falling back to basic:', error);
+      applyCompatibilityFields({ profileId: 'basic' });
       const interpretations = this.fortuneInterpreter.getCategoryInterpretations(request, fr, 'basic');
       fr.inputData.fortune_interpretations = interpretations;
       fr.inputData.fortune_type = 'basic';
+      fr.inputData.fortune_type_description = fr.fortuneProfileResult?.profile.description ?? '';
     }
 
     return fr;

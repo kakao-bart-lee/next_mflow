@@ -1,0 +1,35 @@
+QA: G028 all 10 sasang pair combinations
+Date: 2026-03-08
+Worktree: .claude/worktrees/saju-continuation
+
+Command:
+npx tsx -e "
+import { buildLegacySasangCompatibilityInsight } from './lib/saju-core/saju/legacyCompatibility';
+const types = ['ty','sy','tu','su'] as const;
+let pass = 0, fail = 0;
+for (const a of types) {
+  for (const b of types) {
+    if (types.indexOf(a) <= types.indexOf(b)) {
+      const r = buildLegacySasangCompatibilityInsight(a, b);
+      if (r && r.text) { pass++; console.log(a+'+'+b, r.lookupKey, 'OK'); }
+      else { fail++; console.log(a+'+'+b, 'FAIL'); }
+    }
+  }
+}
+console.log('pass:', pass, 'fail:', fail);
+"
+
+Output:
+ty+ty tyty OK
+ty+sy tysy OK
+ty+tu tytu OK
+ty+su tysu OK
+sy+sy sysy OK
+sy+tu sytu OK
+sy+su sysu OK
+tu+tu tutu OK
+tu+su tusu OK
+su+su susu OK
+pass: 10 fail: 0
+
+Result: PASS (10/10)

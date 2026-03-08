@@ -1,0 +1,547 @@
+{
+  "version": 1,
+  "generatedAt": "2026-03-06T21:15:42.820Z",
+  "source": {
+    "markdownPath": "/Users/bclaw/workspace/moonlit/next_mflow/docs/explore-api-inventory.md"
+  },
+  "apis": [
+    {
+      "id": "API-1",
+      "endpoint": "POST /api/saju/analyze",
+      "method": "POST",
+      "path": "/api/saju/analyze",
+      "responseType": "FortuneResponse",
+      "topic": "동양 명리학의 근간 — \"나는 누구인가\"",
+      "feature": "한 번의 호출로 사주의 거의 모든 고정 데이터를 가져옴. 현재 프론트에서 일주만 쓰고 나머지 대부분을 버리고 있음.",
+      "fields": [
+        {
+          "field": "sajuData.pillars.년/월/일/시",
+          "description": "4기둥 각각의 천간·지지·오행",
+          "dataNature": "🔒 고정 (출생 시 결정)"
+        },
+        {
+          "field": "sajuData.pillars.*.십이운성",
+          "description": "각 기둥의 에너지 단계 (장생~양)",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "sajuData.pillars.*.신살[]",
+          "description": "도화살, 역마살 등 특수 기운",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "sajuData.pillars.*.지장간[]",
+          "description": "각 지지 속 숨은 천간 + 십신",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "sipsin.positions",
+          "description": "년간·월간·시간·년지·월지·일지·시지의 십신명",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "sipsin.counts",
+          "description": "비겁/식상/재성/관성/인성 분포 수치",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "sipsin.dominant_sipsin",
+          "description": "가장 강한 십신",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "sinyakSingang.strength_type",
+          "description": "신강/신약",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "sinyakSingang.strength_score",
+          "description": "강약 수치",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "sinyakSingang.element_powers",
+          "description": "목·화·토·금·수 파워 수치",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "greatFortune.periods[]",
+          "description": "대운 전체 목록 (시작·종료 나이, 천간·지지·십신)",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "greatFortune.current_period",
+          "description": "현재 대운",
+          "dataNature": "🔄 반고정 (10년 단위 변경)"
+        },
+        {
+          "field": "hyungchung",
+          "description": "삼합·천간합·삼형살·자형살·육충살·육파살·육해살",
+          "dataNature": "🔒 고정"
+        }
+      ]
+    },
+    {
+      "id": "API-2",
+      "endpoint": "POST /api/astrology/static",
+      "method": "POST",
+      "path": "/api/astrology/static",
+      "responseType": "AstrologyStaticResult",
+      "topic": "서양 점성술의 현재 — \"오늘 하늘은 어떤가\"",
+      "feature": "고정(출생 차트)과 동적(오늘/미래) 데이터가 혼합. `today`의 tags/actions/caution과 `future.days`가 완전히 미활용 상태.",
+      "fields": [
+        {
+          "field": "positions[PLANET]",
+          "description": "7행성 각각의 황경·별자리·도수·하우스",
+          "dataNature": "🔒 고정 (출생 차트)"
+        },
+        {
+          "field": "influences[PLANET]",
+          "description": "행성별 영향력 (natural/essential/positional/final score) + dignity breakdown + interpretation",
+          "dataNature": "🔒 고정 + 🔄 날짜별"
+        },
+        {
+          "field": "isDayChart",
+          "description": "주간/야간 차트 여부",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "ranking",
+          "description": "영향력 기준 행성 순위",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "assumptions",
+          "description": "계산 모드/시간 정확도/입력 등급 메타",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "generatedAt",
+          "description": "결과 생성 시각",
+          "dataNature": "🔄 호출 시점 기준"
+        },
+        {
+          "field": "today.headline",
+          "description": "오늘의 한 줄 제목",
+          "dataNature": "🔄 매일 변경"
+        },
+        {
+          "field": "today.summary",
+          "description": "오늘의 요약",
+          "dataNature": "🔄 매일 변경"
+        },
+        {
+          "field": "today.dominantPlanet",
+          "description": "오늘의 지배 행성",
+          "dataNature": "🔄 매일 변경"
+        },
+        {
+          "field": "today.tags[]",
+          "description": "오늘의 테마 태그",
+          "dataNature": "🔄 매일 변경"
+        },
+        {
+          "field": "today.actions[]",
+          "description": "오늘의 추천 행동",
+          "dataNature": "🔄 매일 변경"
+        },
+        {
+          "field": "today.caution",
+          "description": "오늘의 주의사항",
+          "dataNature": "🔄 매일 변경"
+        },
+        {
+          "field": "future.days[]",
+          "description": "향후 7일: date·dominantPlanet·theme·focus·intensity",
+          "dataNature": "🔄 매일 변경"
+        },
+        {
+          "field": "observationTimeUtc",
+          "description": "천문 계산 기준 시각",
+          "dataNature": "🔄 호출 시점/targetDate 기준"
+        }
+      ]
+    },
+    {
+      "id": "API-3",
+      "endpoint": "POST /api/astrology/chart-core",
+      "method": "POST",
+      "path": "/api/astrology/chart-core",
+      "responseType": "ChartCoreResponse",
+      "topic": "출생 차트의 뼈대 — \"나의 하늘 지도\"",
+      "feature": "출생 차트 시각화(원형 차트, 하우스 차트)의 핵심 데이터. ASC/MC가 현재 UI에서 누락됨.",
+      "fields": [
+        {
+          "field": "ascendant",
+          "description": "상승점 (ASC) — 별자리·도수",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "midheaven",
+          "description": "중천 (MC) — 별자리·도수",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "houses[]",
+          "description": "12하우스 경계(cusp) — 각각 도수·별자리",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "planets[PLANET]",
+          "description": "행성별 정밀 배치 — 황경·별자리·도수·하우스",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "observation_time_utc",
+          "description": "천문 계산 기준 시각",
+          "dataNature": "🔄 호출 시점 기준"
+        }
+      ]
+    },
+    {
+      "id": "API-4",
+      "endpoint": "POST /api/astrology/aspects",
+      "method": "POST",
+      "path": "/api/astrology/aspects",
+      "responseType": "AspectsResponse",
+      "topic": "행성 간의 관계 — \"내 안의 긴장과 조화\"",
+      "feature": "출생 차트의 행성 간 각도 관계. conjunction(합일)은 에너지 증폭, opposition(대립)은 긴장, trine(삼각)은 조화. applying=true면 영향 강화 중.",
+      "fields": [
+        {
+          "field": "aspects[]",
+          "description": "행성 쌍별: type(합/충/삼합/사각/육각), 각도, 허용도, applying 여부",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "observation_time_utc",
+          "description": "천문 계산 기준 시각",
+          "dataNature": "🔄 호출 시점 기준"
+        }
+      ]
+    },
+    {
+      "id": "API-5",
+      "endpoint": "POST /api/astrology/vedic-core",
+      "method": "POST",
+      "path": "/api/astrology/vedic-core",
+      "responseType": "VedicCoreResponse",
+      "topic": "베다 점성술 기초 — \"달의 영혼\"",
+      "feature": "서양 점성술과 같은 행성이지만 좌표계가 다름(~24° 차이). 낙샥트라는 27개의 달의 별자리로, 인도 점성술의 근간.",
+      "fields": [
+        {
+          "field": "ayanamsa",
+          "description": "아야남사 보정값 (서양↔베다 좌표 차이)",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "planets[PLANET]",
+          "description": "사이드리얼 좌표 기준 행성 위치 + 낙샥트라(name, pada, lord)",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "moonNakshatra",
+          "description": "달의 낙샥트라 — 베다 점성술의 핵심",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "observation_time_utc",
+          "description": "천문 계산 기준 시각",
+          "dataNature": "🔄 호출 시점 기준"
+        }
+      ]
+    },
+    {
+      "id": "API-6",
+      "endpoint": "POST /api/astrology/essential-score",
+      "method": "POST",
+      "path": "/api/astrology/essential-score",
+      "responseType": "EssentialScoreResponse",
+      "topic": "행성의 품격 — \"이 행성은 얼마나 편안한가\"",
+      "feature": "중세 점성술의 핵심 개념. 행성이 어느 별자리에 있느냐에 따라 \"자기 집\"(domicile +5)인지 \"적진\"(detriment -5)인지 결정. 행성 카드의 깊이를 크게 높일 수 있음.",
+      "fields": [
+        {
+          "field": "scores[PLANET].score",
+          "description": "전통적 품위 총점",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "scores[PLANET].dignities[]",
+          "description": "보유 품위 목록 (domicile, exaltation, triplicity 등)",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "scores[PLANET].debilities[]",
+          "description": "보유 약점 목록 (detriment, fall, peregrine 등)",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "observation_time_utc",
+          "description": "천문 계산 기준 시각",
+          "dataNature": "🔄 호출 시점 기준"
+        }
+      ]
+    },
+    {
+      "id": "API-7",
+      "endpoint": "POST /api/astrology/accidental-score",
+      "method": "POST",
+      "path": "/api/astrology/accidental-score",
+      "responseType": "AccidentalScoreResponse",
+      "topic": "행성의 상태 — \"지금 이 행성이 얼마나 활성화됐는가\"",
+      "feature": "Essential(본질적 품위)이 \"이 행성이 어떤 별자리인가\"라면, Accidental(우발적 품위)은 \"이 행성이 어떤 상황에 있는가\". 역행(retrograde), 연소(combustion) 등 상태 정보 포함.",
+      "fields": [
+        {
+          "field": "scores[PLANET].score",
+          "description": "우발적 품위 총점",
+          "dataNature": "🔒 고정 + 🔄 일부 동적"
+        },
+        {
+          "field": "scores[PLANET].factors[]",
+          "description": "영향 요인 (하우스 강도, 역행/직행, 연소, 어스펙트 등)",
+          "dataNature": "🔒 고정 + 🔄 일부 동적"
+        },
+        {
+          "field": "observation_time_utc",
+          "description": "천문 계산 기준 시각",
+          "dataNature": "🔄 호출 시점 기준"
+        }
+      ]
+    },
+    {
+      "id": "API-8",
+      "endpoint": "POST /api/astrology/hellenistic-core",
+      "method": "POST",
+      "path": "/api/astrology/hellenistic-core",
+      "responseType": "HellenisticCoreResponse",
+      "topic": "헬레니즘 점성술 — \"운명의 좌표\"",
+      "feature": "2000년 전 그리스-로마 시대의 점성술 기법. \"아라빅 파츠(Lots)\"는 특정 수학 공식으로 계산된 운명의 포인트. Lot of Fortune = 물질적 행운, Lot of Spirit = 정신적 방향.",
+      "fields": [
+        {
+          "field": "sect",
+          "description": "DAY/NIGHT (주간/야간 차트)",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "sect_scores[PLANET]",
+          "description": "행성별 sect 점수 (in_sect, above_horizon, rationale)",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "lot_of_fortune_deg/sign",
+          "description": "행운의 점 (Lot of Fortune) 위치",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "lot_of_spirit_deg/sign",
+          "description": "영혼의 점 (Lot of Spirit) 위치",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "asc_deg`, `mc_deg",
+          "description": "ASC/MC 정밀 도수",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "observation_time_utc",
+          "description": "천문 계산 기준 시각",
+          "dataNature": "🔄 호출 시점 기준"
+        }
+      ]
+    },
+    {
+      "id": "API-8b",
+      "endpoint": "fetchHellenisticProfection",
+      "method": null,
+      "path": null,
+      "responseType": "HellenisticProfectionResponse",
+      "topic": "올해의 테마 — \"지금 인생의 어느 챕터인가\"",
+      "feature": "1세=1하우스, 2세=2하우스, ... 12세=12하우스, 13세→다시 1하우스. 매년 활성화되는 인생의 \"챕터\"를 결정. 대운(사주)의 서양 버전. 매우 직관적이라 사용자에게 설명하기 쉬움.",
+      "fields": [
+        {
+          "field": "profected_house",
+          "description": "올해 활성화된 하우스 (1~12)",
+          "dataNature": "🔄 매년 변경"
+        },
+        {
+          "field": "profected_sign",
+          "description": "해당 별자리",
+          "dataNature": "🔄 매년 변경"
+        },
+        {
+          "field": "time_lord",
+          "description": "올해의 지배 행성 (Time Lord)",
+          "dataNature": "🔄 매년 변경"
+        },
+        {
+          "field": "monthly_offset",
+          "description": "월간 프로펙션 오프셋",
+          "dataNature": "🔄 매월 변경"
+        },
+        {
+          "field": "age_years",
+          "description": "현재 나이",
+          "dataNature": "🔄 매년 변경"
+        },
+        {
+          "field": "observation_time_utc",
+          "description": "천문 계산 기준 시각",
+          "dataNature": "🔄 호출 시점 기준"
+        }
+      ]
+    },
+    {
+      "id": "API-9",
+      "endpoint": "POST /api/astrology/vimshottari",
+      "method": "POST",
+      "path": "/api/astrology/vimshottari",
+      "responseType": "VimshottariResponse",
+      "topic": "인생의 대주기 — \"우주적 시간표\"",
+      "feature": "베다 점성술의 핵심 타이밍 시스템. 달의 낙샥트라를 기반으로 120년 주기를 7행성에 배분. 사주 대운(10년 단위)과 매우 유사한 개념이라 크로스시스템 비교의 핵심.",
+      "fields": [
+        {
+          "field": "currentMahaDasha",
+          "description": "현재 대주기 (lord, start~end, 6~20년 단위)",
+          "dataNature": "🔄 수년~수십 년 단위"
+        },
+        {
+          "field": "currentAntarDasha",
+          "description": "현재 소주기 (lord, start~end)",
+          "dataNature": "🔄 수개월~수년 단위"
+        },
+        {
+          "field": "currentPratyantarDasha",
+          "description": "현재 극소주기 (lord, start~end)",
+          "dataNature": "🔄 수주~수개월 단위"
+        },
+        {
+          "field": "upcoming[]",
+          "description": "다가오는 주기들",
+          "dataNature": "🔄 동적"
+        },
+        {
+          "field": "observation_time_utc",
+          "description": "천문 계산 기준 시각",
+          "dataNature": "🔄 호출 시점 기준"
+        }
+      ]
+    },
+    {
+      "id": "API-10",
+      "endpoint": "POST /api/ziwei/board",
+      "method": "POST",
+      "path": "/api/ziwei/board",
+      "responseType": "ZiweiBoardResponse",
+      "topic": "자미두수 명반 — \"별들이 그린 나의 인생 설계도\"",
+      "feature": "중국 전통 점성술 체계. 12궁이 인생의 12가지 영역(명궁=자아, 재백궁=재물, 관록궁=직업, 부처궁=배우자 등)을 담당. 사화(四化: 록·권·과·기)가 가장 중요한 해석 키. 현재 **100% 미활용**.",
+      "fields": [
+        {
+          "field": "board.soul",
+          "description": "명궁 위치",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "board.body",
+          "description": "신궁 위치",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "board.five_elements_class",
+          "description": "오행국 (금사국/수이국 등)",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "board.palaces[12]",
+          "description": "12궁 각각: 이름, 주성, 보조성, 잡요성, 밝기, 사화(록/권/과/기), 십이장생, 대한(10년 대운 범위)",
+          "dataNature": "🔒 고정"
+        }
+      ]
+    },
+    {
+      "id": "API-11",
+      "endpoint": "POST /api/ziwei/runtime-overlay",
+      "method": "POST",
+      "path": "/api/ziwei/runtime-overlay",
+      "responseType": "ZiweiRuntimeOverlayResponse",
+      "topic": "자미두수의 시간 흐름 — \"지금 어떤 궁이 활성화됐는가\"",
+      "feature": "명반(고정)에 시간의 레이어를 겹치는 것. 대한→유년→월→일→시 순으로 점점 세밀한 운세를 제공. 사주 대운, Profection, Dasha와 함께 놓으면 4중 타이밍 비교 가능.",
+      "fields": [
+        {
+          "field": "timing.decadal",
+          "description": "대한(10년 대운): 활성 궁·사화·성요",
+          "dataNature": "🔄 10년 단위"
+        },
+        {
+          "field": "timing.age",
+          "description": "소한(나이별): 활성 궁·사화·성요·nominal_age",
+          "dataNature": "🔄 매년"
+        },
+        {
+          "field": "timing.yearly",
+          "description": "유년운: 올해의 궁·사화·성요 + dec_star",
+          "dataNature": "🔄 매년"
+        },
+        {
+          "field": "timing.monthly",
+          "description": "월운: 이번 달의 궁·사화·성요",
+          "dataNature": "🔄 매월"
+        },
+        {
+          "field": "timing.daily",
+          "description": "일운: 오늘의 궁·사화·성요",
+          "dataNature": "🔄 매일"
+        },
+        {
+          "field": "timing.hourly",
+          "description": "시운: 지금의 궁·사화·성요",
+          "dataNature": "🔄 매시간"
+        }
+      ]
+    },
+    {
+      "id": "API-12",
+      "endpoint": "POST /api/saju/compatibility",
+      "method": "POST",
+      "path": "/api/saju/compatibility",
+      "responseType": "GunghapResult",
+      "topic": "두 사람의 궁합 — \"우리는 어떤 관계인가\"",
+      "feature": "2인용 분석. 별도 입력(상대방 생년월일)이 필요하므로 explore 기본 뷰가 아닌 별도 플로우 필요.",
+      "fields": [
+        {
+          "field": "total_score",
+          "description": "전체 궁합 점수·등급·설명·장단점·조언",
+          "dataNature": "🔒 고정 (2인 조합)"
+        },
+        {
+          "field": "elemental_compatibility",
+          "description": "오행 궁합 (상생/상극/동오행)",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "animals_compatibility",
+          "description": "띠 궁합 (삼합/육합/충/형/해)",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "personality_match",
+          "description": "성격 궁합 점수",
+          "dataNature": "🔒 고정"
+        },
+        {
+          "field": "fortune_match",
+          "description": "운세 궁합 점수",
+          "dataNature": "🔒 고정"
+        }
+      ]
+    },
+    {
+      "id": "API-13",
+      "endpoint": "POST /api/saju/interpret",
+      "method": "POST",
+      "path": "/api/saju/interpret",
+      "responseType": null,
+      "topic": "AI 해석 — \"사주를 자연어로 풀어주는 대화\"",
+      "feature": "**라우트가 아직 없음**. 클래스 로직만 존재. 라우트를 만들면 LLM 없이 구조화된 해석문 10세트를 즉시 제공 가능. 콘텐츠 양 대비 구현 비용이 가장 낮은 항목.",
+      "fields": []
+    }
+  ]
+}

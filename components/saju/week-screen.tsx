@@ -21,8 +21,8 @@ import {
 import { toast } from "sonner"
 import { DeepDiveSheet } from "./deep-dive-sheet"
 import { WhyThisResult } from "./why-this-result"
-import { useSaju } from "@/lib/contexts/saju-context"
-import { useSajuInterpret } from "@/lib/hooks/use-saju-interpret"
+import { useFortune } from "@/lib/contexts/fortune-context"
+import { useFortuneInterpret } from "@/lib/hooks/use-saju-interpret"
 import type { PlanetId } from "@/lib/astrology/static/types"
 import type { WeeklyFortune } from "@/lib/use-cases/interpret-saju"
 
@@ -165,7 +165,7 @@ function mapLlmToWeekData(llm: WeeklyFortune, startDate: string): WeekData {
 // =============================================================================
 
 export function WeekScreen() {
-  const { astrologyResult, birthInfo } = useSaju()
+  const { astrologyResult, birthInfo } = useFortune()
   const [journalText, setJournalText] = useState("")
   const [journalSaved, setJournalSaved] = useState(false)
   const [journalLoading, setJournalLoading] = useState(false)
@@ -186,7 +186,7 @@ export function WeekScreen() {
   const isForecast = weekMode === "forecast"
 
   // 예보 모드에서만 LLM fetch
-  const { data: llmWeekly, isLoading: weekLoading } = useSajuInterpret(
+  const { data: llmWeekly, isLoading: weekLoading } = useFortuneInterpret(
     "weekly",
     isForecast ? birthInfo : null,
     viewedWeekStartDate,

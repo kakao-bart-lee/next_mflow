@@ -26,7 +26,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(result)
   } catch (err) {
     if (err instanceof HorizonsClientError) {
-      return NextResponse.json({ error: err.message, code: err.code }, { status: err.status })
+      return NextResponse.json(
+        { error: err.message, code: err.code, details: err.details ?? null },
+        { status: err.status }
+      )
     }
     return NextResponse.json({ error: "비묘타리 다샤 데이터 조회 실패" }, { status: 500 })
   }

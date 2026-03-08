@@ -29,6 +29,14 @@ saju-core/
 │   ├── constants.ts      # Stems, branches, sipsin mappings
 │   ├── combinations.ts   # Fortune type → table mapping
 │   ├── dataLoader.ts     # JSON data loader (singleton)
+│   ├── legacyCompatibility/  # Legacy compatibility family modules
+│   │   ├── index.ts      # Barrel export (all 21 builders)
+│   │   ├── legacySpouseInsights.ts    # 7 builders: G030, G031, G024, G032, G016, G020, Y003
+│   │   ├── legacyTimingInsights.ts    # 6 builders: G001, G033, G004-G007, G034, Y004, Y001
+│   │   ├── legacyZodiacInsights.ts    # 3 builders: G019, G026, G028
+│   │   ├── legacyBasicCompatibility.ts # 5 builders: G003, G012, T010, G023, G022
+│   │   ├── legacyDataReaders.ts       # 18 reader functions (G/Y/T table lookups)
+│   │   └── legacyUtilities.ts         # 39 constants + helpers
 │   └── twelveSinsal/     # 신살 (spiritual influences)
 ├── yukim/                # 육임 divination methods
 └── data/                 # JSON lookup tables (~61MB)

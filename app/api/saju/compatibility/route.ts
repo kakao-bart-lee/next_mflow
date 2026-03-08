@@ -8,6 +8,29 @@ import {
   CompatibilityType,
   type SajuData,
 } from "@/lib/saju-core/saju/gunghap"
+import {
+  buildLegacyBedroomInsight,
+  buildLegacyFutureSpouseInsight,
+  buildLegacyIntimacyInsight,
+  buildLegacyMarriageTimingTableInsight,
+  buildLegacySpouseCoreInsight,
+  buildLegacyPartnerRoleInsight,
+  buildLegacyRelationshipTimingInsight,
+  buildLegacyMarriageFlowInsight,
+  buildLegacyLoveStyleInsight,
+  buildLegacyLoveWeakPointInsight,
+  buildLegacyDestinyCoreInsight,
+  buildLegacyOuterCompatibilityInsight,
+  buildLegacyPartnerPersonalityInsight,
+  buildLegacyTraditionalCompatibilityInsight,
+  buildLegacyTypeProfileInsight,
+  buildLegacyYearlyLoveCycleInsight,
+  buildLegacyBasicCompatibilityInsight,
+  buildLegacyDetailedCompatibilityInsight,
+  buildLegacyZodiacCompatibilityInsight,
+  buildLegacyAnimalCompatibilityInsight,
+  buildLegacySasangCompatibilityInsight,
+} from "@/lib/saju-core/saju/legacyCompatibility"
 import type { FortuneResponse } from "@/lib/saju-core"
 
 const CompatibilityRequestSchema = z.object({
@@ -82,8 +105,35 @@ export async function POST(req: NextRequest) {
     const compatType = TYPE_MAP[type] ?? CompatibilityType.GENERAL
 
     const result = gunghap.analyzeCompatibility(sajuA, sajuB, compatType)
+    const legacyBedroom = buildLegacyBedroomInsight(fortuneA)
+    const legacyIntimacy = buildLegacyIntimacyInsight(personA, fortuneA, personB, fortuneB)
+    const legacyMarriageFlow = buildLegacyMarriageFlowInsight(personA, fortuneA)
+    const legacySpouseCore = buildLegacySpouseCoreInsight(personA, fortuneA)
+    const legacyLoveStyle = buildLegacyLoveStyleInsight(personB, fortuneB)
+    const legacyLoveWeakPoint = buildLegacyLoveWeakPointInsight(fortuneA)
+    const legacyFutureSpouseFace = buildLegacyFutureSpouseInsight("G004", personA, fortuneA)
+    const legacyFutureSpousePersonality = buildLegacyFutureSpouseInsight("G005", personA, fortuneA)
+    const legacyFutureSpouseCareer = buildLegacyFutureSpouseInsight("G006", personA, fortuneA)
+    const legacyFutureSpouseRomance = buildLegacyFutureSpouseInsight("G007", personA, fortuneA)
+    const legacyMarriageTimingTable = buildLegacyMarriageTimingTableInsight(personA, fortuneA)
+    const legacyPartnerRole = buildLegacyPartnerRoleInsight(personA, fortuneA)
+    const legacyRelationshipTiming = buildLegacyRelationshipTimingInsight(personA, fortuneA)
+    const legacyDestinyCore = buildLegacyDestinyCoreInsight(personA, fortuneA, fortuneB)
+    const legacyOuterCompatibility = buildLegacyOuterCompatibilityInsight(personA, fortuneA, fortuneB)
+    const legacyPartnerPersonality = buildLegacyPartnerPersonalityInsight(personA, fortuneA, fortuneB)
+    const legacyTraditionalCompatibility = buildLegacyTraditionalCompatibilityInsight(personA, fortuneA, fortuneB)
+     const legacyTypeProfile = buildLegacyTypeProfileInsight(fortuneA)
+     const legacyYearlyLoveCycle = buildLegacyYearlyLoveCycleInsight(fortuneA)
+     const legacyBasicCompat = buildLegacyBasicCompatibilityInsight(personA, fortuneA)
+     const legacyDetailedCompat = buildLegacyDetailedCompatibilityInsight(fortuneA)
+     const legacyZodiacCompat = buildLegacyZodiacCompatibilityInsight(personA)
+     const legacyAnimalCompat = buildLegacyAnimalCompatibilityInsight(fortuneA, fortuneB)
+     const legacySasangCompat = 
+       personA.sasangConstitution && personB.sasangConstitution
+         ? buildLegacySasangCompatibilityInsight(personA.sasangConstitution, personB.sasangConstitution)
+         : null
 
-    return NextResponse.json({
+     return NextResponse.json({
       data: {
         total_score: result.total_score,
         personality_match: result.personality_match,
@@ -91,8 +141,32 @@ export async function POST(req: NextRequest) {
         health_match: result.health_match,
         wealth_match: result.wealth_match,
         career_match: result.career_match,
-        overall_interpretation: result.overall_interpretation,
-        recommendations: result.recommendations,
+        legacy_bedroom: legacyBedroom,
+        legacy_intimacy: legacyIntimacy,
+        legacy_marriage_flow: legacyMarriageFlow,
+        legacy_spouse_core: legacySpouseCore,
+        legacy_love_style: legacyLoveStyle,
+        legacy_love_weak_point: legacyLoveWeakPoint,
+        legacy_future_spouse_face: legacyFutureSpouseFace,
+        legacy_future_spouse_personality: legacyFutureSpousePersonality,
+        legacy_future_spouse_career: legacyFutureSpouseCareer,
+        legacy_future_spouse_romance: legacyFutureSpouseRomance,
+        legacy_marriage_timing_table: legacyMarriageTimingTable,
+        legacy_partner_role: legacyPartnerRole,
+        legacy_relationship_timing: legacyRelationshipTiming,
+        legacy_destiny_core: legacyDestinyCore,
+        legacy_outer_compatibility: legacyOuterCompatibility,
+        legacy_partner_personality: legacyPartnerPersonality,
+        legacy_traditional_compatibility: legacyTraditionalCompatibility,
+         legacy_type_profile: legacyTypeProfile,
+         legacy_yearly_love_cycle: legacyYearlyLoveCycle,
+         legacy_basic_compat: legacyBasicCompat,
+         legacy_detailed_compat: legacyDetailedCompat,
+         legacy_zodiac_compat: legacyZodiacCompat,
+         legacy_animal_compat: legacyAnimalCompat,
+         legacy_sasang_compat: legacySasangCompat,
+         overall_interpretation: result.overall_interpretation,
+         recommendations: result.recommendations,
       },
       userId: session?.user?.id,
     })

@@ -21,9 +21,11 @@ import Link from "next/link"
 import { CheckInChips } from "./check-in-chips"
 import { DeepDiveSheet } from "./deep-dive-sheet"
 import { WhyThisResult } from "./why-this-result"
-import { useSaju } from "@/lib/contexts/saju-context"
-import { useSajuInterpret } from "@/lib/hooks/use-saju-interpret"
+import { useFortune } from "@/lib/contexts/fortune-context"
+import { useFortuneInterpret } from "@/lib/hooks/use-saju-interpret"
 import type { FortuneResponse } from "@/lib/saju-core"
+import { PLANET_LABEL } from "@/lib/astrology/static/constants"
+import type { AstrologyStaticResult } from "@/lib/astrology/static/types"
 
 /* ─── 오행 기반 오늘의 데이터 매핑 ─── */
 
@@ -77,30 +79,64 @@ const DEFAULT_ACTIONS = [
   { id: "a2", text: "감사한 것 하나를 마음속으로 떠올려보세요" },
 ]
 
-function buildTodayDisplay(result: FortuneResponse): TodayDisplay {
-  const dayPillar = result.sajuData.pillars.일
-  const element = dayPillar.오행.천간 // "목", "화", "토", "금", "수"
+const INTENSITY_LABEL: Record<"low" | "medium" | "high", string> = {
+  low: "낮음",
+  medium: "보통",
+  high: "높음",
+}
 
-  const now = new Date()
-  const date = now.toLocaleDateString("ko-KR", {
+function formatDateLabel(dateIso?: string): string {
+  if (!dateIso) {
+    return new Date().toLocaleDateString("ko-KR", {
+      month: "long",
+      day: "numeric",
+      weekday: "short",
+    })
+  }
+  const date = new Date(`${dateIso}T00:00:00`)
+  if (Number.isNaN(date.getTime())) return dateIso
+  return date.toLocaleDateString("ko-KR", {
     month: "long",
     day: "numeric",
     weekday: "short",
   })
+}
 
+function buildTodayDisplay(
+  result: FortuneResponse,
+  astrologyResult: AstrologyStaticResult | null,
+): TodayDisplay {
+  const dayPillar = result.sajuData.pillars.일
+  const element = dayPillar.오행.천간 // "목", "화", "토", "금", "수"
   const elementInfo = ELEMENT_DATA[element] ?? ELEMENT_DATA.토
-  const actions = [
-    { id: "a1", text: "오늘의 에너지를 느끼며 하루를 시작해보세요" },
-    ...DEFAULT_ACTIONS.slice(1),
-  ]
+  const astrologyToday = astrologyResult?.today ?? null
+  const astrologyActions = (astrologyToday?.actions ?? [])
+    .map((action) => action.trim())
+    .filter((action) => action.length > 0)
+  const actions =
+    astrologyActions.length > 0
+      ? astrologyActions.slice(0, 3).map((text, idx) => ({ id: `a${idx + 1}`, text }))
+      : [
+          { id: "a1", text: "오늘의 에너지를 느끼며 하루를 시작해보세요" },
+          ...DEFAULT_ACTIONS.slice(1),
+        ]
+
+  const summary = astrologyToday?.headline?.trim() || elementInfo.summary
+  const body = astrologyToday?.summary?.trim()
+    ? `${astrologyToday.summary} 사주의 ${dayPillar.천간}${dayPillar.지지}(${element}) 흐름을 함께 참고해 주세요.`
+    : elementInfo.body
+  const tags = astrologyToday?.tags?.length
+    ? astrologyToday.tags
+    : elementInfo.tags
+  const avoid = astrologyToday?.caution?.trim() || elementInfo.avoid
 
   return {
-    date,
-    summary: elementInfo.summary,
-    tags: elementInfo.tags,
-    body: elementInfo.body,
+    date: formatDateLabel(astrologyToday?.date),
+    summary,
+    tags,
+    body,
     actions,
-    avoid: elementInfo.avoid,
+    avoid,
   }
 }
 
@@ -265,7 +301,7 @@ function RecentHistory() {
 /* ─── 메인 컴포넌트 ─── */
 
 export function TodayScreen() {
-  const { sajuResult, birthInfo, isLoading, isDemo } = useSaju()
+  const { sajuResult, astrologyResult, birthInfo, isLoading, isDemo } = useFortune()
   const [checkedActions, setCheckedActions] = useState<Set<string>>(new Set())
   const [deepDiveOpen, setDeepDiveOpen] = useState(false)
   const [aiActions, setAiActions] = useState<string[]>([])
@@ -286,11 +322,11 @@ export function TodayScreen() {
     }
   }, [])
   // LLM 동적 콘텐츠 fetch
-  const { data: llmDaily, isLoading: llmLoading, error: llmError } = useSajuInterpret("daily", birthInfo)
+  const { data: llmDaily, isLoading: llmLoading, error: llmError } = useFortuneInterpret("daily", birthInfo)
 
   const todayData = useMemo(() => {
     if (!sajuResult) return null
-    const staticData = buildTodayDisplay(sajuResult)
+    const staticData = buildTodayDisplay(sajuResult, astrologyResult)
     
     // LLM 데이터가 있으면 오버라이드
     if (llmDaily) {
@@ -305,7 +341,25 @@ export function TodayScreen() {
     }
     
     return staticData
-  }, [sajuResult, llmDaily])
+  }, [sajuResult, astrologyResult, llmDaily])
+
+  const currentGreatFortune = useMemo(() => {
+    const greatFortune = sajuResult?.greatFortune as
+      | { current_period?: { heavenly_stem?: string; earthly_branch?: string; sipsin?: string } }
+      | undefined
+    const current = greatFortune?.current_period
+    if (!current) return null
+    const stem = current.heavenly_stem ?? ""
+    const branch = current.earthly_branch ?? ""
+    const sipsin = current.sipsin?.trim()
+    if (!stem && !branch && !sipsin) return null
+    return `${stem}${branch}${sipsin ? ` · ${sipsin}` : ""}`.trim()
+  }, [sajuResult])
+
+  const tomorrowPreview = useMemo(
+    () => astrologyResult?.future.days?.[0] ?? null,
+    [astrologyResult],
+  )
 
   const toggleAction = (id: string) => {
     setCheckedActions((prev) => {
@@ -440,6 +494,49 @@ export function TodayScreen() {
                 </div>
               )}
             </section>
+
+            {todayData && (
+              <section className="mt-4 grid gap-3 sm:grid-cols-2" aria-label="오늘의 근거 요약">
+                <div className="rounded-xl border border-border/40 bg-card/60 p-4 backdrop-blur-sm">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    오늘의 기준
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-foreground">
+                    {astrologyResult
+                      ? `지배 행성: ${PLANET_LABEL[astrologyResult.today.dominantPlanet]}`
+                      : "사주 오행 중심 해석"}
+                  </p>
+                  {currentGreatFortune && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      현재 대운: {currentGreatFortune}
+                    </p>
+                  )}
+                </div>
+
+                <div className="rounded-xl border border-border/40 bg-card/60 p-4 backdrop-blur-sm">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    내일 예고
+                  </p>
+                  {tomorrowPreview ? (
+                    <>
+                      <p className="mt-2 text-sm font-medium text-foreground">
+                        {tomorrowPreview.theme}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        포커스: {tomorrowPreview.focus}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        강도: {INTENSITY_LABEL[tomorrowPreview.intensity]}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      예고 데이터가 아직 없습니다
+                    </p>
+                  )}
+                </div>
+              </section>
+            )}
 
             {/* Practice Block */}
             <section className="mt-6" aria-label="오늘의 실천">

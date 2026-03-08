@@ -1,0 +1,3 @@
+Date: 2026-03-08
+Commands: grep "findYong_" lib/saju-core/saju/fortuneCalculatorBase.ts; npx vitest run __tests__/lib/saju-core/metadata-exposure.test.ts
+Observed: findYong auxiliary keys are exposed in S014 metadata and metadata exposure tests pass.

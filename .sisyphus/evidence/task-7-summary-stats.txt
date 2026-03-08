@@ -1,0 +1,3 @@
+Date: 2026-03-08
+Commands: grep "요약 통계\|Summary Stats\|포팅됨\|미포팅\|접을 것" docs/compatibility-coverage-matrix.md
+Observed: summary statistics section is present in the coverage matrix document.

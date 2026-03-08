@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { CalendarDays, Compass, Home, Telescope } from "lucide-react"
+import { CalendarDays, Compass, FlaskConical, Home, Telescope } from "lucide-react"
 import { useLocale } from "@/lib/contexts/locale-context"
 
 const TAB_DEFS = [
@@ -10,6 +10,7 @@ const TAB_DEFS = [
   { href: "/week", key: "week" as const, icon: CalendarDays },
   { href: "/decision", key: "decision" as const, icon: Compass },
   { href: "/explore", key: "explore" as const, icon: Telescope },
+  { href: "/lab", key: "lab" as const, icon: FlaskConical },
 ]
 
 export function BottomNav() {
@@ -22,7 +23,7 @@ export function BottomNav() {
       role="navigation"
       aria-label="메인 탐색"
     >
-      <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
+      <div className="mx-auto flex h-16 max-w-lg items-center justify-between gap-1 px-2">
         {TAB_DEFS.map(({ href, key, icon: Icon }) => {
           const isActive = pathname === href
           return (
@@ -30,7 +31,7 @@ export function BottomNav() {
               key={href}
               href={href}
               aria-current={isActive ? "page" : undefined}
-              className={`relative flex h-14 w-16 flex-col items-center justify-center gap-1 rounded-xl transition-colors ${
+              className={`relative flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl transition-colors ${
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground/50 hover:text-muted-foreground"

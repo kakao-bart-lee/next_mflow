@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { AlertCircle, ArrowRight, RotateCcw, Sparkles } from "lucide-react"
 import { DeepDiveSheet } from "./deep-dive-sheet"
 import { WhyThisResult } from "./why-this-result"
-import { useSaju } from "@/lib/contexts/saju-context"
+import { useFortune } from "@/lib/contexts/fortune-context"
 
 const QUESTIONS = [
   {
@@ -40,7 +40,7 @@ const QUESTIONS = [
 type Step = "input" | "questions" | "result"
 
 export function DecisionHelper() {
-  const { birthInfo } = useSaju()
+  const { birthInfo } = useFortune()
   const [step, setStep] = useState<Step>("input")
   const [optionA, setOptionA] = useState("")
   const [optionB, setOptionB] = useState("")

@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from "react"
 import type { BirthInfo } from "@/lib/schemas/birth-info"
 import type { DailyFortune, WeeklyFortune } from "@/lib/use-cases/interpret-saju"
-import { useSaju } from "@/lib/contexts/saju-context"
-import { DEMO_DAILY_FORTUNE } from "@/lib/contexts/saju-context"
+import { useFortune } from "@/lib/contexts/fortune-context"
+import { DEMO_DAILY_FORTUNE } from "@/lib/contexts/fortune-context"
 
 type InterpretationType = "daily" | "weekly"
 
@@ -26,12 +26,12 @@ interface UseSajuInterpretReturn<T extends InterpretationType> {
  * 같은 birthInfo + type 조합에 대해 중복 fetch를 방지합니다.
  * 데모 모드에서는 API 호출 없이 정적 데이터를 반환합니다.
  */
-export function useSajuInterpret<T extends InterpretationType>(
+export function useFortuneInterpret<T extends InterpretationType>(
   type: T,
   birthInfo: BirthInfo | null,
   weekStartDate?: string
 ): UseSajuInterpretReturn<T> {
-  const { isDemo } = useSaju()
+  const { isDemo } = useFortune()
   const [data, setData] = useState<InterpretResult<T> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

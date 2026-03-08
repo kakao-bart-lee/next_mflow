@@ -91,7 +91,8 @@ test.describe("에러 및 그레이스풀 디그레이데이션", () => {
     expect(checkinState).not.toBeNull()
     expect(checkinState?.saved).toBe(true)
     expect(checkinState?.selected).toBe("calm")
-    await expect(page.getByText("오늘의 체크인이 저장되었어요")).toBeVisible()
+    // 모바일/데스크톱 레이아웃 중복 렌더링 방어
+    await expect(page.getByText("오늘의 체크인이 저장되었어요").first()).toBeVisible()
   })
 
   test("LLM interpret 실패 시 정적 데이터로 폴백된다", async ({ page }) => {

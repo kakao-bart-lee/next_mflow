@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useSaju } from "@/lib/contexts/saju-context"
+import { useFortune } from "@/lib/contexts/fortune-context"
 
 /**
  * Guard hook for (main) tab pages.
@@ -10,7 +10,7 @@ import { useSaju } from "@/lib/contexts/saju-context"
  * Returns `true` while still checking (show nothing), `false` when safe to render.
  */
 export function useRequireBirthInfo(): boolean {
-  const { birthInfo, isHydrated } = useSaju()
+  const { birthInfo, isHydrated } = useFortune()
   const router = useRouter()
 
   useEffect(() => {

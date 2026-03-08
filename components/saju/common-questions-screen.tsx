@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AlertCircle, Sparkles, TrendingUp, Heart, Briefcase, Activity, Calendar, Users } from "lucide-react"
-import { useSaju } from "@/lib/contexts/saju-context"
+import { useFortune } from "@/lib/contexts/fortune-context"
 import { WhyThisResult } from "./why-this-result"
 import { DeepDiveSheet } from "./deep-dive-sheet"
 import type { ElementType } from "react"
@@ -31,7 +31,7 @@ interface AnswerResult {
 }
 
 export function CommonQuestionsScreen() {
-  const { birthInfo } = useSaju()
+  const { birthInfo } = useFortune()
   const [selectedQ, setSelectedQ] = useState<string | null>(null)
   const [answers, setAnswers] = useState<Record<string, AnswerResult>>({})
   const [loading, setLoading] = useState<string | null>(null)

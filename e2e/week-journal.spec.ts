@@ -33,16 +33,17 @@ test.describe("주간 저널 플로우", () => {
   })
 
   test("저널 입력 영역이 표시된다", async ({ page }) => {
-    const journalInput = page.getByPlaceholder("30초만 적어보세요...")
-    const saveButton = page.getByRole("button", { name: "저장" })
+    // 모바일/데스크톱 레이아웃 중복 렌더링 방어
+    const journalInput = page.getByPlaceholder("30초만 적어보세요...").first()
+    const saveButton = page.getByRole("button", { name: "저장" }).first()
 
     await expect(journalInput).toBeVisible()
     await expect(saveButton).toBeDisabled()
   })
 
   test("텍스트 입력 후 저장 버튼이 활성화된다", async ({ page }) => {
-    const journalInput = page.getByPlaceholder("30초만 적어보세요...")
-    const saveButton = page.getByRole("button", { name: "저장" })
+    const journalInput = page.getByPlaceholder("30초만 적어보세요...").first()
+    const saveButton = page.getByRole("button", { name: "저장" }).first()
 
     await journalInput.fill("이번 주에는 수면 루틴을 지키고 싶다.")
 
@@ -50,8 +51,8 @@ test.describe("주간 저널 플로우", () => {
   })
 
   test("저널 저장 시 저장 확인이 표시된다", async ({ page }) => {
-    const journalInput = page.getByPlaceholder("30초만 적어보세요...")
-    const saveButton = page.getByRole("button", { name: "저장" })
+    const journalInput = page.getByPlaceholder("30초만 적어보세요...").first()
+    const saveButton = page.getByRole("button", { name: "저장" }).first()
     const requestOrResponse = Promise.race([
       page.waitForRequest((req) => req.url().includes("/api/user/journal") && req.method() === "POST"),
       page.waitForResponse((res) => res.url().includes("/api/user/journal") && res.request().method() === "POST"),

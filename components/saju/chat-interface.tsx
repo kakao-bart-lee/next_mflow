@@ -19,7 +19,7 @@ import {
   Star,
   MessageCircle,
 } from "lucide-react"
-import { useSaju } from "@/lib/contexts/saju-context"
+import { useFortune } from "@/lib/contexts/fortune-context"
 import { useDebate } from "@/lib/hooks/use-debate"
 import { DebateMessage } from "./debate-message"
 import { DebateSummaryCard } from "./debate-summary"
@@ -80,7 +80,7 @@ function SingleChatContent({
   initialPrompt,
   onActionsGenerated,
 }: SingleChatContentProps) {
-  const { birthInfo, astrologyResult, sajuResult } = useSaju()
+  const { birthInfo, astrologyResult, sajuResult } = useFortune()
   const ctxKey = ["today", "week", "decision"].includes(context) ? context : "default"
 
   const [input, setInput] = useState(initialPrompt ?? "")
@@ -268,7 +268,7 @@ function SingleChatContent({
 // ── Debate content ────────────────────────────────────────────────────────────
 
 function DebateContent() {
-  const { birthInfo } = useSaju()
+  const { birthInfo } = useFortune()
   const {
     messages,
     summary,
