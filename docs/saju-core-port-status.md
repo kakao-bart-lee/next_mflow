@@ -6,6 +6,13 @@
 
 `next_mflow`의 내장 `lib/saju-core`는 `saju-core-lib` 3.0.0 방향에 맞춰 structured profile 응답을 내도록 포팅했고, 주요 레거시 PHP 흐름 복구도 완료했다.
 
+`2026-03-08` 기준 연동 운영 고정 작업으로 아래를 추가했다.
+
+- `lib/integrations/saju-core-adapter.ts` 경유 호출 경로 적용
+- `SYNC_POLICY.md`를 upstream 정책과 동일 내용으로 동기화
+- `__tests__/lib/integrations/saju-core-adapter.parity.test.ts` parity 게이트 추가
+- 실행 체크리스트 문서 `docs/saju-core-sync-checklist.md` 추가
+
 현재 기준으로는 “동작 복구” 단계보다 “opaque한 legacy 흐름을 의미 있는 계산 단계로 재배치하는 유지보수성 개선” 단계가 더 중요하다.
 
 추가 계획은 아래 문서로 관리한다.
