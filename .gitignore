@@ -25,3 +25,4 @@ mastra-memory.db-wal
 .omx/
 .claude/worktrees/
 dogfood-output/
+.sisyphus/

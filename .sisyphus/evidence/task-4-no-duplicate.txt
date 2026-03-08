@@ -1,3 +1,0 @@
-Date: 2026-03-08
-Commands: grep -c "findYong_yongToSipsin\|findYong_yongChungan" lib/saju-core/saju/fortuneCalculatorBase.ts
-Observed: Duplicate findYong_yongToSipsin/findYong_yongChungan fields are not present.

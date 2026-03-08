@@ -1,3 +1,0 @@
-Date: 2026-03-08
-Commands: npx vitest run; npx tsc --noEmit
-Observed: Regression suite and typecheck pass after metadata enrichment.

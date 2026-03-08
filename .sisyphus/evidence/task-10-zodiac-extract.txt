@@ -1,3 +1,0 @@
-Date: 2026-03-08
-Commands: test -f lib/saju-core/saju/legacyCompatibility/legacyZodiacInsights.ts; npx vitest run __tests__/lib/saju-core/legacyGCodes.test.ts; npx tsc --noEmit
-Observed: zodiac insights module exists; related tests and typecheck pass.

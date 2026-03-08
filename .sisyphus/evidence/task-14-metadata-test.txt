@@ -1,3 +1,0 @@
-Date: 2026-03-08
-Commands: grep "findYong_usefulCode\|findYong_usefulElement\|role_profile_secondary\|role_profile_tertiary" __tests__/lib/saju-core/metadata-exposure.test.ts
-Observed: tests-after assertions for findYong metadata and secondary/tertiary profiles are present.

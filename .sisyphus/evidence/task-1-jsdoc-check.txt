@@ -1,3 +1,0 @@
-Date: 2026-03-08
-Commands: grep -c "@module" lib/saju-core/saju/yongsinDecisionTree.ts; grep -c "@module" lib/saju-core/saju/yongsinFlows.ts; grep -c "@module" lib/saju-core/saju/elementRoleProfiles.ts
-Observed: All three files contain module-level JSDoc with Source of Truth context.

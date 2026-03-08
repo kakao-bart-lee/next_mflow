@@ -1,3 +1,0 @@
-Date: 2026-03-08
-Commands: grep "legacyCompatibility/" lib/saju-core/AGENTS.md; grep "현대화 준비\|findYong\|분해 완료" docs/saju-core-maintenance-roadmap.md
-Observed: AGENTS and roadmap docs reflect decomposition and metadata work.

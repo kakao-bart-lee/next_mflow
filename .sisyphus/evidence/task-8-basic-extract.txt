@@ -1,3 +1,0 @@
-Date: 2026-03-08
-Commands: test -f lib/saju-core/saju/legacyCompatibility/legacyBasicCompatibility.ts; npx vitest run; npx tsc --noEmit
-Observed: basic compatibility module exists; full tests and typecheck pass.

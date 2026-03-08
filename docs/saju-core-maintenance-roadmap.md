@@ -226,4 +226,3 @@ Priority 1-3 완료 후 추가 정리 작업 상태:
 5. **cross-validation 불일치 보고-only 상태 명시**
    - yongsinDecisionTree.ts: 5 샘플 중 1 일치, 원인 미파악
    - 수정 미진행 (report-only, 향후 조사 대상)
-   - 문서화: `.sisyphus/notepads/yong-coverage-decomposition/learnings.md`

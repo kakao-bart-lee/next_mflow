@@ -1,3 +1,0 @@
-Date: 2026-03-08
-Commands: test -f lib/saju-core/saju/legacyCompatibility/legacyUtilities.ts; npx vitest run; npx tsc --noEmit
-Observed: utilities module exists; tests and typecheck pass.
