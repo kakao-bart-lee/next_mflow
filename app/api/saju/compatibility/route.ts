@@ -63,6 +63,8 @@ type LegacyProvenanceEntry = {
   lookupKey: string | null
 }
 
+type LegacyProvenanceMap = Record<string, LegacyProvenanceEntry>
+
 function toLegacyProvenanceEntry(
   insight: LegacyInsightLike,
   nullStatus: Exclude<LegacyProvenanceStatus, "resolved"> = "lookup_not_found",
@@ -79,6 +81,32 @@ function toLegacyProvenanceEntry(
     status: "resolved",
     sourceTable: insight.sourceTable ?? null,
     lookupKey: insight.lookupKey ?? null,
+  }
+}
+
+function toLegacyProvenanceLog(entries: LegacyProvenanceMap): {
+  totalEntries: number
+  unresolvedCount: number
+  unresolvedEntries: Array<{
+    key: string
+    status: Exclude<LegacyProvenanceStatus, "resolved">
+    sourceTable: string | null
+    lookupKey: string | null
+  }>
+} {
+  const unresolvedEntries = Object.entries(entries)
+    .filter(([, value]) => value.status !== "resolved")
+    .map(([key, value]) => ({
+      key,
+      status: value.status as Exclude<LegacyProvenanceStatus, "resolved">,
+      sourceTable: value.sourceTable,
+      lookupKey: value.lookupKey,
+    }))
+
+  return {
+    totalEntries: Object.keys(entries).length,
+    unresolvedCount: unresolvedEntries.length,
+    unresolvedEntries,
   }
 }
 
@@ -191,6 +219,17 @@ export async function POST(req: NextRequest) {
         ),
       },
     }
+    const legacyProvenanceLog = toLegacyProvenanceLog(legacyProvenance.entries)
+
+    console.info("[saju-compatibility] legacy provenance", {
+      route: "/api/saju/compatibility",
+      type,
+      userId: session?.user?.id ?? null,
+      source: legacyProvenance.source,
+      baselineSha: legacyProvenance.baselineSha,
+      adapter: legacyProvenance.adapter,
+      ...legacyProvenanceLog,
+    })
 
     return NextResponse.json({
       data: {

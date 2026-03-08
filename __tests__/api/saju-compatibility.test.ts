@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const {
@@ -96,6 +96,12 @@ function makeRequest(body: unknown): NextRequest {
 }
 
 describe("POST /api/saju/compatibility", () => {
+  const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+
+  afterAll(() => {
+    infoSpy.mockRestore();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockAuth.mockResolvedValue({ user: { id: "user-1" } });
@@ -136,6 +142,16 @@ describe("POST /api/saju/compatibility", () => {
     );
     expect(json.data.legacy_provenance?.entries?.legacy_bedroom?.status).toBe("lookup_not_found");
     expect(json.data.legacy_provenance?.entries?.legacy_sasang_compat?.status).toBe("missing_input");
+    expect(infoSpy).toHaveBeenCalledTimes(1);
+    expect(infoSpy).toHaveBeenCalledWith(
+      "[saju-compatibility] legacy provenance",
+      expect.objectContaining({
+        route: "/api/saju/compatibility",
+        source: "saju-core-lib",
+        baselineSha: "1e57848e115b2bee38149c76c63b3d4a487254d2",
+        totalEntries: 24,
+      })
+    );
     expect(mockCalculateSajuFromBirthInfo).toHaveBeenCalledTimes(2);
   });
 
