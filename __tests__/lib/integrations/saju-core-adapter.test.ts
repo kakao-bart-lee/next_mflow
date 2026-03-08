@@ -12,7 +12,7 @@ describe("saju-core adapter", () => {
     const metadata = getSajuCoreEngineMetadata();
     expect(metadata.source).toBe("saju-core-lib");
     expect(metadata.baselineSha).toBe(SAJU_CORE_BASELINE_SHA);
-    expect(SAJU_CORE_BASELINE_SHORT_SHA).toBe("6aac047");
+    expect(SAJU_CORE_BASELINE_SHORT_SHA).toBe("cdbd4c7");
   });
 
   it("normalizes unknown birth time to noon", () => {

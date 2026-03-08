@@ -94,7 +94,7 @@ parityDescribe("saju-core parity (next_mflow adapter vs saju-core-lib baseline)"
   });
 
   it("uses pinned baseline short sha", () => {
-    expect(SAJU_CORE_BASELINE_SHORT_SHA).toBe("6aac047");
+    expect(SAJU_CORE_BASELINE_SHORT_SHA).toBe("cdbd4c7");
   });
 
   for (const testCase of cases) {

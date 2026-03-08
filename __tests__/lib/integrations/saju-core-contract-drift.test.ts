@@ -4,6 +4,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import type { FortuneRequest, FortuneResponse } from "@/lib/saju-core";
 import {
+  SAJU_CORE_BASELINE_SHORT_SHA,
   calculateSajuFromBirthInfo,
   getSajuFortuneFromBirthInfo,
 } from "@/lib/integrations/saju-core-adapter";
@@ -54,58 +55,58 @@ function toRequest(input: ParityCase): FortuneRequest {
 
 const driftDescribe = driftEnabled ? describe : describe.skip;
 
-driftDescribe("saju contract drift snapshot (next_mflow vs saju-core-lib@6aac047)", () => {
-  let warnSpy: ReturnType<typeof vi.spyOn> | null = null;
+driftDescribe(
+  `saju contract drift snapshot (next_mflow vs saju-core-lib@${SAJU_CORE_BASELINE_SHORT_SHA})`,
+  () => {
+    let warnSpy: ReturnType<typeof vi.spyOn> | null = null;
 
-  beforeAll(() => {
-    warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-  });
-
-  afterAll(() => {
-    warnSpy?.mockRestore();
-  });
-
-  it("calculateSaju drift is limited to inputData.jumno", async () => {
-    const upstream = await getUpstreamService();
-    const adapterResult = calculateSajuFromBirthInfo({
-      ...coreCase,
-      isTimeUnknown: false,
+    beforeAll(() => {
+      warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     });
-    const upstreamResult = upstream.calculateSaju(toRequest(coreCase));
 
-    const adapterKeys = Object.keys(adapterResult.inputData ?? {}).sort();
-    const upstreamKeys = Object.keys(upstreamResult.inputData ?? {}).sort();
+    afterAll(() => {
+      warnSpy?.mockRestore();
+    });
 
-    const adapterOnly = adapterKeys.filter((key) => !upstreamKeys.includes(key)).sort();
-    const upstreamOnly = upstreamKeys.filter((key) => !adapterKeys.includes(key)).sort();
-
-    expect(adapterOnly).toEqual(["jumno"]);
-    expect(upstreamOnly).toEqual([]);
-  });
-
-  it("basic fortune drift is captured as known adapter-only extensions", async () => {
-    const upstream = await getUpstreamService();
-    const adapterResult = getSajuFortuneFromBirthInfo(
-      {
+    it("calculateSaju inputData keys are aligned", async () => {
+      const upstream = await getUpstreamService();
+      const adapterResult = calculateSajuFromBirthInfo({
         ...coreCase,
         isTimeUnknown: false,
-      },
-      "basic"
-    );
-    const upstreamResult = upstream.getSajuFortune(toRequest(coreCase), "basic");
+      });
+      const upstreamResult = upstream.calculateSaju(toRequest(coreCase));
 
-    expect(Boolean(adapterResult.fortuneProfileResult)).toBe(true);
-    expect(Boolean(upstreamResult.fortuneProfileResult)).toBe(false);
+      const adapterKeys = Object.keys(adapterResult.inputData ?? {}).sort();
+      const upstreamKeys = Object.keys(upstreamResult.inputData ?? {}).sort();
 
-    const adapterKeys = Object.keys(adapterResult.inputData ?? {}).sort();
-    const upstreamKeys = Object.keys(upstreamResult.inputData ?? {}).sort();
-    const adapterOnly = adapterKeys.filter((key) => !upstreamKeys.includes(key)).sort();
+      const adapterOnly = adapterKeys.filter((key) => !upstreamKeys.includes(key)).sort();
+      const upstreamOnly = upstreamKeys.filter((key) => !adapterKeys.includes(key)).sort();
 
-    expect(adapterOnly).toEqual([
-      "fortune_type_description",
-      "jumno",
-      "profile_id",
-      "theme_interpretation",
-    ]);
-  });
-});
+      expect(adapterOnly).toEqual([]);
+      expect(upstreamOnly).toEqual([]);
+    });
+
+    it("basic fortune extended keys are aligned", async () => {
+      const upstream = await getUpstreamService();
+      const adapterResult = getSajuFortuneFromBirthInfo(
+        {
+          ...coreCase,
+          isTimeUnknown: false,
+        },
+        "basic"
+      );
+      const upstreamResult = upstream.getSajuFortune(toRequest(coreCase), "basic");
+
+      expect(Boolean(adapterResult.fortuneProfileResult)).toBe(true);
+      expect(Boolean(upstreamResult.fortuneProfileResult)).toBe(true);
+
+      const adapterKeys = Object.keys(adapterResult.inputData ?? {}).sort();
+      const upstreamKeys = Object.keys(upstreamResult.inputData ?? {}).sort();
+      const adapterOnly = adapterKeys.filter((key) => !upstreamKeys.includes(key)).sort();
+      const upstreamOnly = upstreamKeys.filter((key) => !adapterKeys.includes(key)).sort();
+
+      expect(adapterOnly).toEqual([]);
+      expect(upstreamOnly).toEqual([]);
+    });
+  }
+);
