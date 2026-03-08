@@ -1,0 +1,38 @@
+[
+  {
+    "id": "compat-general-1990-1992",
+    "type": "general",
+    "personA": {
+      "birthDate": "1990-01-15",
+      "birthTime": "14:30",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "M"
+    },
+    "personB": {
+      "birthDate": "1992-08-03",
+      "birthTime": "09:10",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "F"
+    }
+  },
+  {
+    "id": "compat-love-1988-1993-midnight-edge",
+    "type": "love",
+    "personA": {
+      "birthDate": "1988-04-10",
+      "birthTime": "04:00",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "F"
+    },
+    "personB": {
+      "birthDate": "1993-10-09",
+      "birthTime": "00:30",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "M"
+    }
+  }
+]

@@ -11,6 +11,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:saju-parity": "vitest run __tests__/lib/integrations/saju-core-adapter.parity.test.ts",
+    "test:saju-sync": "pnpm exec tsc --noEmit && pnpm exec vitest run __tests__/lib/integrations/saju-core-adapter.boundary.test.ts __tests__/lib/integrations/saju-core-adapter.test.ts __tests__/lib/integrations/saju-core-adapter.parity.test.ts __tests__/lib/integrations/saju-core-compatibility.parity.test.ts __tests__/lib/integrations/saju-core-contract-drift.test.ts __tests__/api/saju-interpret.test.ts __tests__/api/saju-compatibility.test.ts __tests__/lib/use-cases/analyze-saju.test.ts",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "db:generate": "prisma generate",
