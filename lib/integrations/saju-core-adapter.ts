@@ -6,7 +6,7 @@ import type { BirthInfo } from "@/lib/schemas/birth-info";
  * 기준 저장소 고정값.
  * 포팅 커밋은 반드시 이 SHA를 메시지에 남긴다.
  */
-export const SAJU_CORE_BASELINE_SHA = "cdbd4c77147395d1fc757a6069635ae3633c8ed1";
+export const SAJU_CORE_BASELINE_SHA = "1e57848e115b2bee38149c76c63b3d4a487254d2";
 export const SAJU_CORE_BASELINE_SHORT_SHA = SAJU_CORE_BASELINE_SHA.slice(0, 7);
 
 export interface SajuCoreEngineMetadata {
