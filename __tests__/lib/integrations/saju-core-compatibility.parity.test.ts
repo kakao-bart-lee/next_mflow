@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { pathToFileURL } from "node:url";
 import {
-  assertSajuSyncPreconditions,
+  getSajuSyncPreconditionStatus,
   getRequiredArtifactPath,
 } from "../../../scripts/saju-sync-preconditions";
 import type { BirthInfo } from "@/lib/schemas/birth-info";
@@ -48,9 +48,10 @@ const TYPE_MAP: Record<Case["type"], CompatibilityType> = {
 };
 
 const cases = casesJson as Case[];
-const preconditions = assertSajuSyncPreconditions(["facade-dist", "gunghap-dist"]);
+const preconditions = getSajuSyncPreconditionStatus(["facade-dist", "gunghap-dist"]);
 const upstreamFacadePath = getRequiredArtifactPath(preconditions, "facade-dist");
 const upstreamGunghapPath = getRequiredArtifactPath(preconditions, "gunghap-dist");
+const parityDescribe = preconditions.missing.length === 0 ? describe : describe.skip;
 
 let upstreamFacade: UpstreamFacadeService | null = null;
 let UpstreamGunghapAnalyzer: (new () => UpstreamGunghapAnalyzerType) | null = null;
@@ -88,7 +89,7 @@ function toGunghapSajuData(fortune: FortuneResponse): SajuData {
   };
 }
 
-describe("saju compatibility parity (next_mflow vs saju-core-lib baseline)", () => {
+parityDescribe("saju compatibility parity (next_mflow vs saju-core-lib baseline)", () => {
   for (const testCase of cases) {
     it(`compatibility parity: ${testCase.id}`, async () => {
       const { facade, GunghapAnalyzerClass } = await loadUpstreamModules();

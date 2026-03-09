@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { pathToFileURL } from "node:url";
 import {
-  assertSajuSyncPreconditions,
+  getSajuSyncPreconditionStatus,
   getRequiredArtifactPath,
 } from "../../../scripts/saju-sync-preconditions";
 import type { FortuneRequest, FortuneResponse } from "@/lib/saju-core";
@@ -26,8 +26,9 @@ type UpstreamService = {
 };
 
 const cases = parityCases as ParityCase[];
-const preconditions = assertSajuSyncPreconditions(["facade-dist"]);
+const preconditions = getSajuSyncPreconditionStatus(["facade-dist"]);
 const upstreamFacadePath = getRequiredArtifactPath(preconditions, "facade-dist");
+const parityDescribe = preconditions.missing.length === 0 ? describe : describe.skip;
 
 let upstreamService: UpstreamService | null = null;
 
@@ -79,7 +80,7 @@ function normalizeCoreFortune(result: FortuneResponse): unknown {
   };
 }
 
-describe("saju-core parity (next_mflow adapter vs saju-core-lib baseline)", () => {
+parityDescribe("saju-core parity (next_mflow adapter vs saju-core-lib baseline)", () => {
   let warnSpy: ReturnType<typeof vi.spyOn> | null = null;
 
   beforeAll(() => {

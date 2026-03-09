@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { pathToFileURL } from "node:url";
 import {
-  assertSajuSyncPreconditions,
+  getSajuSyncPreconditionStatus,
   getRequiredArtifactPath,
 } from "../../../scripts/saju-sync-preconditions";
 import type { FortuneRequest, FortuneResponse } from "@/lib/saju-core";
@@ -26,8 +26,9 @@ type UpstreamService = {
 };
 
 const coreCase = (parityCases as ParityCase[])[0];
-const preconditions = assertSajuSyncPreconditions(["facade-dist"]);
+const preconditions = getSajuSyncPreconditionStatus(["facade-dist"]);
 const upstreamFacadePath = getRequiredArtifactPath(preconditions, "facade-dist");
+const driftDescribe = preconditions.missing.length === 0 ? describe : describe.skip;
 
 let upstreamService: UpstreamService | null = null;
 
@@ -52,7 +53,7 @@ function toRequest(input: ParityCase): FortuneRequest {
   };
 }
 
-describe(
+driftDescribe(
   `saju contract drift snapshot (next_mflow vs saju-core-lib@${SAJU_CORE_BASELINE_SHORT_SHA})`,
   () => {
     let warnSpy: ReturnType<typeof vi.spyOn> | null = null;
