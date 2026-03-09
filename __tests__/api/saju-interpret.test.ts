@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { NextRequest } from "next/server"
 
-const { mockAuth, mockCalculateSaju, mockInterpretSaju } = vi.hoisted(() => ({
+const { mockAuth, mockCalculateSajuFromBirthInfo, mockInterpretSaju } = vi.hoisted(() => ({
   mockAuth: vi.fn(),
-  mockCalculateSaju: vi.fn(),
+  mockCalculateSajuFromBirthInfo: vi.fn(),
   mockInterpretSaju: vi.fn(),
 }))
 
@@ -11,13 +11,9 @@ vi.mock("@/lib/auth", () => ({
   auth: mockAuth,
 }))
 
-vi.mock("@/lib/saju-core/facade", () => {
-  class FortuneTellerService {
-    calculateSaju = mockCalculateSaju
-  }
-
-  return { FortuneTellerService }
-})
+vi.mock("@/lib/integrations/saju-core-adapter", () => ({
+  calculateSajuFromBirthInfo: mockCalculateSajuFromBirthInfo,
+}))
 
 vi.mock("@/lib/use-cases/interpret-saju", () => ({
   interpretSaju: mockInterpretSaju,
@@ -68,7 +64,7 @@ describe("POST /api/saju/interpret", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockAuth.mockResolvedValue({ user: { id: "test-user" } })
-    mockCalculateSaju.mockReturnValue(MOCK_FORTUNE_RESPONSE)
+    mockCalculateSajuFromBirthInfo.mockReturnValue(MOCK_FORTUNE_RESPONSE)
   })
 
   it("POST with valid daily request returns 200 with daily data", async () => {

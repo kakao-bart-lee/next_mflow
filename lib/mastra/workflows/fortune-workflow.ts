@@ -1,7 +1,7 @@
-import { FortuneTellerService } from "@/lib/saju-core/facade"
 import { calculateAstrologyWithOptions } from "@/lib/astrology/static/calculator"
 import { analyzeZiweiBoard } from "@/lib/use-cases/analyze-ziwei"
 import type { BirthInfo } from "@/lib/schemas/birth-info"
+import { calculateSajuFromBirthInfo } from "@/lib/integrations/saju-core-adapter"
 import {
   classifyIntentByKeywords,
   ContextBundleSchemas,
@@ -74,18 +74,7 @@ async function fetchSajuData(
   input: FortuneWorkflowInput,
   bundleId: ContextBundleId
 ): Promise<Record<string, unknown>> {
-  const service = new FortuneTellerService()
-  const birthTime = input.birthInfo.isTimeUnknown ? "12:00" : (input.birthInfo.birthTime ?? "12:00")
-  
-  const sajuResult = service.calculateSaju(
-    {
-      birthDate: input.birthInfo.birthDate,
-      birthTime,
-      gender: input.birthInfo.gender,
-      timezone: input.birthInfo.timezone,
-    },
-    input.currentAge
-  )
+  const sajuResult = calculateSajuFromBirthInfo(input.birthInfo, input.currentAge)
 
   const bundle = ContextBundleSchemas[bundleId]
   const filteredData: Record<string, unknown> = {}

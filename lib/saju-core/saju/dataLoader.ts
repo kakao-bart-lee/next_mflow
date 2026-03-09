@@ -10,14 +10,18 @@ import { readFileSync, existsSync } from 'fs';
  * Get the default data path, handling both ESM and CJS environments.
  */
 function getDefaultDataPath(): string {
+  const dirnamePaths =
+    typeof __dirname === 'string'
+      ? [join(__dirname, '..', 'data'), join(__dirname, '..', '..', 'data')]
+      : [];
+
   const possiblePaths = [
     join(process.cwd(), 'lib', 'saju-core', 'data'),
     join(process.cwd(), 'data'),
     join(process.cwd(), 'dist', 'data'),
     join(process.cwd(), 'dist', 'esm', 'data'),
     join(process.cwd(), 'dist', 'cjs', 'data'),
-    join(__dirname, '..', 'data'),
-    join(__dirname, '..', '..', 'data'),
+    ...dirnamePaths,
   ];
 
   for (const path of possiblePaths) {

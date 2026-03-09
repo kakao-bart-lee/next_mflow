@@ -1,0 +1,30 @@
+[
+  {
+    "id": "core-baseline-1990-01-15",
+    "birthDate": "1990-01-15",
+    "birthTime": "14:30",
+    "gender": "M",
+    "timezone": "Asia/Seoul"
+  },
+  {
+    "id": "midnight-boundary-1993-10-08-2330",
+    "birthDate": "1993-10-08",
+    "birthTime": "23:30",
+    "gender": "M",
+    "timezone": "Asia/Seoul"
+  },
+  {
+    "id": "midnight-boundary-1993-10-09-0030",
+    "birthDate": "1993-10-09",
+    "birthTime": "00:30",
+    "gender": "M",
+    "timezone": "Asia/Seoul"
+  },
+  {
+    "id": "female-case-1988-04-10",
+    "birthDate": "1988-04-10",
+    "birthTime": "04:00",
+    "gender": "F",
+    "timezone": "Asia/Seoul"
+  }
+]

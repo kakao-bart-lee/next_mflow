@@ -19,6 +19,14 @@ const TYPE_LABELS: Record<CompatibilityType, string> = {
   friendship: "우정",
 }
 
+type LegacyProvenanceStatus = "resolved" | "lookup_not_found" | "missing_input"
+
+type LegacyProvenanceEntry = {
+  status: LegacyProvenanceStatus
+  sourceTable: string | null
+  lookupKey: string | null
+}
+
 interface CompatibilityResult {
   total_score: { score: number; grade: string; description: string; strengths: string[]; weaknesses: string[]; advice: string[] }
   personality_match: { score: number; description: string }
@@ -226,6 +234,12 @@ interface CompatibilityResult {
     lookupKey: string
     text: string
   } | null
+  legacy_provenance?: {
+    source: string
+    baselineSha: string
+    adapter: string
+    entries: Record<string, LegacyProvenanceEntry>
+  } | null
   overall_interpretation: string
   recommendations: string[]
 }
@@ -246,6 +260,13 @@ export function CompatibilityScreen() {
   const [error, setError] = useState<string | null>(null)
   const [deepDiveOpen, setDeepDiveOpen] = useState(false)
   const canSubmit = partnerDate.length === 10 && birthInfo
+
+  const legacyProvenanceEntries = result?.legacy_provenance?.entries
+    ? Object.entries(result.legacy_provenance.entries)
+    : []
+  const unresolvedLegacyEntries = legacyProvenanceEntries.filter(
+    ([, entry]) => entry.status !== "resolved"
+  )
 
   const handleAnalyze = async () => {
     if (!birthInfo || !partnerDate) return
@@ -947,6 +968,38 @@ export function CompatibilityScreen() {
                       {result.legacy_sasang_compat.text}
                     </p>
                   </div>
+                ) : null}
+
+                {result.legacy_provenance ? (
+                  <details className="rounded-xl border border-border bg-card p-5">
+                    <summary className="cursor-pointer text-sm font-semibold text-foreground">
+                      운영 로그(legacy provenance) 보기
+                    </summary>
+                    <div className="mt-4 space-y-3 text-xs text-muted-foreground">
+                      <p>
+                        source: {result.legacy_provenance.source} · baseline:{" "}
+                        {result.legacy_provenance.baselineSha.slice(0, 7)} · adapter:{" "}
+                        {result.legacy_provenance.adapter}
+                      </p>
+                      <p>
+                        entries: {legacyProvenanceEntries.length} · unresolved:{" "}
+                        {unresolvedLegacyEntries.length}
+                      </p>
+                      {unresolvedLegacyEntries.length > 0 ? (
+                        <div className="space-y-2 rounded-lg border border-border/80 bg-background/60 p-3">
+                          {unresolvedLegacyEntries.map(([key, entry]) => (
+                            <div key={key} className="rounded border border-border/70 px-2 py-1">
+                              <span className="font-medium text-foreground">{key}</span> · status{" "}
+                              {entry.status} · table {entry.sourceTable ?? "-"} · key{" "}
+                              {entry.lookupKey ?? "-"}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p>모든 legacy 항목이 resolved 상태입니다.</p>
+                      )}
+                    </div>
+                  </details>
                 ) : null}
 
                 {/* 강점/약점/조언 */}

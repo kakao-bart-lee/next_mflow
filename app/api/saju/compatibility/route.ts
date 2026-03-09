@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { BirthInfoSchema } from "@/lib/schemas/birth-info"
-import { FortuneTellerService } from "@/lib/saju-core/facade"
 import {
   GunghapAnalyzer,
   CompatibilityType,
@@ -32,6 +31,10 @@ import {
   buildLegacySasangCompatibilityInsight,
 } from "@/lib/saju-core/saju/legacyCompatibility"
 import type { FortuneResponse } from "@/lib/saju-core"
+import {
+  calculateSajuFromBirthInfo,
+  getSajuCoreEngineMetadata,
+} from "@/lib/integrations/saju-core-adapter"
 
 const CompatibilityRequestSchema = z.object({
   personA: BirthInfoSchema,
@@ -47,6 +50,66 @@ const TYPE_MAP: Record<string, CompatibilityType> = {
   general: CompatibilityType.GENERAL,
 }
 
+type LegacyInsightLike = {
+  sourceTable?: string | null
+  lookupKey?: string | null
+} | null
+
+type LegacyProvenanceStatus = "resolved" | "lookup_not_found" | "missing_input"
+
+type LegacyProvenanceEntry = {
+  status: LegacyProvenanceStatus
+  sourceTable: string | null
+  lookupKey: string | null
+}
+
+type LegacyProvenanceMap = Record<string, LegacyProvenanceEntry>
+
+function toLegacyProvenanceEntry(
+  insight: LegacyInsightLike,
+  nullStatus: Exclude<LegacyProvenanceStatus, "resolved"> = "lookup_not_found",
+): LegacyProvenanceEntry {
+  if (!insight) {
+    return {
+      status: nullStatus,
+      sourceTable: null,
+      lookupKey: null,
+    }
+  }
+
+  return {
+    status: "resolved",
+    sourceTable: insight.sourceTable ?? null,
+    lookupKey: insight.lookupKey ?? null,
+  }
+}
+
+function toLegacyProvenanceLog(entries: LegacyProvenanceMap): {
+  totalEntries: number
+  unresolvedCount: number
+  unresolvedEntries: Array<{
+    key: string
+    status: Exclude<LegacyProvenanceStatus, "resolved">
+    sourceTable: string | null
+    lookupKey: string | null
+  }>
+} {
+  const unresolvedEntries = Object.entries(entries)
+    .filter(([, value]) => value.status !== "resolved")
+    .map(([key, value]) => ({
+      key,
+      status: value.status as Exclude<LegacyProvenanceStatus, "resolved">,
+      sourceTable: value.sourceTable,
+      lookupKey: value.lookupKey,
+    }))
+
+  return {
+    totalEntries: Object.keys(entries).length,
+    unresolvedCount: unresolvedEntries.length,
+    unresolvedEntries,
+  }
+}
+
 /** FortuneResponse.sajuData.pillars → GunghapAnalyzer.SajuData */
 function toGunghapSajuData(fortune: FortuneResponse): SajuData {
   const p = fortune.sajuData.pillars
@@ -60,7 +123,6 @@ function toGunghapSajuData(fortune: FortuneResponse): SajuData {
   }
 }
 
-const service = new FortuneTellerService()
 const gunghap = new GunghapAnalyzer()
 
 export async function POST(req: NextRequest) {
@@ -85,19 +147,8 @@ export async function POST(req: NextRequest) {
 
   try {
     // 양쪽 사주 계산
-    const fortuneA = service.calculateSaju({
-      birthDate: personA.birthDate,
-      birthTime: personA.isTimeUnknown ? "12:00" : (personA.birthTime ?? "12:00"),
-      gender: personA.gender,
-      timezone: personA.timezone,
-    })
-
-    const fortuneB = service.calculateSaju({
-      birthDate: personB.birthDate,
-      birthTime: personB.isTimeUnknown ? "12:00" : (personB.birthTime ?? "12:00"),
-      gender: personB.gender,
-      timezone: personB.timezone,
-    })
+    const fortuneA = calculateSajuFromBirthInfo(personA)
+    const fortuneB = calculateSajuFromBirthInfo(personB)
 
     // 궁합 분석
     const sajuA = toGunghapSajuData(fortuneA)
@@ -122,18 +173,65 @@ export async function POST(req: NextRequest) {
     const legacyOuterCompatibility = buildLegacyOuterCompatibilityInsight(personA, fortuneA, fortuneB)
     const legacyPartnerPersonality = buildLegacyPartnerPersonalityInsight(personA, fortuneA, fortuneB)
     const legacyTraditionalCompatibility = buildLegacyTraditionalCompatibilityInsight(personA, fortuneA, fortuneB)
-     const legacyTypeProfile = buildLegacyTypeProfileInsight(fortuneA)
-     const legacyYearlyLoveCycle = buildLegacyYearlyLoveCycleInsight(fortuneA)
-     const legacyBasicCompat = buildLegacyBasicCompatibilityInsight(personA, fortuneA)
-     const legacyDetailedCompat = buildLegacyDetailedCompatibilityInsight(fortuneA)
-     const legacyZodiacCompat = buildLegacyZodiacCompatibilityInsight(personA)
-     const legacyAnimalCompat = buildLegacyAnimalCompatibilityInsight(fortuneA, fortuneB)
-     const legacySasangCompat = 
-       personA.sasangConstitution && personB.sasangConstitution
-         ? buildLegacySasangCompatibilityInsight(personA.sasangConstitution, personB.sasangConstitution)
-         : null
+    const legacyTypeProfile = buildLegacyTypeProfileInsight(fortuneA)
+    const legacyYearlyLoveCycle = buildLegacyYearlyLoveCycleInsight(fortuneA)
+    const legacyBasicCompat = buildLegacyBasicCompatibilityInsight(personA, fortuneA)
+    const legacyDetailedCompat = buildLegacyDetailedCompatibilityInsight(fortuneA)
+    const legacyZodiacCompat = buildLegacyZodiacCompatibilityInsight(personA)
+    const legacyAnimalCompat = buildLegacyAnimalCompatibilityInsight(fortuneA, fortuneB)
+    const hasSasangInput = Boolean(personA.sasangConstitution && personB.sasangConstitution)
+    const legacySasangCompat = hasSasangInput
+      ? buildLegacySasangCompatibilityInsight(personA.sasangConstitution, personB.sasangConstitution)
+      : null
+    const engineMetadata = getSajuCoreEngineMetadata()
 
-     return NextResponse.json({
+    const legacyProvenance = {
+      source: engineMetadata.source,
+      baselineSha: engineMetadata.baselineSha,
+      adapter: engineMetadata.adapter,
+      entries: {
+        legacy_bedroom: toLegacyProvenanceEntry(legacyBedroom),
+        legacy_intimacy: toLegacyProvenanceEntry(legacyIntimacy),
+        legacy_marriage_flow: toLegacyProvenanceEntry(legacyMarriageFlow),
+        legacy_spouse_core: toLegacyProvenanceEntry(legacySpouseCore),
+        legacy_love_style: toLegacyProvenanceEntry(legacyLoveStyle),
+        legacy_love_weak_point: toLegacyProvenanceEntry(legacyLoveWeakPoint),
+        legacy_future_spouse_face: toLegacyProvenanceEntry(legacyFutureSpouseFace),
+        legacy_future_spouse_personality: toLegacyProvenanceEntry(legacyFutureSpousePersonality),
+        legacy_future_spouse_career: toLegacyProvenanceEntry(legacyFutureSpouseCareer),
+        legacy_future_spouse_romance: toLegacyProvenanceEntry(legacyFutureSpouseRomance),
+        legacy_marriage_timing_table: toLegacyProvenanceEntry(legacyMarriageTimingTable),
+        legacy_partner_role: toLegacyProvenanceEntry(legacyPartnerRole),
+        legacy_relationship_timing: toLegacyProvenanceEntry(legacyRelationshipTiming),
+        legacy_destiny_core: toLegacyProvenanceEntry(legacyDestinyCore),
+        legacy_outer_compatibility: toLegacyProvenanceEntry(legacyOuterCompatibility),
+        legacy_partner_personality: toLegacyProvenanceEntry(legacyPartnerPersonality),
+        legacy_traditional_compatibility: toLegacyProvenanceEntry(legacyTraditionalCompatibility),
+        legacy_type_profile: toLegacyProvenanceEntry(legacyTypeProfile),
+        legacy_yearly_love_cycle: toLegacyProvenanceEntry(legacyYearlyLoveCycle),
+        legacy_basic_compat: toLegacyProvenanceEntry(legacyBasicCompat),
+        legacy_detailed_compat: toLegacyProvenanceEntry(legacyDetailedCompat),
+        legacy_zodiac_compat: toLegacyProvenanceEntry(legacyZodiacCompat),
+        legacy_animal_compat: toLegacyProvenanceEntry(legacyAnimalCompat),
+        legacy_sasang_compat: toLegacyProvenanceEntry(
+          legacySasangCompat,
+          hasSasangInput ? "lookup_not_found" : "missing_input",
+        ),
+      },
+    }
+    const legacyProvenanceLog = toLegacyProvenanceLog(legacyProvenance.entries)
+
+    console.info("[saju-compatibility] legacy provenance", {
+      route: "/api/saju/compatibility",
+      type,
+      userId: session?.user?.id ?? null,
+      source: legacyProvenance.source,
+      baselineSha: legacyProvenance.baselineSha,
+      adapter: legacyProvenance.adapter,
+      ...legacyProvenanceLog,
+    })
+
+    return NextResponse.json({
       data: {
         total_score: result.total_score,
         personality_match: result.personality_match,
@@ -161,12 +259,13 @@ export async function POST(req: NextRequest) {
          legacy_type_profile: legacyTypeProfile,
          legacy_yearly_love_cycle: legacyYearlyLoveCycle,
          legacy_basic_compat: legacyBasicCompat,
-         legacy_detailed_compat: legacyDetailedCompat,
-         legacy_zodiac_compat: legacyZodiacCompat,
-         legacy_animal_compat: legacyAnimalCompat,
-         legacy_sasang_compat: legacySasangCompat,
-         overall_interpretation: result.overall_interpretation,
-         recommendations: result.recommendations,
+        legacy_detailed_compat: legacyDetailedCompat,
+        legacy_zodiac_compat: legacyZodiacCompat,
+        legacy_animal_compat: legacyAnimalCompat,
+        legacy_sasang_compat: legacySasangCompat,
+        legacy_provenance: legacyProvenance,
+        overall_interpretation: result.overall_interpretation,
+        recommendations: result.recommendations,
       },
       userId: session?.user?.id,
     })

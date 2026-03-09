@@ -1,5 +1,6 @@
-import { FortuneTellerService } from "@/lib/saju-core/facade";
+import type { FortuneResponse } from "@/lib/saju-core";
 import type { BirthInfo } from "@/lib/schemas/birth-info";
+import { getSajuFortuneFromBirthInfo } from "@/lib/integrations/saju-core-adapter";
 import {
   consumeCredit,
   isCreditEnabled,
@@ -7,10 +8,8 @@ import {
 } from "@/lib/credit-service";
 
 export type AnalyzeSajuResult =
-  | { success: true; data: ReturnType<FortuneTellerService["calculateSaju"]> }
+  | { success: true; data: FortuneResponse }
   | { success: false; error: string; code: string; status: number };
-
-const service = new FortuneTellerService();
 
 export async function analyzeSaju(
   birthInfo: BirthInfo,
@@ -18,20 +17,9 @@ export async function analyzeSaju(
   currentAge?: number
 ): Promise<AnalyzeSajuResult> {
   // 계산 먼저 — 실패 시 크레딧 차감 안 함
-  let data: ReturnType<FortuneTellerService["calculateSaju"]>;
+  let data: FortuneResponse;
   try {
-    // 시간 미상일 경우 정오(12:00)로 대체 — FortuneRequest는 string 타입 필수
-    const birthTime = birthInfo.isTimeUnknown ? "12:00" : (birthInfo.birthTime ?? "12:00");
-    data = service.getSajuFortune(
-      {
-        birthDate: birthInfo.birthDate,
-        birthTime,
-        gender: birthInfo.gender,
-        timezone: birthInfo.timezone,
-      },
-      "basic",
-      currentAge
-    );
+    data = getSajuFortuneFromBirthInfo(birthInfo, "basic", currentAge);
   } catch (err) {
     return {
       success: false,

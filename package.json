@@ -10,12 +10,18 @@
     "lint": "eslint .",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:saju-parity": "vitest run __tests__/lib/integrations/saju-core-adapter.parity.test.ts",
+    "saju:sync:diff": "tsx scripts/generate-saju-sync-diff-report.ts",
+    "test:saju-sync": "pnpm exec tsc --noEmit && pnpm exec tsx scripts/run-saju-sync-gate.ts",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "test:saju-sync:vitest": "pnpm exec vitest run __tests__/lib/integrations/saju-core-adapter.boundary.test.ts __tests__/lib/integrations/saju-core-adapter.test.ts __tests__/lib/integrations/saju-core-adapter.parity.test.ts __tests__/lib/integrations/saju-core-compatibility.parity.test.ts __tests__/lib/integrations/saju-core-contract-drift.test.ts __tests__/lib/integrations/saju-core-legacy-gcodes.parity.test.ts __tests__/api/saju-interpret.test.ts __tests__/api/saju-compatibility.test.ts __tests__/lib/use-cases/analyze-saju.test.ts",
+    "gate:saju-domain": "pnpm run test:saju-sync && pnpm run saju:sync:diff",
+    "gate:platform-build": "pnpm run build"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.37",

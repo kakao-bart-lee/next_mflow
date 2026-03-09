@@ -6,6 +6,20 @@
 
 `next_mflow`의 내장 `lib/saju-core`는 `saju-core-lib` 3.0.0 방향에 맞춰 structured profile 응답을 내도록 포팅했고, 주요 레거시 PHP 흐름 복구도 완료했다.
 
+`2026-03-08` 기준 연동 운영 고정 작업으로 아래를 추가했다.
+
+- `lib/integrations/saju-core-adapter.ts` 경유 호출 경로 적용
+- `SYNC_POLICY.md`를 upstream 정책과 동일 내용으로 동기화
+- `__tests__/lib/integrations/saju-core-adapter.parity.test.ts` parity 게이트 추가
+- 실행 체크리스트 문서 `docs/saju-core-sync-checklist.md` 추가
+- 계약 정렬 문서 `docs/saju-core-contract-alignment.md` 추가
+- compatibility parity 게이트 `__tests__/lib/integrations/saju-core-compatibility.parity.test.ts` 추가
+- adapter boundary 게이트 `__tests__/lib/integrations/saju-core-adapter.boundary.test.ts` 추가
+- upstream 승격 제안서 `docs/saju-core-upstream-extension-proposal.md` 추가
+- upstream 확장 계약 승격/legacy 분해 반영(`saju-core-lib@1e57848`) 및 drift 0 정렬 완료
+- compatibility API `legacy_provenance` 표준 메타데이터(`status/sourceTable/lookupKey + baselineSha`) 반영
+- drift 자동 리포트 스크립트 `pnpm run saju:sync:diff` 및 산출물 `docs/generated/saju-sync-diff-report.{md,json}` 추가
+
 현재 기준으로는 “동작 복구” 단계보다 “opaque한 legacy 흐름을 의미 있는 계산 단계로 재배치하는 유지보수성 개선” 단계가 더 중요하다.
 
 추가 계획은 아래 문서로 관리한다.

@@ -1,0 +1,92 @@
+[
+  {
+    "id": "compat-general-1990-1992",
+    "type": "general",
+    "personA": {
+      "birthDate": "1990-01-15",
+      "birthTime": "14:30",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "M"
+    },
+    "personB": {
+      "birthDate": "1992-08-03",
+      "birthTime": "09:10",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "F"
+    }
+  },
+  {
+    "id": "compat-love-1988-1993-midnight-edge",
+    "type": "love",
+    "personA": {
+      "birthDate": "1988-04-10",
+      "birthTime": "04:00",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "F"
+    },
+    "personB": {
+      "birthDate": "1993-10-09",
+      "birthTime": "00:30",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "M"
+    }
+  },
+  {
+    "id": "compat-marriage-1985-1991-unknown-time",
+    "type": "marriage",
+    "personA": {
+      "birthDate": "1985-11-22",
+      "birthTime": null,
+      "isTimeUnknown": true,
+      "timezone": "Asia/Seoul",
+      "gender": "M"
+    },
+    "personB": {
+      "birthDate": "1991-02-17",
+      "birthTime": "23:50",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "F"
+    }
+  },
+  {
+    "id": "compat-business-1979-1984-midnight-boundary",
+    "type": "business",
+    "personA": {
+      "birthDate": "1979-12-31",
+      "birthTime": "23:59",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "M"
+    },
+    "personB": {
+      "birthDate": "1984-01-01",
+      "birthTime": "00:01",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "F"
+    }
+  },
+  {
+    "id": "compat-friendship-2001-2002-sasang-null",
+    "type": "friendship",
+    "personA": {
+      "birthDate": "2001-05-15",
+      "birthTime": "12:00",
+      "isTimeUnknown": false,
+      "timezone": "Asia/Seoul",
+      "gender": "F"
+    },
+    "personB": {
+      "birthDate": "2002-09-20",
+      "birthTime": null,
+      "isTimeUnknown": true,
+      "timezone": "Asia/Seoul",
+      "gender": "M"
+    }
+  }
+]
